@@ -56,6 +56,7 @@ use App\Http\Controllers\Api\Admin\PoliklinikController as AdminPoliklinikContro
 use App\Http\Controllers\Api\Admin\InsurancePartnerController as AdminInsurancePartnerController;
 use App\Http\Controllers\Api\Admin\InitController as AdminInitController;
 use App\Http\Controllers\Api\Admin\UploadController as AdminUploadController;
+use App\Http\Controllers\Api\Admin\AdminUserController;
 
 
 // ============================================================
@@ -83,6 +84,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/admin/logout', [AdminAuthController::class, 'logout']);
     Route::get('/admin/me', [AdminAuthController::class, 'me']);
+
+    // --------------------------------------------------------
+    // USER MANAGEMENT & RBAC (Role-Based Access Control)
+    // --------------------------------------------------------
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get('/admin/users', [AdminUserController::class, 'index']);
+        Route::post('/admin/users', [AdminUserController::class, 'store']);
+        Route::get('/admin/users/{id}', [AdminUserController::class, 'show']);
+        Route::put('/admin/users/{id}', [AdminUserController::class, 'update']);
+        Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
+        Route::post('/admin/users/{id}/toggle-status', [AdminUserController::class, 'toggleStatus']);
+    });
 
     // --------------------------------------------------------
     // IMAGE UPLOAD (Secure, Anti-Injection, WebP Lightweight)

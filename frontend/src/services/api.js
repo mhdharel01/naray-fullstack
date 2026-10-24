@@ -275,6 +275,17 @@ export const api = {
     method: 'POST',
     body: formData,
   }),
+
+  // 23. Admin User Management & RBAC CRUD (Super Admin Only)
+  adminGetUsers: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchApi(`/admin/users${query ? `?${query}` : ''}`);
+  },
+  adminCreateUser: (data) => fetchApi('/admin/users', { method: 'POST', body: JSON.stringify(data) }),
+  adminGetUser: (id) => fetchApi(`/admin/users/${id}`),
+  adminUpdateUser: (id, data) => fetchApi(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  adminDeleteUser: (id) => fetchApi(`/admin/users/${id}`, { method: 'DELETE' }),
+  adminToggleUserStatus: (id) => fetchApi(`/admin/users/${id}/toggle-status`, { method: 'POST' }),
 };
 
 export default api;

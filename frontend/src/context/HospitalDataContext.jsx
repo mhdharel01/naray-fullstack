@@ -170,6 +170,11 @@ export function HospitalDataProvider({ children }) {
   const [adminDashboardStats, setAdminDashboardStats] = useState(() => getStoredData(STORAGE_KEYS.ADMIN_CACHED_STATS, null));
   const [isLoadingAdminAppointments, setIsLoadingAdminAppointments] = useState(false);
 
+  // 1b. Admin Users & RBAC Management (Super Admin)
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminUserStats, setAdminUserStats] = useState(null);
+  const [isLoadingAdminUsers, setIsLoadingAdminUsers] = useState(false);
+
   // 2. Data Collections (Murni dari Database Backend & SIMRS - Anti Data Mentah Palsu)
   const [poliklinikList, setPoliklinikList] = useState([]);
   const [specializationsList, setSpecializationsList] = useState(DEFAULT_SPECIALIZATIONS);
@@ -1203,6 +1208,84 @@ export function HospitalDataProvider({ children }) {
       console.warn('[HospitalDataContext] Gagal mengambil admin dashboard stats:', err);
     }
     return null;
+  };
+
+  // ── Admin User Management & RBAC Handlers ──
+  const fetchAdminUsers = async (params = {}) => {
+    setIsLoadingAdminUsers(true);
+    try {
+      const res = await api.adminGetUsers(params);
+      if (res?.success) {
+        setAdminUsers(res.data || []);
+        if (res.stats) setAdminUserStats(res.stats);
+        return res;
+      }
+    } catch (err) {
+      console.warn('[HospitalDataContext] Gagal memuat daftar admin users:', err);
+    } finally {
+      setIsLoadingAdminUsers(false);
+    }
+    return { success: false, data: [] };
+  };
+
+  const adminCreateUser = async (data) => {
+    try {
+      const res = await api.adminCreateUser(data);
+      if (res?.success && res.data) {
+        setAdminUsers(prev => [res.data, ...prev]);
+        fetchAdminUsers();
+        return res;
+      }
+      return res || { success: false, message: 'Gagal membuat pengguna admin' };
+    } catch (err) {
+      return { success: false, message: err.message || 'Terjadi kesalahan sistem' };
+    }
+  };
+
+  const adminUpdateUser = async (id, data) => {
+    try {
+      const res = await api.adminUpdateUser(id, data);
+      if (res?.success && res.data) {
+        setAdminUsers(prev => prev.map(u => u.id === id ? res.data : u));
+        if (adminUser && adminUser.id === id) {
+          setAdminUser(res.data);
+          try { localStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(res.data)); } catch (e) { }
+        }
+        fetchAdminUsers();
+        return res;
+      }
+      return res || { success: false, message: 'Gagal memperbarui data pengguna' };
+    } catch (err) {
+      return { success: false, message: err.message || 'Terjadi kesalahan sistem' };
+    }
+  };
+
+  const adminDeleteUser = async (id) => {
+    try {
+      const res = await api.adminDeleteUser(id);
+      if (res?.success) {
+        setAdminUsers(prev => prev.filter(u => u.id !== id));
+        fetchAdminUsers();
+        return res;
+      }
+      return res || { success: false, message: 'Gagal menghapus pengguna' };
+    } catch (err) {
+      return { success: false, message: err.message || 'Terjadi kesalahan sistem' };
+    }
+  };
+
+  const adminToggleUserStatus = async (id) => {
+    try {
+      const res = await api.adminToggleUserStatus(id);
+      if (res?.success && res.data) {
+        setAdminUsers(prev => prev.map(u => u.id === id ? res.data : u));
+        fetchAdminUsers();
+        return res;
+      }
+      return res || { success: false, message: 'Gagal mengubah status pengguna' };
+    } catch (err) {
+      return { success: false, message: err.message || 'Terjadi kesalahan sistem' };
+    }
   };
 
   // Auto-fetch admin data and ensure valid Sanctum token on mount
@@ -2344,6 +2427,14 @@ export function HospitalDataProvider({ children }) {
         fetchAdminDashboardStats,
         loginAdmin,
         logoutAdmin,
+        adminUsers,
+        adminUserStats,
+        isLoadingAdminUsers,
+        fetchAdminUsers,
+        adminCreateUser,
+        adminUpdateUser,
+        adminDeleteUser,
+        adminToggleUserStatus,
         poliklinikList,
         specializationsList,
         setSpecializationsList,

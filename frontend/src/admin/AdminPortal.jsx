@@ -29,6 +29,7 @@ import FacilitiesTab from './tabs/FacilitiesTab';
 import GalleryTab from './tabs/GalleryTab';
 import BannersTab from './tabs/BannersTab';
 import LeadershipTab from './tabs/LeadershipTab';
+import UsersTab from './tabs/UsersTab';
 
 function AdminDashboard({ onLogout }) {
   const {
@@ -53,6 +54,7 @@ function AdminDashboard({ onLogout }) {
     galleryActivities = [],
     videoList = [],
     adminUser,
+    adminUsers = [],
     adminAppointments = [],
     adminDashboardStats,
     isLoadingAdminAppointments,
@@ -429,19 +431,37 @@ function AdminDashboard({ onLogout }) {
     ];
   }, [adminDashboardStats, doctors, poliklinikList, mcuPackages, inpatientRooms, galleryActivities, videoList, activeTodayLeaves, upcomingLeaves]);
 
-  // Sidebar Menu Items (Konsolidasi Dokter & Jadwal dalam 1 Modul Terpadu)
-  const navItems = [
-    { id: 'dashboard',    label: 'Dashboard',             icon: LayoutDashboard, count: null },
-    { id: 'banners',      label: 'Banner Slide Home',     icon: Sparkles,        count: bannerSlides?.length || 3 },
-    { id: 'leadership',   label: 'Pesan Pimpinan Medis',  icon: UserCheck,       count: null },
-    { id: 'articles',     label: 'Berita & Artikel',      icon: FileText,        count: healthArticles?.length || 0 },
-    { id: 'doctors',      label: 'Dokter & Jadwal Dinas', icon: Stethoscope,     count: doctors?.length || 0, badge: activeTodayLeaves.length > 0 ? `${activeTodayLeaves.length} Cuti` : null },
-    { id: 'poli',         label: 'Poliklinik',            icon: Activity,        count: poliklinikList?.length || 0 },
-    { id: 'rooms',        label: 'Kamar Rawat',           icon: BedDouble,       count: inpatientRooms?.length || 0 },
-    { id: 'facilities',   label: 'Layanan Medis',         icon: Building2,       count: (facilities?.length || 0) + (centersOfExcellence?.length || 0) },
-    { id: 'mcu',          label: 'Paket MCU',             icon: Package,         count: mcuPackages?.length || 0 },
-    { id: 'gallery',      label: 'Galeri & Video',        icon: ImageIcon,       count: (galleryActivities?.length || 0) + (videoList?.length || 0) },
+  // ── Role-Based Access Control (RBAC) Navigation ──
+  const userRole = adminUser?.role || 'super_admin';
+
+  const allNavItems = [
+    { id: 'dashboard',    label: 'Dashboard',             icon: LayoutDashboard, count: null, section: 'UTAMA', roles: ['super_admin', 'admin', 'marketing'] },
+    { id: 'doctors',      label: 'Dokter & Jadwal Dinas', icon: Stethoscope,     count: doctors?.length || 0, badge: activeTodayLeaves.length > 0 ? `${activeTodayLeaves.length} Cuti` : null, section: 'PELAYANAN & DOKTER', roles: ['super_admin', 'admin'] },
+    { id: 'poli',         label: 'Poliklinik',            icon: Activity,        count: poliklinikList?.length || 0, section: 'PELAYANAN & DOKTER', roles: ['super_admin', 'admin'] },
+    { id: 'rooms',        label: 'Kamar Rawat',           icon: BedDouble,       count: inpatientRooms?.length || 0, section: 'PELAYANAN & DOKTER', roles: ['super_admin', 'admin'] },
+    { id: 'facilities',   label: 'Layanan Medis',         icon: Building2,       count: (facilities?.length || 0) + (centersOfExcellence?.length || 0), section: 'PELAYANAN & DOKTER', roles: ['super_admin', 'admin'] },
+    { id: 'mcu',          label: 'Paket MCU',             icon: Package,         count: mcuPackages?.length || 0, section: 'MARKETING & KONTEN', roles: ['super_admin', 'marketing'] },
+    { id: 'articles',     label: 'Berita & Artikel',      icon: FileText,        count: healthArticles?.length || 0, section: 'MARKETING & KONTEN', roles: ['super_admin', 'marketing'] },
+    { id: 'gallery',      label: 'Galeri & Video',        icon: ImageIcon,       count: (galleryActivities?.length || 0) + (videoList?.length || 0), section: 'MARKETING & KONTEN', roles: ['super_admin', 'marketing'] },
+    { id: 'banners',      label: 'Banner Slide Home',     icon: Sparkles,        count: bannerSlides?.length || 3, section: 'MARKETING & KONTEN', roles: ['super_admin', 'marketing'] },
+    { id: 'leadership',   label: 'Pesan Pimpinan Medis',  icon: UserCheck,       count: null, section: 'MARKETING & KONTEN', roles: ['super_admin', 'marketing'] },
+    { id: 'users',        label: 'Hak Akses Pengguna',    icon: ShieldCheck,     count: adminUsers?.length || null, section: 'KEAMANAN & PENGGUNA', roles: ['super_admin'] },
   ];
+
+  const navItems = useMemo(() => {
+    return allNavItems.filter(item => {
+      if (userRole === 'super_admin') return true;
+      return item.roles.includes(userRole);
+    });
+  }, [userRole, doctors, activeTodayLeaves, poliklinikList, inpatientRooms, facilities, centersOfExcellence, mcuPackages, healthArticles, galleryActivities, videoList, bannerSlides, adminUsers]);
+
+  // Tab Guard: Jika tab aktif tidak diizinkan untuk peran saat ini, kembalikan ke dashboard
+  useEffect(() => {
+    const isAllowed = navItems.some(item => item.id === activeTab);
+    if (!isAllowed) {
+      setActiveTab('dashboard');
+    }
+  }, [navItems, activeTab]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex overflow-hidden font-sans antialiased text-slate-800">
@@ -503,55 +523,54 @@ function AdminDashboard({ onLogout }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin scrollbar-thumb-slate-800" aria-label="Menu Admin Mobile">
-          {navItems.map((item, idx) => {
-            const isDoctorGroup = ['doctors', 'schedules', 'leaves'].includes(activeTab);
-            const isActive = (item.id === 'doctors' ? isDoctorGroup : activeTab === item.id) && !doctorStatusPage.isOpen;
-            const showDivider = idx === 1 || idx === 4 || idx === 6;
-            const sectionTitles = {
-              1: 'KONTEN & INFORMASI',
-              4: 'PELAYANAN & DOKTER',
-              6: 'FASILITAS & MCU'
-            };
+          {(() => {
+            let lastSection = null;
+            return navItems.map((item) => {
+              const isDoctorGroup = ['doctors', 'schedules', 'leaves'].includes(activeTab);
+              const isActive = (item.id === 'doctors' ? isDoctorGroup : activeTab === item.id) && !doctorStatusPage.isOpen;
+              const showSection = item.section && item.section !== lastSection;
+              lastSection = item.section;
 
-            return (
-              <React.Fragment key={item.id}>
-                {showDivider && (
-                  <div className="pt-3 pb-1 px-3">
-                    <span className="text-[10px] font-extrabold tracking-wider text-slate-500 font-mono uppercase">
-                      {sectionTitles[idx]}
-                    </span>
-                  </div>
-                )}
-                <button
-                  type="button"
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-teal-300 font-extrabold border-l-[3px] border-teal-400'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border-l-[3px] border-transparent'
-                  }`}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setSearchQuery('');
-                    setDoctorStatusPage({ isOpen: false, schedule: null, doctor: null, returnTab: item.id });
-                    setMobileSidebarOpen(false);
-                  }}
-                  aria-current={isActive ? 'page' : undefined}
-                >
-                  <div className="flex items-center gap-3 truncate">
-                    <item.icon size={18} className={isActive ? 'text-teal-400' : 'text-slate-400'} />
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                  {item.count !== null && (
-                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                      isActive ? 'bg-teal-500/25 text-teal-200' : 'bg-slate-800 text-slate-400'
-                    }`}>
-                      {item.count}
-                    </span>
+              return (
+                <React.Fragment key={item.id}>
+                  {showSection && (
+                    <div className="pt-3 pb-1 px-3">
+                      <span className="text-[10px] font-extrabold tracking-wider text-slate-500 font-mono uppercase">
+                        {item.section}
+                      </span>
+                    </div>
                   )}
-                </button>
-              </React.Fragment>
-            );
-          })}
+                  <button
+                    type="button"
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-teal-300 font-extrabold border-l-[3px] border-teal-400'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border-l-[3px] border-transparent'
+                    }`}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setSearchQuery('');
+                      setDoctorStatusPage({ isOpen: false, schedule: null, doctor: null, returnTab: item.id });
+                      setMobileSidebarOpen(false);
+                    }}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <div className="flex items-center gap-3 truncate">
+                      <item.icon size={18} className={isActive ? 'text-teal-400' : 'text-slate-400'} />
+                      <span className="truncate">{item.label}</span>
+                    </div>
+                    {item.count !== null && (
+                      <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                        isActive ? 'bg-teal-500/25 text-teal-200' : 'bg-slate-800 text-slate-400'
+                      }`}>
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                </React.Fragment>
+              );
+            });
+          })()}
         </nav>
 
         <div className="p-3 border-t border-slate-800 space-y-1 bg-slate-900/90">
@@ -617,27 +636,25 @@ function AdminDashboard({ onLogout }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto overflow-x-hidden p-3 space-y-1 scrollbar-thin scrollbar-thumb-slate-800" aria-label="Menu Admin">
-          {navItems.map((item, idx) => {
-            const isDoctorGroup = ['doctors', 'schedules', 'leaves'].includes(activeTab);
-            const isActive = (item.id === 'doctors' ? isDoctorGroup : activeTab === item.id) && !doctorStatusPage.isOpen;
-            const showDivider = sidebarOpen && (idx === 1 || idx === 4 || idx === 6);
-            const sectionTitles = {
-              1: 'KONTEN & INFORMASI',
-              4: 'PELAYANAN & DOKTER',
-              6: 'FASILITAS & MCU'
-            };
+          {(() => {
+            let lastSection = null;
+            return navItems.map((item) => {
+              const isDoctorGroup = ['doctors', 'schedules', 'leaves'].includes(activeTab);
+              const isActive = (item.id === 'doctors' ? isDoctorGroup : activeTab === item.id) && !doctorStatusPage.isOpen;
+              const showSection = sidebarOpen && item.section && item.section !== lastSection;
+              lastSection = item.section;
 
-            return (
-              <React.Fragment key={item.id}>
-                {showDivider && (
-                  <div className="pt-3 pb-1 px-3">
-                    <span className="text-[10px] font-extrabold tracking-wider text-slate-500 font-mono uppercase">
-                      {sectionTitles[idx]}
-                    </span>
-                  </div>
-                )}
-                <button
-                  type="button"
+              return (
+                <React.Fragment key={item.id}>
+                  {showSection && (
+                    <div className="pt-3 pb-1 px-3">
+                      <span className="text-[10px] font-extrabold tracking-wider text-slate-500 font-mono uppercase">
+                        {item.section}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-heading font-semibold transition-all group relative cursor-pointer ${
                     isActive
                       ? 'bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-teal-300 font-extrabold border-l-[3px] border-teal-400 shadow-xs'
@@ -681,8 +698,9 @@ function AdminDashboard({ onLogout }) {
                 </button>
               </React.Fragment>
             );
-          })}
-        </nav>
+          });
+        })()}
+      </nav>
 
         <div className="p-3 border-t border-slate-800/90 space-y-1 bg-slate-900/60">
           <a
@@ -792,17 +810,31 @@ function AdminDashboard({ onLogout }) {
               <span>Lihat Web</span>
             </a>
 
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-600 text-white font-black text-sm flex items-center justify-center shadow-xs shrink-0">
+            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center font-black text-sm shadow-xs shrink-0 ${
+                userRole === 'super_admin'
+                  ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-white'
+                  : userRole === 'marketing'
+                  ? 'bg-gradient-to-tr from-purple-500 to-fuchsia-600 text-white'
+                  : 'bg-gradient-to-tr from-teal-600 to-emerald-600 text-white'
+              }`}>
                 {adminUser?.name ? adminUser.name.charAt(0).toUpperCase() : 'A'}
               </div>
-              <div className="hidden md:flex flex-col text-left max-w-[140px] truncate">
+              <div className="hidden md:flex flex-col text-left max-w-[150px] truncate">
                 <strong className="text-xs font-bold text-slate-900 truncate leading-tight">
                   {adminUser?.name || 'Administrator'}
                 </strong>
-                <span className="text-[10px] text-slate-400 font-mono truncate">
-                  {adminUser?.email || 'admin@narayhospital.com'}
-                </span>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className={`inline-flex items-center px-1.5 py-0.2 rounded-md text-[9px] font-bold uppercase tracking-wider ${
+                    userRole === 'super_admin'
+                      ? 'bg-amber-100 text-amber-800'
+                      : userRole === 'marketing'
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-teal-100 text-teal-800'
+                  }`}>
+                    {adminUser?.role_label || (userRole === 'super_admin' ? 'Super Admin' : userRole === 'marketing' ? 'Marketing' : 'Operasional')}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -1009,6 +1041,10 @@ function AdminDashboard({ onLogout }) {
                   showToast={showToast}
                   formatImageUrl={formatImageUrl}
                 />
+              )}
+
+              {activeTab === 'users' && userRole === 'super_admin' && (
+                <UsersTab onShowToast={showToast} />
               )}
             </>
           )}

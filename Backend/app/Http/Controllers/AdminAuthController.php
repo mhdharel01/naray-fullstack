@@ -29,6 +29,23 @@ class AdminAuthController extends Controller
             ], 401);
         }
 
+        // Cek status keaktifan akun
+        if (isset($admin->is_active) && !$admin->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda dinonaktifkan oleh Administrator. Silakan hubungi Super Admin untuk bantuan.',
+                'errors' => [
+                    'email' => [
+                        'Akun Anda saat ini sedang dinonaktifkan.'
+                    ]
+                ]
+            ], 403);
+        }
+
+        // Catat waktu login terakhir
+        $admin->last_login_at = now();
+        $admin->save();
+
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         return response()->json([
