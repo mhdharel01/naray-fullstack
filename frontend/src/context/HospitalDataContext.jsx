@@ -1084,7 +1084,7 @@ export function HospitalDataProvider({ children }) {
       return { success: false, message: res?.message || 'Kredensial tidak valid. Silakan periksa kembali email dan kata sandi Anda.' };
     } catch (err) {
       console.warn('[HospitalDataContext] Autentikasi admin gagal:', err.message);
-      return { success: false, message: 'Kredensial tidak valid. Pastikan email dan kata sandi Anda sudah benar.' };
+      return { success: false, message: err.message || 'Kredensial tidak valid. Pastikan email dan kata sandi Anda sudah benar.' };
     }
   };
 
@@ -1288,25 +1288,13 @@ export function HospitalDataProvider({ children }) {
     }
   };
 
-  // Auto-fetch admin data and ensure valid Sanctum token on mount
+  // Auto-fetch admin data when valid admin token exists
   useEffect(() => {
     if (isAdmin) {
-      if (!adminToken) {
-        api.adminLogin({ email: 'admin@narayhospital.com', password: 'admin123' })
-          .then(res => {
-            if (res?.data?.token) {
-              setAdminToken(res.data.token);
-              setAdminUser(res.data.admin);
-              try {
-                localStorage.setItem(STORAGE_KEYS.ADMIN_TOKEN, res.data.token);
-                localStorage.setItem(STORAGE_KEYS.ADMIN_USER, JSON.stringify(res.data.admin));
-              } catch (e) { }
-              fetchAdminInit();
-            }
-          })
-          .catch(e => console.warn('[HospitalDataContext] Token prime failed:', e));
-      } else {
+      if (adminToken) {
         fetchAdminInit();
+      } else {
+        setIsAdmin(false);
       }
     }
   }, [adminToken, isAdmin]);

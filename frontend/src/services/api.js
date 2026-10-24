@@ -30,34 +30,12 @@ async function fetchApi(endpoint, options = {}) {
   try {
     let response = await fetch(url, config);
 
-    // Auto-heal 401 Unauthorized for admin endpoints: re-authenticate seamlessly and retry once
-    if (response.status === 401 && endpoint.startsWith('/admin') && !endpoint.includes('/login') && !options._retry) {
-      try {
-        const loginRes = await fetch(`${API_BASE_URL}/admin/login`, {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'admin@narayhospital.com', password: 'admin123' })
-        });
-        if (loginRes.ok) {
-          const loginData = await loginRes.json();
-          if (loginData.success && loginData.data?.token) {
-            token = loginData.data.token;
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('naray_admin_token', token);
-              localStorage.setItem('naray_is_admin', 'true');
-              if (loginData.data.admin) {
-                localStorage.setItem('naray_admin_user', JSON.stringify(loginData.data.admin));
-              }
-            }
-            const retryHeaders = {
-              ...headers,
-              'Authorization': `Bearer ${token}`
-            };
-            response = await fetch(url, { ...options, headers: retryHeaders, _retry: true });
-          }
-        }
-      } catch (authErr) {
-        console.warn('[API] Auto re-auth failed:', authErr);
+    // Tangani token kadaluarsa (401 Unauthorized) untuk endpoint admin
+    if (response.status === 401 && endpoint.startsWith('/admin') && !endpoint.includes('/login')) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('naray_admin_token');
+        localStorage.removeItem('naray_is_admin');
+        localStorage.removeItem('naray_admin_user');
       }
     }
 

@@ -60,10 +60,10 @@ use App\Http\Controllers\Api\Admin\AdminUserController;
 
 
 // ============================================================
-// ADMIN LOGIN
+// ADMIN LOGIN (Diproteksi Rate Limiter: Maksimal 5x percobaan per menit)
 // ============================================================
 
-Route::post('/admin/login', [AdminAuthController::class, 'login']);
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->middleware('throttle:5,1');
 
 
 // ============================================================
