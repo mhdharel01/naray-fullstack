@@ -66,7 +66,7 @@ class AdminUserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:admins,email'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('admins', 'email')->whereNull('deleted_at')],
             'password' => ['required', 'string', 'min:6'],
             'role' => ['required', Rule::in([Admin::ROLE_SUPER_ADMIN, Admin::ROLE_ADMIN, Admin::ROLE_MARKETING])],
             'is_active' => ['nullable', 'boolean'],
@@ -119,7 +119,7 @@ class AdminUserController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('admins', 'email')->ignore($admin->id)],
+            'email' => ['required', 'email', 'max:255', Rule::unique('admins', 'email')->ignore($admin->id)->whereNull('deleted_at')],
             'password' => ['nullable', 'string', 'min:6'],
             'role' => ['required', Rule::in([Admin::ROLE_SUPER_ADMIN, Admin::ROLE_ADMIN, Admin::ROLE_MARKETING])],
             'is_active' => ['nullable', 'boolean'],
@@ -208,7 +208,7 @@ class AdminUserController extends Controller
         }
 
         $adminName = $admin->name;
-        $admin->delete();
+        $admin->forceDelete();
 
         return response()->json([
             'success' => true,
