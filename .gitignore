@@ -1,0 +1,47 @@
+# Dependencies
+**/node_modules/
+**/vendor/
+
+# Environment and sensitive credentials
+.env
+.env.*
+!.env.example
+*.ppk
+*.pem
+id_rsa*
+*.key
+
+# Laravel Backend specific
+Backend/storage/framework/cache/*
+Backend/storage/framework/sessions/*
+Backend/storage/framework/views/*
+Backend/storage/logs/*
+Backend/bootstrap/cache/*.php
+!Backend/bootstrap/cache/.gitignore
+Backend/public/storage
+Backend/storage/app/public/*
+!Backend/storage/app/public/.gitignore
+
+# Frontend build (optional, if you want build tracked remove dist)
+frontend/dist/
+
+# Archives & Temporary files
+*.zip
+*.tar.gz
+*.rar
+scratch_*.php
+
+# IDE & OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Graphify / AI agent caches
+graphify-out/
+.agents/

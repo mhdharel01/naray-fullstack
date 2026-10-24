@@ -1,0 +1,1185 @@
+{
+  "hospitalInfo": {
+    "name": "Naray Hospital",
+    "tagline": "Serve With Heart",
+    "subTagline": "Rumah Sakit Modern, Nyaman & Terpercaya di Kota Dumai, Riau",
+    "aboutText": "Naray Hospital adalah simbol dedikasi, inovasi, dan kepercayaan dalam layanan kesehatan modern. Dilengkapi dengan fasilitas medis terdepan, tim dokter spesialis berpengalaman, dan teknologi diagnostik mutakhir, kami menghadirkan pengalaman perawatan yang personal, profesional, dan terukur. Kami melayani dengan presisi klinis dan sentuhan kemanusiaan, melalui jaringan poliklinik spesialis yang dirancang untuk memenuhi berbagai kebutuhan medis Anda — dari pencegahan hingga pemulihan.",
+    "accreditation": "Akreditasi Paripurna Kemenkes RI & Pelayanan Standar Nasional",
+    "emergencyHotline": "+62 853-6339-5383",
+    "ambulanceHotline": "+62 853-6339-5383",
+    "callCenter": "+62 811-7529-798",
+    "whatsappHotline": "+62 811-7529-798",
+    "email": "admin@narayhospital.com",
+    "address": "Jl. Dr. Wahidin No.98-99, Purnama, Kec. Dumai Barat, Kota Dumai, Riau 28823",
+    "operatingHours": "IGD & Rawat Inap 24 Jam | Poliklinik Spesialis: Senin - Sabtu 09:00 - 21:00 WIB",
+    "totalBeds": "101 Tempat Tidur",
+    "totalDoctors": "19+ Dokter Spesialis",
+    "totalPolis": "13 Poliklinik Terpadu",
+    "instagram": "https://www.instagram.com/narayhospital",
+    "youtube": "https://www.youtube.com/@NarayHospital",
+    "gmapsIframe": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.0645585284587!2d101.39689867423775!3d1.6988783603561073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d3a978dfcdb1fb%3A0xeffaf38f1dce7e9c!2sNaray%20Hospital!5e0!3m2!1sen!2sid!4v1749523003379!5m2!1sen!2sid"
+  },
+  "branches": [
+    {
+      "id": "naray-dumai-utama",
+      "name": "Naray Hospital Dumai (Gedung Utama)",
+      "location": "Dumai Barat, Riau",
+      "address": "Jl. Dr. Wahidin No.98-99, Purnama, Kec. Dumai Barat, Kota Dumai, Riau 28823",
+      "phone": "+62 811-7529-798",
+      "emergencyPhone": "+62 853-6339-5383",
+      "whatsapp": "+62 811-7529-798",
+      "beds": "101 Tempat Tidur",
+      "image": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=1200&q=80",
+      "features": [
+        "Layanan Gawat Darurat & UGD 24 Jam",
+        "13 Poliklinik Dokter Spesialis",
+        "Ruang Perawatan VIP Pistillum & ICU Staments",
+        "Layanan Geriatri & MCU Komprehensif"
+      ],
+      "mapCoords": {
+        "lat": 1.698878,
+        "lng": 101.396898
+      }
+    },
+    {
+      "id": "naray-mcu-center",
+      "name": "Naray Wellness & Medical Check-Up Hub",
+      "location": "Purnama, Dumai",
+      "address": "Kawasan Layanan Terpadu Naray Hospital, Jl. Dr. Wahidin No.99, Dumai",
+      "phone": "+62 811-7529-798",
+      "emergencyPhone": "+62 853-6339-5383",
+      "whatsapp": "+62 811-7529-798",
+      "beds": "Fasilitas One-Day Care",
+      "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80",
+      "features": [
+        "Skrining Kesehatan Korporasi & Pribadi",
+        "Laboratorium Otomasi & Radiologi",
+        "Konsultasi Dokter Spesialis Terpadu"
+      ],
+      "mapCoords": {
+        "lat": 1.698878,
+        "lng": 101.396898
+      }
+    }
+  ],
+  "poliklinikList": [
+    {
+      "id": "poli-umum",
+      "name": "Poliklinik Umum",
+      "icon": "🩺",
+      "desc": "Layanan diagnostik dan pengobatan pertama untuk keluhan kesehatan umum."
+    },
+    {
+      "id": "poli-anak",
+      "name": "Poliklinik Anak (Pediatrik)",
+      "icon": "👶",
+      "desc": "Perawatan komprehensif kesehatan bayi dan anak, imunisasi, dan pemantauan tumbuh kembang."
+    },
+    {
+      "id": "poli-obgyn",
+      "name": "Poliklinik Obgyn (Kebidanan & Kandungan)",
+      "icon": "🤰",
+      "desc": "Pemeriksaan kehamilan, USG 4D, persalinan, dan kesehatan reproduksi wanita."
+    },
+    {
+      "id": "poli-penyakit-dalam",
+      "name": "Poliklinik Penyakit Dalam",
+      "icon": "🧬",
+      "desc": "Diagnosis dan penanganan penyakit organ dalam seperti diabetes, hipertensi, hati, dan ginjal."
+    },
+    {
+      "id": "poli-jantung",
+      "name": "Poliklinik Jantung & Pembuluh Darah",
+      "icon": "❤️",
+      "desc": "Pemeriksaan fungsi jantung, EKG, treadmill, dan pencegahan risiko kardiovaskular."
+    },
+    {
+      "id": "poli-bedah",
+      "name": "Poliklinik Bedah",
+      "icon": "⚕️",
+      "desc": "Layanan konsultasi dan tindakan bedah umum serta bedah khusus berpengalaman."
+    },
+    {
+      "id": "poli-mata",
+      "name": "Poliklinik Mata",
+      "icon": "👁️",
+      "desc": "Pemeriksaan kesehatan penglihatan, skrining katarak, glaukoma, dan gangguan refraksi."
+    },
+    {
+      "id": "poli-gigi",
+      "name": "Poliklinik Gigi & Bedah Mulut",
+      "icon": "😁",
+      "desc": "Perawatan gigi, tambal, scalling, pencabutan gigi impaksi, dan estetika senyum."
+    },
+    {
+      "id": "poli-tht",
+      "name": "Poliklinik THT-KL",
+      "icon": "👂",
+      "desc": "Penanganan gangguan pendengaran, sinus, amandel, dan saluran pernapasan atas."
+    },
+    {
+      "id": "poli-paru",
+      "name": "Poliklinik Paru & Pernapasan",
+      "icon": "🫁",
+      "desc": "Pemeriksaan asma, PPOK, infeksi paru, dan spirometri kesehatan pernapasan."
+    },
+    {
+      "id": "poli-dve",
+      "name": "Poliklinik Kulit & Kelamin (D.V.E)",
+      "icon": "🌟",
+      "desc": "Perawatan penyakit kulit klinis, alergi, jerawat, dan estetika medis."
+    },
+    {
+      "id": "poli-saraf",
+      "name": "Poliklinik Saraf (Neurologi)",
+      "icon": "⚡",
+      "desc": "Penanganan stroke, vertigo, migrain, nyeri saraf terjepit, dan gangguan saraf."
+    },
+    {
+      "id": "poli-psikiatri",
+      "name": "Poliklinik Psikiatri (Kesehatan Jiwa)",
+      "icon": "🧠",
+      "desc": "Konsultasi kesehatan mental, penanganan kecemasan, depresi, dan terapi psikologis."
+    }
+  ],
+  "centersOfExcellence": [
+    {
+      "id": "center-jantung",
+      "title": "Pusat Jantung & Kardiovaskular",
+      "shortTitle": "Pusat Jantung",
+      "icon": "HeartPulse",
+      "tagline": "Pemeriksaan Jantung Komprehensif & Deteksi Dini Penyakit Jantung Koroner",
+      "description": "Didukung oleh dokter spesialis jantung dan pembuluh darah dengan peralatan diagnostik EKG 12-Lead, Ekokardiografi, dan Treadmill Stress Test untuk penanganan preventif dan kuratif.",
+      "image": "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=800&q=80",
+      "stats": "Siaga Pemeriksaan Jantung",
+      "technologies": [
+        "Ekokardiografi Doppler",
+        "Treadmill Stress Test",
+        "Resting ECG 12-Lead",
+        "Laboratorium Enzim Jantung"
+      ],
+      "services": [
+        "Konsultasi Spesialis Jantung (dr. Christian Yosaputra, Sp.JP, FIHA)",
+        "Skrining Risiko Serangan Jantung & Aritmia",
+        "Pemeriksaan Ekokardiografi Struktur Katup Jantung",
+        "Edukasi Pola Hidup Sehat Pasca Gangguan Jantung"
+      ],
+      "doctorsCount": 2
+    },
+    {
+      "id": "center-ibu-anak",
+      "title": "Pusat Kesehatan Ibu & Anak Terpadu",
+      "shortTitle": "Ibu & Anak",
+      "icon": "Baby",
+      "tagline": "Pelayanan Kebidanan, Kandungan, dan Tumbuh Kembang Anak Penuh Kasih",
+      "description": "Menyediakan layanan persalinan yang aman dan nyaman, pemeriksaan USG kehamilan, klinik anak ramah anak, imunisasi lengkap, serta penanganan penyakit anak terpadu.",
+      "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
+      "stats": "Kamar Bersalin & Perinatologi Siaga",
+      "technologies": [
+        "USG Kandungan 4D Real-Time",
+        "Inkubator Bayi Perinatologi",
+        "Phototherapy Unit",
+        "Kamar Rawat Ibu & Anak"
+      ],
+      "services": [
+        "Pemeriksaan Kehamilan & Persalinan (dr. Sofyan Qadri Rozi Dalimunthe, Sp.OG)",
+        "Klinik Spesialis Anak (dr. M. Riki Fachrozi, Sp.A & dr. M. Riza Deyuga, Sp.A)",
+        "Imunisasi Dasar & Lanjutan Lengkap",
+        "Skrining Tumbuh Kembang & Gizi Balita"
+      ],
+      "doctorsCount": 3
+    },
+    {
+      "id": "center-penyakit-dalam",
+      "title": "Pusat Penyakit Dalam & Geriatri",
+      "shortTitle": "Penyakit Dalam & Geriatri",
+      "icon": "Activity",
+      "tagline": "Penanganan Penyakit Metabolik Kronik & Pelayanan Pasien Lanjut Usia",
+      "description": "Fokus pada pengelolaan penyakit metabolik menahun seperti diabetes melitus, hipertensi, gangguan ginjal, dan pencernaan, dilengkapi program khusus pelayanan lansia (Geriatri).",
+      "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
+      "stats": "Layanan Pasien Geriatri Unggulan",
+      "technologies": [
+        "Digital Automated Laboratory",
+        "USG Abdomen",
+        "Monitoring Gula Darah Terpadu",
+        "Unit Fisioterapi"
+      ],
+      "services": [
+        "Konsultasi Spesialis Penyakit Dalam (dr. Rizka Nadia, dr. Murdia, dr. Doni Saputra)",
+        "Klinik Layanan Geriatri Pasien Usia Lanjut",
+        "Manajemen Diabetes & Hipertensi Terkontrol",
+        "Pemeriksaan Kesehatan Saluran Cerna & Hati"
+      ],
+      "doctorsCount": 3
+    },
+    {
+      "id": "center-bedah-trauma",
+      "title": "Pusat Bedah & Layanan UGD 24 Jam",
+      "shortTitle": "Bedah & UGD 24 Jam",
+      "icon": "ShieldAlert",
+      "tagline": "Respon Cepat Gawat Darurat & Kamar Operasi Berstandar Sterilisasi Tinggi",
+      "description": "Unit Gawat Darurat 24 jam dengan tim dokter siaga didukung kamar bedah modern untuk menangani kasus bedah umum, bedah mulut traumatik, serta cedera kecelakaan.",
+      "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80",
+      "stats": "Siaga Darurat 24 Jam",
+      "technologies": [
+        "Kamar Operasi Steril HEPA",
+        "Armada Ambulans Darurat",
+        "Peralatan Resusitasi UGD",
+        "Sistem Monitoring Pasien"
+      ],
+      "services": [
+        "Penanganan Emergency 24 Jam (dr. Siti Asri Yolanda)",
+        "Bedah Umum (dr. Ihsan, Sp.B)",
+        "Bedah Mulut & Maksilofasial (drg. Depsi Indri Papilaya Simanjuntak, Sp.B.M.M)",
+        "Layanan Rawat Luka & Trauma Kecelakaan"
+      ],
+      "doctorsCount": 3
+    },
+    {
+      "id": "center-paru-pernapasan",
+      "title": "Pusat Paru & Kesehatan Pernapasan",
+      "shortTitle": "Paru & Pernapasan",
+      "icon": "Stethoscope",
+      "tagline": "Diagnostik & Terapi Penyakit Saluran Pernapasan Menyeluruh",
+      "description": "Pelayanan terpadu untuk asma, penyakit paru obstruktif kronik (PPOK), pneumonia, dan skrining kesehatan pernapasan oleh tim dokter spesialis paru berpengalaman.",
+      "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80",
+      "stats": "Klinik Paru Modern",
+      "technologies": [
+        "Nebulizer Room",
+        "Spirometri Uji Fungsi Paru",
+        "Rontgen Dada Digital",
+        "Ruang Rawat Isolasi Bertekanan"
+      ],
+      "services": [
+        "Konsultasi Spesialis Paru (dr. Jemmy Fandri, Sp.P & dr. Atikanur, Sp.P)",
+        "Penanganan Asma & Sesak Napas Akut",
+        "Pemeriksaan Rontgen Thorax & Uji Dahak",
+        "Ruang Rawat Isolasi Khusus Berstandar Hepafilter"
+      ],
+      "doctorsCount": 2
+    },
+    {
+      "id": "center-mata-tht",
+      "title": "Pusat Mata, THT & Panca Indera",
+      "shortTitle": "Mata & THT",
+      "icon": "Brain",
+      "tagline": "Perawatan Presisi untuk Penglihatan Tajam & Pendengaran Optimal",
+      "description": "Menghadirkan klinik spesialis mata dan spesialis THT-KL dengan peralatan diagnostik optik modern untuk menjaga kualitas indera penglihatan dan pendengaran Anda.",
+      "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+      "stats": "Peralatan Optik & Endoskopi THT",
+      "technologies": [
+        "Slit Lamp Biomicroscope",
+        "Autorefraktometer",
+        "Endoskopi THT-KL",
+        "Audiometri Skrining Pendengaran"
+      ],
+      "services": [
+        "Klinik Spesialis Mata (dr. Ahmad Musa, Sp.M & dr. Dedy Saputra, Sp.M)",
+        "Klinik Spesialis THT-KL (dr. Diflayzer, Sp.THT-KL)",
+        "Pemeriksaan Tajam Penglihatan & Tekanan Bola Mata",
+        "Pembersihan Serumen & Terapi Infeksi Saluran Telinga"
+      ],
+      "doctorsCount": 3
+    }
+  ],
+  "doctors": [
+    {
+      "id": "dr-siti-asri-yolanda",
+      "name": "dr. Siti Asri Yolanda",
+      "specialty": "Dokter Umum & Dokter Jaga IGD",
+      "specialtyGroup": "UGD & Dokter Umum",
+      "subSpecialty": "Penanganan Kegawatdaruratan Medis, Triase UGD, Konsultasi Umum",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Siaga UGD",
+      "education": "Fakultas Kedokteran | Sertifikasi ACLS & ATLS Emergency Medicine",
+      "rating": 4.9,
+      "reviewCount": 185,
+      "photo": "https://images.unsplash.com/photo-1594824813629-679815802a46?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Kamis",
+        "Jumat",
+        "Sabtu",
+        "Minggu"
+      ],
+      "schedules": [
+        {
+          "day": "Senin - Minggu",
+          "time": "Siaga 24 Jam Bergilir",
+          "room": "Unit Gawat Darurat (UGD) Naray"
+        }
+      ],
+      "bio": "dr. Siti Asri Yolanda adalah dokter jaga UGD Naray Hospital yang berdedikasi melayani pertolongan pertama pasien gawat darurat dengan cepat, tepat, dan penuh empati."
+    },
+    {
+      "id": "dr-rizka-nadia",
+      "name": "dr. Rizka Nadia, Sp.PD",
+      "specialty": "Spesialis Penyakit Dalam",
+      "specialtyGroup": "Penyakit Dalam",
+      "subSpecialty": "Diabetes Melitus, Hipertensi, Gangguan Lambung & Hati, Penyakit Infeksi",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Penyakit Dalam",
+      "education": "Universitas Negeri Terkemuka | Spesialis Penyakit Dalam (Sp.PD)",
+      "rating": 5,
+      "reviewCount": 240,
+      "photo": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Selasa",
+        "Kamis",
+        "Jumat"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "09:00 - 12:00 WIB",
+          "room": "Poliklinik Penyakit Dalam, R. 102"
+        },
+        {
+          "day": "Kamis",
+          "time": "09:00 - 12:00 WIB",
+          "room": "Poliklinik Penyakit Dalam, R. 102"
+        },
+        {
+          "day": "Jumat",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Penyakit Dalam, R. 102"
+        }
+      ],
+      "bio": "dr. Rizka Nadia adalah spesialis penyakit dalam yang berfokus pada manajemen penyakit kronis dan perawatan holistik organ dalam pasien."
+    },
+    {
+      "id": "drg-dwi-astari-yahfis",
+      "name": "drg. Dwi Astari Yahfis",
+      "specialty": "Dokter Gigi Umum & Estetika",
+      "specialtyGroup": "Gigi & Mulut",
+      "subSpecialty": "Pembersihan Karang Gigi (Scalling), Tambal Gigi, Estetika Gigi",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Gigi Profesional",
+      "education": "Fakultas Kedokteran Gigi | Sertifikasi Perawatan Gigi Modern",
+      "rating": 4.9,
+      "reviewCount": 198,
+      "photo": "https://images.unsplash.com/photo-1594824813629-679815802a46?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Rabu",
+        "Kamis",
+        "Sabtu"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "09:00 - 14:00 WIB",
+          "room": "Poliklinik Gigi, R. 105"
+        },
+        {
+          "day": "Kamis",
+          "time": "09:00 - 14:00 WIB",
+          "room": "Poliklinik Gigi, R. 105"
+        },
+        {
+          "day": "Sabtu",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Gigi, R. 105"
+        }
+      ],
+      "bio": "drg. Dwi Astari memberikan perawatan gigi yang ramah dan nyaman untuk seluruh anggota keluarga, mulai dari anak-anak hingga dewasa."
+    },
+    {
+      "id": "dr-jemmy-fandri",
+      "name": "dr. Jemmy Fandri, Sp.P",
+      "specialty": "Spesialis Paru & Pernapasan",
+      "specialtyGroup": "Paru & Pernapasan",
+      "subSpecialty": "Asma, PPOK, Infeksi Paru, Tuberkulosis, Skrining Paru",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Paru Senior",
+      "education": "Pendidikan Dokter Spesialis Paru (Sp.P)",
+      "rating": 4.9,
+      "reviewCount": 215,
+      "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Rabu",
+        "Jumat"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "10:00 - 14:00 WIB",
+          "room": "Poliklinik Paru, R. 108"
+        },
+        {
+          "day": "Rabu",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Paru, R. 108"
+        },
+        {
+          "day": "Jumat",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Paru, R. 108"
+        }
+      ],
+      "bio": "Pakar kesehatan pernapasan yang menangani berbagai keluhan sesak napas, batuk kronis, dan gangguan fungsi paru."
+    },
+    {
+      "id": "dr-jefrizal-wirman",
+      "name": "dr. Jefrizal Wirman, Sp.D.V.E",
+      "specialty": "Spesialis Dermatologi, Venereologi & Estetika",
+      "specialtyGroup": "Kulit & Kelamin",
+      "subSpecialty": "Penyakit Kulit Klinis, Dermatologi Alergi, Anti-Aging & Estetika",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Kulit & Kelamin",
+      "education": "Spesialis Dermatologi & Venereologi (Sp.D.V.E)",
+      "rating": 4.9,
+      "reviewCount": 260,
+      "photo": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Selasa",
+        "Kamis",
+        "Sabtu"
+      ],
+      "schedules": [
+        {
+          "day": "Selasa",
+          "time": "10:00 - 15:00 WIB",
+          "room": "Poliklinik Kulit & Estetika, R. 201"
+        },
+        {
+          "day": "Kamis",
+          "time": "10:00 - 15:00 WIB",
+          "room": "Poliklinik Kulit & Estetika, R. 201"
+        },
+        {
+          "day": "Sabtu",
+          "time": "09:00 - 14:00 WIB",
+          "room": "Poliklinik Kulit & Estetika, R. 201"
+        }
+      ],
+      "bio": "Melayani perawatan kesehatan kulit secara menyeluruh dengan pendekatan medis terpercaya untuk hasil sehat alami."
+    },
+    {
+      "id": "dr-diflayzer",
+      "name": "dr. Diflayzer, Sp.THT-KL",
+      "specialty": "Spesialis Telinga Hidung Tenggorok - Bedah Kepala Leher",
+      "specialtyGroup": "THT-KL",
+      "subSpecialty": "Endoskopi THT, Gangguan Pendengaran, Sinusitis, Radang Amandel",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Spesialis THT-KL Berpengalaman",
+      "education": "Pendidikan Dokter Spesialis THT-KL",
+      "rating": 4.8,
+      "reviewCount": 175,
+      "photo": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Rabu",
+        "Kamis"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "13:00 - 17:00 WIB",
+          "room": "Poliklinik THT-KL, R. 106"
+        },
+        {
+          "day": "Rabu",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik THT-KL, R. 106"
+        },
+        {
+          "day": "Kamis",
+          "time": "13:00 - 17:00 WIB",
+          "room": "Poliklinik THT-KL, R. 106"
+        }
+      ],
+      "bio": "Pakar THT dengan keahlian diagnostik endoskopi telinga, hidung, dan tenggorokan untuk penanganan presisi."
+    },
+    {
+      "id": "dr-m-riki-fachrozi",
+      "name": "dr. M. Riki Fachrozi, M.Ked(Ped)., Sp.A",
+      "specialty": "Spesialis Anak (Pediatri)",
+      "specialtyGroup": "Anak & Pediatrik",
+      "subSpecialty": "Kesehatan Bayi & Balita, Imunisasi Anak, Infeksi Pediatrik, Tumbuh Kembang",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Anak",
+      "education": "Magister Kedokteran Pediatri & Dokter Spesialis Anak (Sp.A)",
+      "rating": 5,
+      "reviewCount": 310,
+      "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Selasa",
+        "Rabu",
+        "Jumat"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Anak, R. 110"
+        },
+        {
+          "day": "Rabu",
+          "time": "10:00 - 15:00 WIB",
+          "room": "Poliklinik Anak, R. 110"
+        },
+        {
+          "day": "Jumat",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Anak, R. 110"
+        }
+      ],
+      "bio": "dr. Riki dikenal telaten dan ramah terhadap anak, mendampingi orang tua menjaga kesehatan optimal si kecil."
+    },
+    {
+      "id": "dr-ihsan",
+      "name": "dr. Ihsan, Sp.B",
+      "specialty": "Spesialis Bedah Umum",
+      "specialtyGroup": "Bedah",
+      "subSpecialty": "Bedah Saluran Cerna, Usus Buntu (Apendisitis), Hernia, Tumor Jinak Kulit",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Bedah",
+      "education": "Pendidikan Dokter Spesialis Bedah (Sp.B)",
+      "rating": 4.9,
+      "reviewCount": 220,
+      "photo": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Kamis",
+        "Sabtu"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Bedah, R. 204"
+        },
+        {
+          "day": "Kamis",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Bedah, R. 204"
+        },
+        {
+          "day": "Sabtu",
+          "time": "09:00 - 14:00 WIB",
+          "room": "Poliklinik Bedah, R. 204"
+        }
+      ],
+      "bio": "Spesialis bedah berpengalaman yang mengutamakan keselamatan dan teknik operasi presisi untuk masa pemulihan cepat."
+    },
+    {
+      "id": "dr-murdia",
+      "name": "dr. Murdia, Sp.PD",
+      "specialty": "Spesialis Penyakit Dalam",
+      "specialtyGroup": "Penyakit Dalam",
+      "subSpecialty": "Penyakit Dalam Umum, Hipertensi, Kolesterol, Penyakit Ginjal & Lambung",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Penyakit Dalam",
+      "education": "Pendidikan Dokter Spesialis Penyakit Dalam (Sp.PD)",
+      "rating": 4.8,
+      "reviewCount": 190,
+      "photo": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Selasa",
+        "Rabu",
+        "Sabtu"
+      ],
+      "schedules": [
+        {
+          "day": "Selasa",
+          "time": "13:00 - 17:00 WIB",
+          "room": "Poliklinik Penyakit Dalam, R. 102"
+        },
+        {
+          "day": "Rabu",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Penyakit Dalam, R. 102"
+        },
+        {
+          "day": "Sabtu",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Penyakit Dalam, R. 102"
+        }
+      ],
+      "bio": "Berpengalaman menangani berbagai keluhan penyakit dalam kronis dengan pendekatan komunikatif dan solutif."
+    },
+    {
+      "id": "dr-ahmad-musa",
+      "name": "dr. Ahmad Musa, Sp.M",
+      "specialty": "Spesialis Mata (Oftalmologi)",
+      "specialtyGroup": "Mata",
+      "subSpecialty": "Katarak, Infeksi Mata, Kelainan Refraksi Kacamata, Glaukoma",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Mata",
+      "education": "Pendidikan Dokter Spesialis Mata (Sp.M)",
+      "rating": 4.9,
+      "reviewCount": 165,
+      "photo": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Selasa",
+        "Kamis"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Mata, R. 112"
+        },
+        {
+          "day": "Selasa",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Mata, R. 112"
+        },
+        {
+          "day": "Kamis",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Mata, R. 112"
+        }
+      ],
+      "bio": "Pakar kesehatan mata yang berkomitmen menjaga dan memulihkan kualitas penglihatan pasien di segala usia."
+    },
+    {
+      "id": "dr-sofyan-qadri",
+      "name": "dr. Sofyan Qadri Rozi Dalimunthe, Sp.OG",
+      "specialty": "Spesialis Kebidanan & Kandungan (Obgyn)",
+      "specialtyGroup": "Kebidanan & Kandungan",
+      "subSpecialty": "Antenatal Care (Pemeriksaan Kehamilan), Persalinan, USG 4D, Ginekologi",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Kandungan",
+      "education": "Pendidikan Dokter Spesialis Obstetri & Ginekologi (Sp.OG)",
+      "rating": 5,
+      "reviewCount": 380,
+      "photo": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Rabu",
+        "Jumat",
+        "Sabtu"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "10:00 - 15:00 WIB",
+          "room": "Poliklinik Obgyn, R. 202"
+        },
+        {
+          "day": "Rabu",
+          "time": "10:00 - 15:00 WIB",
+          "room": "Poliklinik Obgyn, R. 202"
+        },
+        {
+          "day": "Jumat",
+          "time": "14:00 - 19:00 WIB",
+          "room": "Poliklinik Obgyn, R. 202"
+        }
+      ],
+      "bio": "Mendampingi ibu dari awal masa kehamilan hingga proses persalinan dengan penuh perhatian dan rasa aman."
+    },
+    {
+      "id": "drg-depsi-indri",
+      "name": "drg. Depsi Indri Papilaya Simanjuntak, Sp.B.M.M",
+      "specialty": "Spesialis Bedah Mulut & Maksilofasial",
+      "specialtyGroup": "Gigi & Mulut",
+      "subSpecialty": "Operasi Gigi Bungsu (Odontektomi), Trauma Rahang, Kista & Tumor Mulut",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Spesialis Bedah Mulut",
+      "education": "Pendidikan Dokter Spesialis Bedah Mulut & Maksilofasial (Sp.B.M.M)",
+      "rating": 4.9,
+      "reviewCount": 140,
+      "photo": "https://images.unsplash.com/photo-1594824813629-679815802a46?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Selasa",
+        "Jumat"
+      ],
+      "schedules": [
+        {
+          "day": "Selasa",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Bedah Mulut, R. 105"
+        },
+        {
+          "day": "Jumat",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Bedah Mulut, R. 105"
+        }
+      ],
+      "bio": "Ahli bedah mulut yang menangani operasi gigi impaksi dan rekonstruksi rahang dengan prosedur steril berstandar tinggi."
+    },
+    {
+      "id": "dr-christian-yosaputra",
+      "name": "dr. Christian Yosaputra, Sp.JP, FIHA",
+      "specialty": "Spesialis Jantung & Pembuluh Darah",
+      "specialtyGroup": "Jantung & Vaskular",
+      "subSpecialty": "Kardiologi Klinis, EKG, Treadmill Test, Hipertensi Jantung",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Jantung",
+      "education": "Pendidikan Dokter Spesialis Jantung & Pembuluh Darah (Sp.JP) | FIHA",
+      "rating": 5,
+      "reviewCount": 290,
+      "photo": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Senin",
+        "Rabu",
+        "Jumat"
+      ],
+      "schedules": [
+        {
+          "day": "Senin",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Jantung, R. 206"
+        },
+        {
+          "day": "Rabu",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Jantung, R. 206"
+        },
+        {
+          "day": "Jumat",
+          "time": "10:00 - 15:00 WIB",
+          "room": "Poliklinik Jantung, R. 206"
+        }
+      ],
+      "bio": "Dokter spesialis jantung yang berfokus pada pencegahan penyakit kardiovaskular dan penanganan aritmia serta jantung koroner."
+    },
+    {
+      "id": "dr-asril-tanjung",
+      "name": "dr. Asril Tanjung, Sp.N",
+      "specialty": "Spesialis Neurologi (Saraf)",
+      "specialtyGroup": "Saraf & Otak",
+      "subSpecialty": "Stroke Akut & Kronis, Nyeri Kepala / Vertigo, Nyeri Saraf Tulang Belakang",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Saraf",
+      "education": "Pendidikan Dokter Spesialis Neurologi (Sp.N)",
+      "rating": 4.9,
+      "reviewCount": 205,
+      "photo": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Selasa",
+        "Kamis",
+        "Sabtu"
+      ],
+      "schedules": [
+        {
+          "day": "Selasa",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Saraf, R. 208"
+        },
+        {
+          "day": "Kamis",
+          "time": "14:00 - 18:00 WIB",
+          "room": "Poliklinik Saraf, R. 208"
+        },
+        {
+          "day": "Sabtu",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Saraf, R. 208"
+        }
+      ],
+      "bio": "Spesialis saraf yang berpengalaman dalam penanganan rehabilitasi stroke dan gangguan sistem saraf tepi maupun pusat."
+    },
+    {
+      "id": "dr-levina-mutia",
+      "name": "dr. Levina Mutia, Sp.KJ",
+      "specialty": "Spesialis Kedokteran Jiwa (Psikiatri)",
+      "specialtyGroup": "Kesehatan Jiwa",
+      "subSpecialty": "Gangguan Kecemasan (Anxiety), Depresi, Gangguan Tidur (Insomnia), Terapi Mental",
+      "branchId": "naray-dumai-utama",
+      "branchName": "Naray Hospital Dumai",
+      "experience": "Dokter Spesialis Kesehatan Jiwa",
+      "education": "Pendidikan Dokter Spesialis Kedokteran Jiwa (Sp.KJ)",
+      "rating": 4.9,
+      "reviewCount": 160,
+      "photo": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=600&q=80",
+      "availableDays": [
+        "Rabu",
+        "Jumat"
+      ],
+      "schedules": [
+        {
+          "day": "Rabu",
+          "time": "13:00 - 17:00 WIB",
+          "room": "Poliklinik Psikiatri, R. 210"
+        },
+        {
+          "day": "Jumat",
+          "time": "09:00 - 13:00 WIB",
+          "room": "Poliklinik Psikiatri, R. 210"
+        }
+      ],
+      "bio": "Menyediakan ruang konsultasi yang aman dan nyaman untuk membantu kesehatan emosional dan psikologis pasien."
+    }
+  ],
+  "facilitiesData": [
+    {
+      "id": "fac-ugd",
+      "name": "Unit Gawat Darurat (UGD) 24 Jam",
+      "category": "Gawat Darurat & Trauma",
+      "image": "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?auto=format&fit=crop&w=800&q=80",
+      "description": "Pelayanan gawat darurat 24 jam dengan tim dokter jaga dan perawat bersertifikasi kegawatdaruratan, dilengkapi ruang triase, ruang resusitasi, dan armada ambulans siaga cepat."
+    },
+    {
+      "id": "fac-icu",
+      "name": "Ruang Perawatan Intensif (ICU Staments)",
+      "category": "Perawatan Kritis",
+      "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80",
+      "description": "Kapasitas 7 tempat tidur dengan bedside monitor canggih, ventilator mekanik, sistem pengaturan udara steril, dan pengawasan intensif dokter spesialis anestesi serta perawat ICU."
+    },
+    {
+      "id": "fac-operasi",
+      "name": "Kamar Operasi Bedah Steril",
+      "category": "Kamar Bedah",
+      "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
+      "description": "Ruang tindakan bedah berstandar sterilisasi tinggi dengan filter udara HEPA untuk prosedur bedah umum, kebidanan/caesar, dan bedah mulut secara aman."
+    },
+    {
+      "id": "fac-lab",
+      "name": "Laboratorium Patologi Klinik 24 Jam",
+      "category": "Diagnostik Laboratorium",
+      "image": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+      "description": "Pemeriksaan darah rutin, kimia darah, profil lemak, fungsi hati, fungsi ginjal, tes urin, dan analisa mikrobiologi dengan alat otomatis akurat."
+    },
+    {
+      "id": "fac-radiologi",
+      "name": "Unit Radiologi & Rontgen Digital",
+      "category": "Pencitraan Medis",
+      "image": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
+      "description": "Pemeriksaan foto rontgen dada, tulang, dan sendi dengan dosis radiasi rendah yang menghasilkan citra digital tajam untuk diagnosa dokter spesialis."
+    },
+    {
+      "id": "fac-geriatri",
+      "name": "Layanan Khusus Geriatri (Lansia)",
+      "category": "Layanan Unggulan",
+      "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+      "description": "Layanan terpadu yang dirancang khusus untuk memenuhi kebutuhan fisik, emosional, dan medis para lansia dengan dokter spesialis dan perawat yang sabar serta penuh kasih."
+    }
+  ],
+  "inpatientRooms": [
+    {
+      "id": "room-pistillum-vip",
+      "name": "Pistillum Suite (VIP / VVIP)",
+      "tag": "Kenyamanan Tertinggi & Privasi Penuh",
+      "capacity": "1 Pasien per Kamar",
+      "image": "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80",
+      "features": [
+        "1 Tempat Tidur Pasien Elektrik Otomatis",
+        "1 Bed / Sofa Penunggu Pasien Nyaman",
+        "Set Meja Makan Pasien & Ruang Tamu Keluarga",
+        "Kitchen Set & Pantry Mini dengan Teko Elektrik",
+        "2 Unit Pendingin Ruangan (AC) Nyaman",
+        "Smart TV Samsung Layar Lebar & WiFi Pasien",
+        "Kamar Mandi Dalam dengan Pemanas Air (Water Heater)",
+        "Nurse Call System 24 Jam di Samping Tempat Tidur",
+        "Bed Side Cabinet Medis Pribadi"
+      ]
+    },
+    {
+      "id": "room-staments-icu",
+      "name": "Staments 1 – Ruang ICU (Intensive Care Unit)",
+      "tag": "Perawatan Kritis & Pemantauan Intensif 24 Jam",
+      "capacity": "7 Bed Pasien Intensif",
+      "image": "https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80",
+      "features": [
+        "7 Bed Pasien Khusus Perawatan Intensif",
+        "Alat Pemantauan Tanda Vital 24 Jam (Bedside Monitor)",
+        "Peralatan Resusitasi & Ventilator Modern",
+        "Sistem Pengaturan Suhu dan Humiditas Ruangan Khusus",
+        "Pengawasan Khusus Dokter Anestesi & Tim Perawat ICU 24 Jam Nonstop"
+      ]
+    },
+    {
+      "id": "room-green-petals",
+      "name": "Green Petals (Kamar Rawat Kelas 1)",
+      "tag": "Kenyamanan Bersama Berstandar Tinggi",
+      "capacity": "5 - 7 Tempat Tidur Pasien",
+      "image": "https://images.unsplash.com/photo-1512678080530-7760d81faba6?auto=format&fit=crop&w=800&q=80",
+      "features": [
+        "Tempat Tidur Medis Pasien dengan Bantal & Selimut Bersih",
+        "Meja Makan Pasien Masing-Masing",
+        "Smart TV Samsung 43 Inch di Ruangan",
+        "Bed Side Cabinet untuk Perlengkapan Pasien",
+        "Kamar Mandi Dalam Luas & Higienis",
+        "Alarm Darurat di Sisi Tempat Tidur",
+        "Pendingin Ruangan (AC) Sejuk & Tenang"
+      ]
+    },
+    {
+      "id": "room-red-petals",
+      "name": "Red Petals (Kamar Rawat Kelas 2)",
+      "tag": "Tenang, Bersih & Terjangkau",
+      "capacity": "2 Tempat Tidur Pasien per Kamar",
+      "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
+      "features": [
+        "2 Tempat Tidur Pasien dengan Sekat Tirai Privasi",
+        "Pendingin Ruangan Daikin Nyaman",
+        "1 Smart TV 43 Inch & Akses WiFi",
+        "Meja Makan Pasien Ergonomis",
+        "Bed Side Cabinet Medis",
+        "Kamar Mandi Dalam Bersih",
+        "Alarm Darurat Terhubung ke Pos Perawat"
+      ]
+    },
+    {
+      "id": "room-seroja",
+      "name": "Seroja (Kamar Rawat Inap Reguler)",
+      "tag": "Layanan Standar Paripurna",
+      "capacity": "4 Tempat Tidur Pasien",
+      "image": "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80",
+      "features": [
+        "4 Tempat Tidur Pasien Terpisah dengan Tirai",
+        "Penyejuk Ruangan (AC)",
+        "Kamar Mandi Dalam Bersih",
+        "Pemeriksaan Dokter dan Perawat Berkala"
+      ]
+    },
+    {
+      "id": "room-isolasi",
+      "name": "Ruang Rawat Isolasi Khusus",
+      "tag": "Protokol Infeksi & Hepafilter Berstandar",
+      "capacity": "3 Bed Pasien Isolasi",
+      "image": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80",
+      "features": [
+        "Sistem Penyaring Udara Hepafilter",
+        "Ventilasi & Pencahayaan Medis Optimal",
+        "Kamar Mandi Dalam Khusus",
+        "Pengawasan Medis 24 Jam dengan Protokol Sterilisasi Ketat",
+        "3 Bed Pasien Khusus Infeksius"
+      ]
+    }
+  ],
+  "mcuPackages": [
+    {
+      "id": "mcu-geriatri",
+      "name": "Paket Sehat Geriatri (Khusus Usia Lanjut)",
+      "badge": "Layanan Unggulan Naray Hospital",
+      "price": "Rp 1.250.000",
+      "originalPrice": "Rp 1.650.000",
+      "duration": "2 - 3 Jam",
+      "target": "Lansia Pria & Wanita (Usia 55+ Tahun)",
+      "highlight": "Pemeriksaan fungsi organ vital, kadar gula darah, kolesterol, dan tulang untuk lansia",
+      "items": [
+        "Pemeriksaan Fisik oleh Dokter Spesialis Penyakit Dalam",
+        "Hematologi Rutin Lengkap",
+        "Profil Lemak: Kolesterol Total, HDL, LDL, Trigliserida",
+        "Gula Darah Puasa & HbA1c",
+        "Fungsi Ginjal: Ureum & Kreatinin",
+        "Fungsi Hati: SGOT, SGPT",
+        "Rontgen Dada (Thorax)",
+        "Elektrokardiogram (EKG Jantung)",
+        "Konsultasi Nutrisi & Pola Aktivitas Sehat Lansia"
+      ]
+    },
+    {
+      "id": "mcu-skrining-rutin",
+      "name": "Paket Skrining Sehat Naray (Umum)",
+      "badge": "Paling Populer untuk Karyawan & Keluarga",
+      "price": "Rp 850.000",
+      "originalPrice": "Rp 1.150.000",
+      "duration": "1.5 - 2 Jam",
+      "target": "Pria & Wanita (Usia 18 - 50 Tahun)",
+      "highlight": "Pemeriksaan dasar kesehatan untuk deteksi dini penyakit umum",
+      "items": [
+        "Konsultasi Dokter Umum & Cek Tensi",
+        "Darah Lengkap 18 Parameter",
+        "Kolesterol Total & Trigliserida",
+        "Gula Darah Sewaktu / Puasa",
+        "Asam Urat & Fungsi Ginjal Dasar",
+        "Urinalisis Lengkap (Air Seni)",
+        "Rontgen Dada (Foto Thorax)",
+        "Resume Medis & Edukasi Kesehatan"
+      ]
+    },
+    {
+      "id": "mcu-jantung-sehat",
+      "name": "Paket Deteksi Dini Jantung Naray",
+      "badge": "Rekomendasi Spesialis Jantung",
+      "price": "Rp 2.100.000",
+      "originalPrice": "Rp 2.750.000",
+      "duration": "3 Jam",
+      "target": "Individu dengan Riwayat Hipertensi, Rokok, atau Kolesterol",
+      "highlight": "Skrining kesehatan pembuluh darah dan irama jantung oleh Dokter Spesialis Jantung",
+      "items": [
+        "Konsultasi dr. Christian Yosaputra, Sp.JP, FIHA",
+        "Pemeriksaan EKG Resting 12-Lead",
+        "Treadmill Stress Test",
+        "Ekokardiografi (USG Jantung)",
+        "Profil Lipid Lengkap",
+        "Fungsi Ginjal & Enzim Jantung Dasar",
+        "Laporan Kesehatan Jantung Komprehensif"
+      ]
+    },
+    {
+      "id": "mcu-pranikah",
+      "name": "Paket Skrining Pra-Nikah Naray",
+      "badge": "Calon Pengantin Bahagia",
+      "price": "Rp 1.950.000 / Pasang",
+      "originalPrice": "Rp 2.500.000",
+      "duration": "2 Jam",
+      "target": "Calon Mempelai Pria & Wanita",
+      "highlight": "Pemeriksaan genetik, penyakit menular, dan kesiapan organ reproduksi",
+      "items": [
+        "Pemeriksaan Golongan Darah & Rhesus",
+        "Hematologi Rutin & Skrining Thalasemia",
+        "Skrining Hepatitis B (HBsAg) & Infeksi Menular",
+        "Pemeriksaan Fisik Kebidanan & Kandungan (Sp.OG)",
+        "Konsultasi Dokter Pra-Nikah & Vaksinasi Pranikah",
+        "Sertifikat Bebas Penyakit Menular Resmi"
+      ]
+    }
+  ],
+  "galleryActivities": [
+    {
+      "id": "gal-1",
+      "title": "Pemeriksaan Kesehatan Gratis saat Bazaar Sekolah Maitreyawira – 18 Mei 2025",
+      "date": "18 Mei 2025",
+      "category": "Kegiatan Sosial / CSR",
+      "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
+      "desc": "Naray Hospital menggelar bakti sosial pemeriksaan tensi, gula darah, dan konsultasi dokter umum gratis untuk ratusan pengunjung dan siswa di Kota Dumai."
+    },
+    {
+      "id": "gal-2",
+      "title": "Pembagian Doorprize untuk Peserta Senam + Health Talk Naray Hospital",
+      "date": "9 Juni 2025",
+      "category": "Edukasi Komunitas Sehat",
+      "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80",
+      "desc": "Edukasi pola hidup sehat, pencegahan serangan jantung dini, dan senam bersama masyarakat sekitar rumah sakit yang diakhiri dengan pembagian doorprize menarik."
+    },
+    {
+      "id": "gal-3",
+      "title": "Pelayanan Geriatri & Kunjungan Kasih Pasien Lanjut Usia",
+      "date": "14 Juli 2025",
+      "category": "Pelayanan Geriatri",
+      "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80",
+      "desc": "Program pendampingan dan pemeriksaan kesehatan berkala bagi lansia untuk memastikan mereka tetap aktif, mandiri, dan bahagia."
+    }
+  ],
+  "videoList": [
+    {
+      "id": "vid-company-profile",
+      "title": "Company Profile Naray Hospital - Rumah Sakit Modern & Nyaman di Dumai",
+      "youtubeEmbed": "https://www.youtube.com/embed/60yNtDcAykw?feature=oembed",
+      "desc": "Mengenal lebih dekat fasilitas, dokter spesialis, dan komitmen pelayanan Naray Hospital di Kota Dumai, Riau."
+    },
+    {
+      "id": "vid-geriatri",
+      "title": "Pelayanan Geriatri Naray Hospital - Peduli Kesehatan Lansia",
+      "youtubeEmbed": "https://www.youtube.com/embed/1yvh_sdLpEU?feature=oembed",
+      "desc": "Dedikasi kami dalam memberikan perawatan yang tulus dan berkualitas tinggi bagi para pasien usia lanjut."
+    }
+  ],
+  "healthArticles": [
+    {
+      "id": "artikel-1",
+      "title": "Pentingnya Menjaga Pola Makan dan Gula Darah Terkontrol bagi Penderita Diabetes",
+      "category": "Penyakit Dalam",
+      "author": "dr. Rizka Nadia, Sp.PD",
+      "date": "2 September 2026",
+      "readTime": "4 Menit Baca",
+      "image": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80",
+      "summary": "Diabetes melitus adalah penyakit kronik yang membutuhkan manajemen pola makan seimbang, olahraga teratur, dan kepatuhan konsumsi obat.",
+      "content": "Diabetes melitus merupakan salah satu gangguan metabolik yang paling banyak dijumpai di masyarakat. Sering kali diabetes tidak menimbulkan keluhan di awal, namun jika dibiarkan dapat memicu komplikasi pada ginjal, jantung, mata, dan persarafan.\n\nLangkah Kunci Mengontrol Gula Darah:\n1. Batasi konsumsi karbohidrat sederhana dan minuman berpemanis tinggi.\n2. Perbanyak asupan serat dari sayur-sayuran hijau dan buah dengan indeks glikemik rendah.\n3. Rutin berolahraga ringan minimal 30 menit sehari (seperti jalan santai atau senam).\n4. Periksa kadar HbA1c dan gula darah puasa berkala di Naray Hospital."
+    },
+    {
+      "id": "artikel-2",
+      "title": "Mengenal Tanda Gangguan Irama Jantung (Aritmia) dan Kapan Harus ke Dokter",
+      "category": "Kesehatan Jantung",
+      "author": "dr. Christian Yosaputra, Sp.JP, FIHA",
+      "date": "28 Agustus 2026",
+      "readTime": "5 Menit Baca",
+      "image": "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=800&q=80",
+      "summary": "Jantung yang berdebar kencang secara tiba-tiba, rasa melayang, atau sesak napas bisa menjadi tanda gangguan irama jantung.",
+      "content": "Irama jantung normal berdetak secara teratur antara 60 hingga 100 kali per menit saat istirahat. Ketika detak jantung terlalu cepat, terlalu lambat, atau tidak beraturan, kondisi ini disebut sebagai aritmia.\n\nKapan Harus Waspada?\n- Debaran jantung mendadak tanpa pemicu aktivitas fisik berat.\n- Disertai pusing hebat, pandangan gelap, atau pingsan (sinkop).\n- Nyeri dada atau rasa tertekan di bagian dada tengah.\n\nLakukan pemeriksaan EKG 12-Lead dan konsultasi di Poliklinik Jantung Naray Hospital untuk evaluasi menyeluruh."
+    },
+    {
+      "id": "artikel-3",
+      "title": "Tips Menjaga Tumbuh Kembang Optimal Anak pada 1.000 Hari Pertama Kehidupan",
+      "category": "Kesehatan Anak",
+      "author": "dr. M. Riki Fachrozi, M.Ked(Ped)., Sp.A",
+      "date": "20 Agustus 2026",
+      "readTime": "4 Menit Baca",
+      "image": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80",
+      "summary": "Periode emas tumbuh kembang anak dimulai dari sejak dalam kandungan hingga anak berusia 2 tahun.",
+      "content": "1.000 Hari Pertama Kehidupan (HPK) adalah periode krusial yang menentukan kecerdasan kognitif, daya tahan tubuh, dan pertumbuhan fisik seorang anak di masa depan.\n\nKunci Sukses 1.000 HPK:\n1. Nutrisi lengkap bagi ibu hamil dan rutin memeriksakan kehamilan.\n2. Inisiasi Menyusu Dini (IMD) dan ASI Eksklusif selama 6 bulan pertama.\n3. MPASI bernutrisi seimbang kaya protein hewani mulai usia 6 bulan.\n4. Imunisasi dasar lengkap tepat waktu di Poliklinik Anak Naray Hospital."
+    },
+    {
+      "id": "artikel-4",
+      "title": "Pencegahan dan Penanganan Gangguan Pernapasan di Lingkungan Beriklim Tropis",
+      "category": "Kesehatan Paru",
+      "author": "dr. Jemmy Fandri, Sp.P",
+      "date": "15 Agustus 2026",
+      "readTime": "3 Menit Baca",
+      "image": "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80",
+      "summary": "Debu, perubahan cuaca, dan polusi dapat memicu kekambuhan asma dan infeksi saluran pernapasan atas (ISPA).",
+      "content": "Saluran pernapasan sangat rentan terhadap partikel polutan dan perubahan suhu udara yang drastis. Bagi penderita asma atau alergi saluran napas, paparan asap rokok dan debu dapat memicu penyempitan bronkus yang menyebabkan sesak.\n\nTips Menjaga Kesehatan Paru:\n- Gunakan masker saat beraktivitas di luar ruangan berdebu.\n- Hindari asap rokok dan jaga sirkulasi udara kamar tidur tetap bersih.\n- Cukupi minum air hangat dan konsumsi makanan kaya antioksidan.\n- Segera periksakan diri jika batuk berlangsung lebih dari 2 minggu."
+    }
+  ],
+  "insurancePartners": [
+    {
+      "name": "Bank Mandiri",
+      "logo": "Bank Mandiri"
+    },
+    {
+      "name": "Asuransi Sinarmas",
+      "logo": "Sinarmas"
+    },
+    {
+      "name": "Bank BRI",
+      "logo": "Bank BRI"
+    },
+    {
+      "name": "Palang Merah Indonesia (PMI)",
+      "logo": "PMI"
+    },
+    {
+      "name": "Pantai Hospital International",
+      "logo": "Pantai Hospital"
+    },
+    {
+      "name": "Apical Group",
+      "logo": "Apical"
+    },
+    {
+      "name": "Laboratorium Thamrin",
+      "logo": "Lab Thamrin"
+    },
+    {
+      "name": "Bank OCBC",
+      "logo": "Bank OCBC"
+    },
+    {
+      "name": "Mandiri Inhealth",
+      "logo": "Mandiri Inhealth"
+    },
+    {
+      "name": "Bank BNI",
+      "logo": "Bank BNI"
+    },
+    {
+      "name": "Laboratorium Klinik Prodia",
+      "logo": "Prodia"
+    },
+    {
+      "name": "AdMedika Third Party",
+      "logo": "AdMedika"
+    },
+    {
+      "name": "BPJS Kesehatan",
+      "logo": "BPJS Kesehatan"
+    }
+  ]
+}

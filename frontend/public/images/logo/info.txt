@@ -1,0 +1,3 @@
+# Folder Aset Logo & Ikon Brand
+Taruh logo rumah sakit, favicon, dan logo akreditasi di sini.
+Contoh: logo-naray.svg, logo-kars.png, bpjs-kesehatan.png

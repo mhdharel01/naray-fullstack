@@ -1,0 +1,3 @@
+# Folder Aset Berita & Edukasi
+Taruh thumbnail gambar artikel kesehatan, siaran pers, dan berita RS di sini.
+Ukuran rekomendasi: 800x450px (format .webp / .jpg).

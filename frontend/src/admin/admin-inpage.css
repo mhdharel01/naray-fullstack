@@ -1,0 +1,849 @@
+/* ===================================================
+   ADMIN IN-PAGE EDITING STYLES (NARAY HOSPITAL)
+   =================================================== */
+
+/* ── 1. Top Admin Status Banner ── */
+.admin-status-banner {
+  background: linear-gradient(90deg, #0b2545 0%, #134e5e 100%);
+  color: #ffffff;
+  padding: 10px 0;
+  border-bottom: 2px solid #0cb299;
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  animation: slideDownAdmin 0.3s ease-out;
+}
+
+@keyframes slideDownAdmin {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.admin-banner-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.admin-banner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(12, 178, 153, 0.25);
+  border: 1px solid #0cb299;
+  color: #4eeddb;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.admin-banner-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #e2e8f0;
+}
+
+.admin-banner-text strong {
+  color: #ffffff;
+}
+
+.admin-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-banner-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.admin-banner-btn.secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+.admin-banner-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.admin-banner-btn.warning {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+.admin-banner-btn.warning:hover {
+  background: rgba(245, 158, 11, 0.35);
+}
+
+.admin-banner-btn.danger {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+.admin-banner-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.38);
+}
+
+/* ── 2. TopBar & Navbar Admin Badges ── */
+.topbar-admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(12, 178, 153, 0.12);
+  border: 1px solid rgba(12, 178, 153, 0.4);
+  color: #0cb299;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.topbar-admin-pill:hover {
+  background: #0cb299;
+  color: #ffffff;
+}
+
+.topbar-admin-pill.active {
+  background: #0cb299;
+  color: #ffffff;
+  border-color: #0cb299;
+}
+
+.nav-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #10b981;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.footer-admin-link-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.footer-admin-link-btn:hover {
+  color: #0cb299;
+}
+
+/* ── 3. Section Header Action (Tambah Data) ── */
+.section-header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.admin-add-section-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0cb299 0%, #09947f 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(12, 178, 153, 0.3);
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.admin-add-section-btn:hover {
+  transform: translateY(-50%) translateY(-2px);
+  box-shadow: 0 6px 16px rgba(12, 178, 153, 0.45);
+}
+
+@media (max-width: 768px) {
+  .section-header-top-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .admin-add-section-btn {
+    position: static;
+    transform: none;
+  }
+  .admin-add-section-btn:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ── 4. In-Page Editable Cards & Floating Actions ── */
+.admin-editable-card {
+  position: relative;
+  outline: 2px dashed rgba(12, 178, 153, 0.45);
+  outline-offset: 4px;
+  transition: outline-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-editable-card:hover {
+  outline: 2px solid #0cb299;
+  box-shadow: 0 8px 24px rgba(12, 178, 153, 0.18) !important;
+}
+
+.admin-card-action-bar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(11, 37, 69, 0.88);
+  backdrop-filter: blur(8px);
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.admin-card-action-bar.top-right-bar {
+  top: 18px;
+  right: 18px;
+}
+
+.admin-card-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.admin-card-action-btn.edit {
+  background: #0cb299;
+  color: #ffffff;
+}
+.admin-card-action-btn.edit:hover {
+  background: #0ea18b;
+}
+
+.admin-card-action-btn.delete {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  padding: 5px 7px;
+}
+.admin-card-action-btn.delete:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* ── 5. Quick Admin Login Modal ── */
+.admin-quick-login-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  position: relative;
+  animation: zoomInAdmin 0.25s ease-out;
+}
+
+@keyframes zoomInAdmin {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.admin-modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #f1f5f9;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.admin-quick-login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.admin-quick-login-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0cb299 0%, #09947f 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 18px rgba(12, 178, 153, 0.3);
+}
+
+.admin-quick-login-header h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0b2545;
+  margin: 0 0 6px;
+}
+
+.admin-quick-login-header p {
+  font-size: 0.86rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.admin-error-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.admin-form-group {
+  margin-bottom: 16px;
+}
+
+.admin-form-label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+}
+
+.admin-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-input-icon {
+  position: absolute;
+  left: 12px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.admin-form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  background: #ffffff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: #0cb299;
+  box-shadow: 0 0 0 3px rgba(12, 178, 153, 0.15);
+}
+
+.admin-form-input.with-left-icon {
+  padding-left: 38px;
+}
+
+.admin-form-input.with-toggle {
+  padding-right: 40px;
+}
+
+.admin-pass-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.admin-pass-toggle:hover {
+  color: #475569;
+}
+
+.admin-quick-login-security-notice {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-modal-actions .btn {
+  flex: 1;
+}
+
+.btn-submit-admin {
+  background: #0cb299;
+  color: #ffffff;
+}
+
+.admin-spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spinAdmin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spinAdmin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 6. In-Page Universal Edit Modal ── */
+.admin-edit-backdrop {
+  z-index: 1100;
+}
+
+.admin-edit-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  animation: zoomInAdmin 0.25s ease-out;
+  overflow: hidden;
+}
+
+.admin-edit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.admin-edit-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-edit-type-badge {
+  background: rgba(12, 178, 153, 0.15);
+  color: #0cb299;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.admin-edit-header-title h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0b2545;
+  margin: 0;
+}
+
+.admin-edit-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.admin-edit-fields-scroll {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.admin-form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .admin-form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.admin-form-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  background: #ffffff;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.admin-form-textarea:focus {
+  outline: none;
+  border-color: #0cb299;
+  box-shadow: 0 0 0 3px rgba(12, 178, 153, 0.15);
+}
+
+.admin-form-textarea.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.admin-image-input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-field-img-preview {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+}
+
+.admin-field-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.admin-field-hint code {
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* Schedules Editor for Doctor */
+.admin-schedules-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.btn-add-schedule-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(12, 178, 153, 0.12);
+  color: #0cb299;
+  border: 1px solid rgba(12, 178, 153, 0.3);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-add-schedule-row:hover {
+  background: #0cb299;
+  color: #ffffff;
+}
+
+.admin-schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-schedule-edit-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-schedule-edit-row .schedule-day {
+  flex: 2;
+}
+.admin-schedule-edit-row .schedule-time {
+  flex: 3;
+}
+.admin-schedule-edit-row .schedule-room {
+  flex: 2;
+}
+
+.admin-btn-delete-row {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  width: 34px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.admin-btn-delete-row:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.admin-empty-helper {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 4px 0;
+}
+
+.admin-edit-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.btn-save-admin-data {
+  background: #0cb299;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-save-admin-data:hover {
+  background: #09947f;
+}
+
+.admin-live-website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(12, 178, 153, 0.15);
+  color: #0cb299;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(12, 178, 153, 0.3);
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+.admin-live-website-link:hover {
+  background: #0cb299;
+  color: #ffffff;
+}
+
+.admin-sidebar-live-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  background: rgba(12, 178, 153, 0.12);
+  color: #0cb299;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(12, 178, 153, 0.3);
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.admin-sidebar-live-link:hover {
+  background: #0cb299;
+  color: #ffffff;
+}
+
+/* ── Mobile Responsive for Admin In-Page Elements ── */
+@media (max-width: 768px) {
+  /* Admin Edit Modal on mobile - slide from bottom */
+  .admin-edit-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .admin-edit-modal-card {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .admin-edit-modal-header {
+    padding: 16px 18px;
+  }
+
+  .admin-edit-header-title h3 {
+    font-size: 1rem;
+  }
+
+  .admin-edit-fields-scroll {
+    padding: 16px;
+  }
+
+  .admin-form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .admin-edit-modal-footer {
+    padding: 12px 16px;
+    gap: 8px;
+  }
+
+  .admin-edit-modal-footer .btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+  }
+
+  /* Quick Login Modal on mobile */
+  .admin-quick-login-card {
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+  }
+
+  /* Admin banner on mobile */
+  .admin-banner-text {
+    font-size: 0.76rem;
+  }
+
+  .admin-banner-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+
+  /* Card action bar on mobile - make smaller */
+  .admin-card-action-bar {
+    padding: 3px 5px;
+    gap: 4px;
+  }
+
+  .admin-card-action-btn {
+    padding: 4px 7px;
+    font-size: 0.7rem;
+    gap: 3px;
+  }
+
+  /* Schedule edit row stack on mobile */
+  .admin-schedule-edit-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .admin-schedule-edit-row .schedule-day,
+  .admin-schedule-edit-row .schedule-time,
+  .admin-schedule-edit-row .schedule-room {
+    flex: none;
+    width: 100%;
+  }
+
+  .admin-btn-delete-row {
+    width: 100%;
+    height: 34px;
+  }
+
+  /* Image input group on mobile */
+  .admin-image-input-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-field-img-preview {
+    width: 64px;
+    height: 64px;
+  }
+
+  .admin-modal-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .admin-modal-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

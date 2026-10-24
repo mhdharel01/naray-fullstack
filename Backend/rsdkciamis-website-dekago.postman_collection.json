@@ -1,0 +1,174 @@
+{
+  "info": {
+    "name": "Dekago v2 - RSDK Ciamis Website Feeds",
+    "description": "The three public (no auth) dekago-v2 endpoints that rsdkciamis-website pulls every 15 minutes (server/dekagoSync.ts): jadwal dokter (+cuti), persediaan tempat tidur, jadwal operasi.\n\nSet the `base_url` variable to the same value as DEKAGO_API_BASE_URL in the website's .env (e.g. https://<dekago-host>/api/v1/pasien, no trailing slash).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://dekago-v2.test/api/v1/pasien", "type": "string" },
+    { "key": "from", "value": "", "type": "string", "description": "Y-m-d. Empty = today (Asia/Jakarta), filled by pre-request script." },
+    { "key": "to", "value": "", "type": "string", "description": "Y-m-d. Empty = from + 7 days (max range 14 days)." }
+  ],
+  "item": [
+    {
+      "name": "Jadwal Dokter",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/jadwal-dokter", "host": ["{{base_url}}"], "path": ["jadwal-dokter"] },
+        "description": "Weekly doctor schedule. data.jadwal_dokter is a 7-element array indexed by weekday (0 = Minggu); use the array index, not day_of_week/nama_hari. data.cuti = leave entries for today..today+6; data.jadwal_cuti_mingguan = slots whose weekly status is cuti. The website's zod schema rejects the response if cuti/jadwal_cuti_mingguan are missing."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const d = pm.response.json().data;",
+              "pm.test('jadwal_dokter has 7 weekday entries', () => pm.expect(d.jadwal_dokter).to.be.an('array').with.lengthOf(7));",
+              "pm.test('cuti and jadwal_cuti_mingguan present', () => { pm.expect(d.cuti).to.be.an('array'); pm.expect(d.jadwal_cuti_mingguan).to.be.an('array'); });",
+              "const slots = d.jadwal_dokter.flatMap(day => day.jadwal);",
+              "pm.test('slots carry ruangan + dokter', () => slots.forEach(s => { pm.expect(s).to.have.property('start_time'); pm.expect(s.ruangan).to.have.property('nama'); pm.expect(s.dokter).to.have.property('nama'); }));",
+              "pm.test('cuti.sumber is mingguan|override', () => d.cuti.forEach(c => pm.expect(c.sumber).to.be.oneOf(['mingguan', 'override'])));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK (shape)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Sukses!\",\n  \"data\": {\n    \"jadwal_dokter\": [\n      { \"day_of_week\": 0, \"nama_hari\": null, \"jadwal\": [] },\n      {\n        \"day_of_week\": 1,\n        \"nama_hari\": null,\n        \"jadwal\": [\n          {\n            \"start_time\": \"08:00:00\",\n            \"end_time\": \"12:00:00\",\n            \"cuti\": false,\n            \"ruangan\": { \"id\": 12, \"nama\": \"Poli Anak\" },\n            \"dokter\": { \"id\": 34, \"nama\": \"dr. Andri, Sp.A\", \"avatar_url\": null }\n          }\n        ]\n      }\n    ],\n    \"cuti\": [\n      {\n        \"tanggal\": \"2026-10-23\",\n        \"day_of_week\": 5,\n        \"start_time\": \"08:00:00\",\n        \"end_time\": \"12:00:00\",\n        \"jadwal_start_time\": \"08:00:00\",\n        \"jadwal_end_time\": \"12:00:00\",\n        \"sumber\": \"override\",\n        \"valid_from\": \"2026-10-20\",\n        \"valid_to\": \"2026-10-25\",\n        \"ruangan\": { \"id\": 12, \"nama\": \"Poli Anak\" },\n        \"dokter\": { \"id\": 34, \"nama\": \"dr. Andri, Sp.A\" }\n      }\n    ],\n    \"jadwal_cuti_mingguan\": [],\n    \"last_fetched\": \"22/10/2026 15:30:00\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Persediaan Tempat Tidur",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/kamar/persediaan", "host": ["{{base_url}}"], "path": ["kamar", "persediaan"] },
+        "description": "Bed availability per kelas. The website stores occupied = max(0, total - tersedia); `total` may exceed tersedia + terpakai because reserved beds are not counted in terpakai. An empty list makes the website sync fail (old data kept)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const rows = pm.response.json().data.persediaan_kamar;",
+              "pm.test('persediaan_kamar is a non-empty array', () => pm.expect(rows).to.be.an('array').that.is.not.empty);",
+              "pm.test('each row has kelas, total, tersedia', () => rows.forEach(r => { pm.expect(r.kelas).to.be.a('string').and.not.empty; pm.expect(Number(r.total)).to.be.at.least(0); pm.expect(Number(r.tersedia)).to.be.at.least(0); }));",
+              "pm.test('tersedia <= total', () => rows.forEach(r => pm.expect(Number(r.tersedia)).to.be.at.most(Number(r.total))));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK (shape)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Sukses!\",\n  \"data\": {\n    \"persediaan_kamar\": [\n      { \"kelas\": \"Kelas 1\", \"total\": 20, \"tersedia\": 5, \"terpakai\": 14 }\n    ],\n    \"last_fetched\": \"22/10/2026 15:30:00\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Jadwal Operasi",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{base_url}}/ruangan/operasi?from={{from}}&to={{to}}",
+          "host": ["{{base_url}}"],
+          "path": ["ruangan", "operasi"],
+          "query": [
+            { "key": "from", "value": "{{from}}", "description": "Y-m-d. Website sends today." },
+            { "key": "to", "value": "{{to}}", "description": "Y-m-d. Website sends today + 7. Max range 14 days." }
+          ]
+        },
+        "description": "Surgery schedule. With from+to, dekago calls SIMGOS once per day (slow: the website allows 120 s). Invalid params -> 422; any SIMGOS day failing -> 502 upstream_error."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const fmt = d => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Jakarta' });",
+              "if (!pm.variables.get('from')) pm.variables.set('from', fmt(new Date()));",
+              "if (!pm.variables.get('to')) { const d = new Date(pm.variables.get('from') + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + 7); pm.variables.set('to', d.toISOString().slice(0, 10)); }"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "const rows = pm.response.json().data.jadwal_operasi;",
+              "pm.test('jadwal_operasi is an array', () => pm.expect(rows).to.be.an('array'));",
+              "pm.test('rows have nama_dokter and tanggal (d/m/Y H:i)', () => rows.forEach(r => { pm.expect(r.nama_dokter).to.be.a('string'); pm.expect(r.tanggal).to.match(/^\\d{2}\\/\\d{2}\\/\\d{4} \\d{2}:\\d{2}/); }));"
+            ]
+          }
+        }
+      ],
+      "response": [
+        {
+          "name": "200 OK (shape)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"status\": \"success\",\n  \"message\": \"Sukses!\",\n  \"data\": {\n    \"jadwal_operasi\": [\n      {\n        \"ruangan_id\": \"103010501\",\n        \"dokter\": { \"id\": 1, \"nama\": \"dr. Budi, Sp.B\", \"nip\": \"1234\" },\n        \"nama_dokter\": \"dr. Budi, Sp.B\",\n        \"smf\": { \"id\": 3, \"nama\": \"Bedah\", \"deskripsi\": null },\n        \"nama_smf\": \"Bedah\",\n        \"tanggal\": \"23/10/2026 09:00\"\n      }\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Jadwal Operasi - tanpa filter (legacy)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/ruangan/operasi", "host": ["{{base_url}}"], "path": ["ruangan", "operasi"] },
+        "description": "No from/to: newest ~100 SIMGOS records, cached 1 min. Used by dekago-app, not by the website sync."
+      },
+      "event": [
+        { "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('200 OK', () => pm.response.to.have.status(200));"] } }
+      ]
+    },
+    {
+      "name": "Jadwal Operasi - 422 (hanya from)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{base_url}}/ruangan/operasi?from=2026-10-22",
+          "host": ["{{base_url}}"],
+          "path": ["ruangan", "operasi"],
+          "query": [{ "key": "from", "value": "2026-10-22" }]
+        },
+        "description": "Negative case. Also 422 for bad format, to < from, or range > 14 days."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('422', () => pm.response.to.have.status(422));",
+              "pm.test('standard error envelope', () => pm.expect(pm.response.json().error).to.have.all.keys('code', 'title', 'message'));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
