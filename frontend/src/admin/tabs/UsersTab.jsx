@@ -206,11 +206,25 @@ export default function UsersTab({ onShowToast }) {
           onShowToast(res.message || (modalState.isEdit ? 'Pengguna berhasil diperbarui.' : 'Pengguna baru berhasil ditambahkan.'));
         }
       } else {
+        if (res?.errors && Object.keys(res.errors).length > 0) {
+          const flatErrors = {};
+          Object.keys(res.errors).forEach(key => {
+            flatErrors[key] = Array.isArray(res.errors[key]) ? res.errors[key][0] : res.errors[key];
+          });
+          setFormErrors(prev => ({ ...prev, ...flatErrors }));
+        }
         if (typeof onShowToast === 'function') {
           onShowToast(res?.message || 'Gagal menyimpan data pengguna.', 'error');
         }
       }
     } catch (err) {
+      if (err?.errors && Object.keys(err.errors).length > 0) {
+        const flatErrors = {};
+        Object.keys(err.errors).forEach(key => {
+          flatErrors[key] = Array.isArray(err.errors[key]) ? err.errors[key][0] : err.errors[key];
+        });
+        setFormErrors(prev => ({ ...prev, ...flatErrors }));
+      }
       if (typeof onShowToast === 'function') {
         onShowToast(err.message || 'Terjadi kesalahan sistem.', 'error');
       }
@@ -695,7 +709,7 @@ export default function UsersTab({ onShowToast }) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmitForm} className="space-y-5">
+            <form onSubmit={handleSubmitForm} className="space-y-5" noValidate autoComplete="off">
               {/* Role Selection Cards */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -816,15 +830,28 @@ export default function UsersTab({ onShowToast }) {
                   <input
                     type="email"
                     required
+                    autoComplete="off"
                     value={formState.email}
-                    onChange={(e) => setFormState(prev => ({ ...prev, email: e.target.value }))}
+                    onChange={(e) => {
+                      setFormState(prev => ({ ...prev, email: e.target.value }));
+                      if (formErrors.email) setFormErrors(prev => ({ ...prev, email: null }));
+                    }}
                     placeholder="nama@narayhospital.com"
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm bg-slate-50/50 transition-all ${
-                      formErrors.email ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:border-teal-500 focus:ring-teal-500/20'
+                      formErrors.email ? 'border-rose-400 bg-rose-50/30 focus:ring-rose-200' : 'border-slate-200 focus:border-teal-500 focus:ring-teal-500/20'
                     } focus:ring-2`}
                   />
                 </div>
-                {formErrors.email && <p className="text-xs text-rose-600 m-0">{formErrors.email}</p>}
+                {formErrors.email ? (
+                  <p className="text-xs text-rose-600 font-semibold flex items-center gap-1.5 m-0 animate-in fade-in">
+                    <AlertTriangle size={13} className="shrink-0 text-rose-500" />
+                    <span>{formErrors.email}</span>
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-500 m-0">
+                    Alamat email harus unik dan akan digunakan sebagai identitas login akun staf.
+                  </p>
+                )}
               </div>
 
               {/* Password Fields */}
@@ -847,8 +874,12 @@ export default function UsersTab({ onShowToast }) {
                   <div className="space-y-1">
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
                       value={formState.password}
-                      onChange={(e) => setFormState(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={(e) => {
+                        setFormState(prev => ({ ...prev, password: e.target.value }));
+                        if (formErrors.password) setFormErrors(prev => ({ ...prev, password: null }));
+                      }}
                       placeholder={modalState.isEdit ? 'Kosongkan jika tidak diubah' : 'Minimal 6 karakter'}
                       className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm bg-white transition-all ${
                         formErrors.password ? 'border-rose-400' : 'border-slate-200 focus:border-teal-500'
@@ -860,8 +891,12 @@ export default function UsersTab({ onShowToast }) {
                   <div className="space-y-1">
                     <input
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
                       value={formState.password_confirmation}
-                      onChange={(e) => setFormState(prev => ({ ...prev, password_confirmation: e.target.value }))}
+                      onChange={(e) => {
+                        setFormState(prev => ({ ...prev, password_confirmation: e.target.value }));
+                        if (formErrors.password_confirmation) setFormErrors(prev => ({ ...prev, password_confirmation: null }));
+                      }}
                       placeholder="Ketik ulang kata sandi"
                       className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm bg-white transition-all ${
                         formErrors.password_confirmation ? 'border-rose-400' : 'border-slate-200 focus:border-teal-500'

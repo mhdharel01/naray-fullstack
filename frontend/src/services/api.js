@@ -41,7 +41,10 @@ async function fetchApi(endpoint, options = {}) {
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
-      throw new Error(errorBody.message || `HTTP error! status: ${response.status}`);
+      const error = new Error(errorBody.message || `HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.errors = errorBody.errors || {};
+      throw error;
     }
     return await response.json();
   } catch (error) {

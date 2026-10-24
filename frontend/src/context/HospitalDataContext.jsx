@@ -1238,7 +1238,11 @@ export function HospitalDataProvider({ children }) {
       }
       return res || { success: false, message: 'Gagal membuat pengguna admin' };
     } catch (err) {
-      return { success: false, message: err.message || 'Terjadi kesalahan sistem' };
+      return { 
+        success: false, 
+        message: err.message || 'Terjadi kesalahan sistem',
+        errors: err.errors || {}
+      };
     }
   };
 
@@ -1256,7 +1260,11 @@ export function HospitalDataProvider({ children }) {
       }
       return res || { success: false, message: 'Gagal memperbarui data pengguna' };
     } catch (err) {
-      return { success: false, message: err.message || 'Terjadi kesalahan sistem' };
+      return { 
+        success: false, 
+        message: err.message || 'Terjadi kesalahan sistem',
+        errors: err.errors || {}
+      };
     }
   };
 
