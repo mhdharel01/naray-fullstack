@@ -181,9 +181,18 @@ export default function SurgerySchedulePage() {
             <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
               Jadwal Operasi Rumah Sakit
             </h1>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-              Pilih hari untuk melihat jadwal operasi dokter spesialis yang tersedia. Data disinkronkan langsung dengan SIMRS Naray Hospital.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal mb-3">
+              Pilih hari untuk melihat jadwal operasi dokter spesialis dari hari ini dan hari mendatang. Data disinkronkan langsung secara real-time dengan SIMRS Naray Hospital.
             </p>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                SIMRS Real-Time Live
+              </span>
+              <span className="text-xs text-slate-500 font-medium">
+                Periode: Hari ini s/d 14 hari ke depan
+              </span>
+            </div>
           </div>
         </div>
 
@@ -411,6 +420,27 @@ export default function SurgerySchedulePage() {
                 </div>
               )}
             </>
+          ) : rawList.length === 0 ? (
+            <div className="bg-white rounded-3xl border border-slate-200/90 p-10 sm:p-14 text-center shadow-xs mb-10">
+              <div className="w-16 h-16 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-4 border border-teal-100">
+                <Activity size={32} />
+              </div>
+              <h3 className="font-heading text-lg sm:text-xl font-bold text-slate-900 mb-2">
+                Belum Ada Jadwal Operasi Terdaftar
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto mb-6 leading-relaxed">
+                Data diambil langsung secara <strong>real-time dari API SIMRS</strong> untuk periode <strong>hari ini dan hari mendatang</strong>. Saat ini belum ada antrean tindakan operasi yang dijadwalkan oleh staf bedah/IBS di sistem SIMRS.
+              </p>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold shadow-sm transition-all cursor-pointer"
+              >
+                <RefreshCw size={15} className={isRefreshing ? 'animate-spin' : ''} />
+                <span>{isRefreshing ? 'Memperbarui...' : 'Periksa Ulang Data SIMRS'}</span>
+              </button>
+            </div>
           ) : (
             <div className="bg-white rounded-3xl border border-slate-200/90 p-12 text-center shadow-xs mb-10">
               <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
@@ -428,7 +458,7 @@ export default function SurgerySchedulePage() {
                   setSelectedDay('Semua');
                   setKeyword('');
                 }}
-                className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold shadow-sm transition-all"
+                className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold shadow-sm transition-all cursor-pointer"
               >
                 Tampilkan Semua Hari
               </button>
