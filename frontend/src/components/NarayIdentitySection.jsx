@@ -13,7 +13,7 @@ export function NarayIdentitySection() {
   const imageSrc = (rawImage && !rawImage.includes('.svg')) ? rawImage : '/images/doctors/doctor-male-default.jpg';
 
   return (
-    <div className="bg-slate-50/70 py-20 sm:py-28 border-b border-slate-200/80">
+    <div className="bg-white py-20 sm:py-28 border-b border-slate-200/80" id="standar-mutu">
       {/* ── Standar Mutu Klinis & Komitmen Rumah Sakit (Editorial Presentation) ── */}
       <section className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
@@ -31,7 +31,7 @@ export function NarayIdentitySection() {
 
             {/* 3 Core Quality Benchmarks */}
             <div className="flex flex-col gap-4">
-              <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-4 transition-all hover:border-teal-300 hover:shadow-sm">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-2xs flex items-start gap-4 transition-all hover:border-teal-300 hover:shadow-sm">
                 <span className="font-heading text-xl font-black text-teal-600 shrink-0">01</span>
                 <div>
                   <strong className="block text-sm sm:text-base font-bold text-slate-900 mb-1">Akreditasi Paripurna KARS &amp; Kemenkes RI</strong>
@@ -41,7 +41,7 @@ export function NarayIdentitySection() {
                 </div>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-4 transition-all hover:border-teal-300 hover:shadow-sm">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-2xs flex items-start gap-4 transition-all hover:border-teal-300 hover:shadow-sm">
                 <span className="font-heading text-xl font-black text-teal-600 shrink-0">02</span>
                 <div>
                   <strong className="block text-sm sm:text-base font-bold text-slate-900 mb-1">100% Rekam Medis Elektronik Terintegrasi</strong>
@@ -51,7 +51,7 @@ export function NarayIdentitySection() {
                 </div>
               </div>
 
-              <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-2xs flex items-start gap-4 transition-all hover:border-teal-300 hover:shadow-sm">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 shadow-2xs flex items-start gap-4 transition-all hover:border-teal-300 hover:shadow-sm">
                 <span className="font-heading text-xl font-black text-teal-600 shrink-0">03</span>
                 <div>
                   <strong className="block text-sm sm:text-base font-bold text-slate-900 mb-1">Fasilitas Higienis dan Menenangkan</strong>

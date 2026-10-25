@@ -126,17 +126,17 @@ export default function App() {
         onOpenEmergency={() => setIsEmergencyOpen(true)}
       />
 
-      {/* 5. Pusat Layanan Unggulan Terpadu (8 Integrated Healthcare Services Grid) */}
+      {/* 5. Profil Rumah Sakit, Standar Mutu & Sambutan Kepemimpinan Medis (Membangun Reputasi & Kepercayaan Awal) */}
+      <NarayIdentitySection />
+
+      {/* 6. Pusat Layanan Unggulan Terpadu (8 Integrated Healthcare Services Grid) */}
       <CentersOfExcellence 
         onSelectCenter={(center) => setActiveCenterModal(center)}
         onOpenEmergency={() => setIsEmergencyOpen(true)}
       />
 
-      {/* 6. Dokter Spesialis Pilihan Kota Dumai (Tim Dokter Medis Berpengalaman) */}
+      {/* 7. Dokter Spesialis Pilihan Kota Dumai (Tim Dokter Medis Berpengalaman) */}
       <FeaturedDoctorsSection />
-
-      {/* 7. Sambutan Kepemimpinan & Komitmen Mutu Klinis (Membangun Reputasi & Akreditasi) */}
-      <NarayIdentitySection />
 
       {/* 8. Fasilitas Pilihan & Program Unggulan (Directs to /kamar-rawat-inap & /paket-mcu) */}
       <HospitalServicesDiscovery 
