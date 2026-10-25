@@ -163,76 +163,96 @@ export default function GalleryVideoPage() {
 
         {/* ── 3. Real-Time 4-Cards Stat Strip (Matching InpatientRoomsPage) ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
             {/* Stat 1: Total Video */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                <Video size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
-                  VIDEO DOKUMENTASI
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <Video className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                  Video
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  DOKUMENTASI VIDEO
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
                     {videoList.length}
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Video</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Video</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 2: Total Galeri Foto */}
-            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Camera size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono">
-                  ARSIP FOTO KEGIATAN
+            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Foto
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-emerald-950">
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono leading-tight">
+                  ARSIP FOTO
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-emerald-950 leading-tight">
                     {galleryActivities.length}
                   </span>
-                  <span className="text-xs font-semibold text-emerald-700">Foto</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-emerald-700">Foto</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 3: Kegiatan CSR & Komunitas */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
-                <Sparkles size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">
+                  CSR
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   PROGRAM KOMUNITAS
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
                     CSR &amp; Sosial
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Aktif</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Aktif</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 4: Privasi & Etika Pasien */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <ShieldCheck size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
+                  KARS &amp; UU
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   ETIKA PUBLIKASI
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-xl sm:text-2xl font-black text-slate-900">
-                    KARS &amp; UU
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
+                    Privasi Pasien
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Privasi Terjaga</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Terjaga</span>
                 </div>
               </div>
             </div>
@@ -242,27 +262,27 @@ export default function GalleryVideoPage() {
 
         {/* ── 4. Segmented Media Tab Switcher & Live Search Toolbar ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-slate-200/90 flex flex-col gap-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-xs border border-slate-200/90 flex flex-col gap-4">
             
             {/* Row 1: Primary Media Tabs & Search Input */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
               
               {/* Primary Tabs */}
-              <div className="inline-flex p-1 rounded-xl bg-slate-100/80 border border-slate-200/80 gap-1 overflow-x-auto max-w-full" role="tablist">
+              <div className="inline-flex p-1 rounded-xl bg-slate-100/80 border border-slate-200/80 gap-1 overflow-x-auto max-w-full scrollbar-none" role="tablist">
                 <button
                   type="button"
                   role="tab"
                   aria-selected={activeTab === 'video'}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'video' 
                       ? 'bg-teal-700 text-white shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                   onClick={() => setActiveTab('video')}
                 >
-                  <Video size={16} />
+                  <Video size={15} className="shrink-0" />
                   <span>Video Dokumentasi</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'video' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {videoList.length}
@@ -273,16 +293,17 @@ export default function GalleryVideoPage() {
                   type="button"
                   role="tab"
                   aria-selected={activeTab === 'gallery'}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'gallery' 
                       ? 'bg-teal-700 text-white shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                   onClick={() => setActiveTab('gallery')}
                 >
-                  <ImageIcon size={16} />
-                  <span>Galeri Foto Kegiatan</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${
+                  <Camera size={15} className="shrink-0" />
+                  <span className="hidden sm:inline">Galeri Foto Kegiatan</span>
+                  <span className="sm:hidden">Galeri Foto</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'gallery' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {galleryActivities.length}

@@ -495,58 +495,73 @@ export default function InpatientRoomsPage() {
 
         {/* ── 3. Real-Time Bed Availability Dashboard (Live Stats Widget) ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
             {/* Stat 1: Total Beds */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                <BedDouble size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <BedDouble className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                  Kapasitas
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   TOTAL TEMPAT TIDUR
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
                     {bedStats.total}
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Bed</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bed</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 2: Available Beds (Siap Pakai) */}
-            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                <CheckCircle2 size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono">
-                  BED TERSEDIA (KOSONG)
+            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Siap Pakai
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-emerald-700">
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono leading-tight">
+                  BED TERSEDIA
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-emerald-700 leading-tight">
                     {bedStats.available}
                   </span>
-                  <span className="text-xs font-bold text-emerald-800">Bed Siap Pakai</span>
+                  <span className="text-[11px] sm:text-xs font-bold text-emerald-800">Bed Siap</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 3: Occupied Beds */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <Users size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
-                  BED TERISI (PASIEN)
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                  {bedStats.occupancyRate}% BOR
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-slate-800">
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  BED TERISI
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-800 leading-tight">
                     {bedStats.occupied}
                   </span>
-                  <span className="text-xs font-semibold text-amber-700 font-mono">
+                  <span className="text-[11px] sm:text-xs font-semibold text-amber-700 font-mono">
                     ({bedStats.occupancyRate}% BOR)
                   </span>
                 </div>
@@ -554,20 +569,25 @@ export default function InpatientRoomsPage() {
             </div>
 
             {/* Stat 4: Intensive & Isolation Siaga */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
-                <Activity size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
-                  ICU &amp; ISOLASI SIAGA
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                  <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">
+                  Siaga
                 </span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">
-                      {bedStats.intensiveAvailable}
-                    </span>
-                    <span className="text-xs font-semibold text-sky-700 font-mono">Bed Siap Pakai</span>
-                  </div>
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  ICU &amp; ISOLASI
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+                    {bedStats.intensiveAvailable}
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-sky-700 font-mono">Siap Pakai</span>
+                </div>
               </div>
             </div>
 
@@ -576,49 +596,52 @@ export default function InpatientRoomsPage() {
 
         {/* ── 3.5. View Switcher Controls (Hybrid UX Mode) ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xs">
-            <div className="flex items-center gap-1.5 overflow-x-auto">
+          <div className="flex items-center justify-between gap-3 bg-white p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 shadow-2xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none w-full sm:w-auto -mx-0.5 px-0.5">
               <button
                 type="button"
                 onClick={() => setDisplayMode('all')}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                   displayMode === 'all'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
-                <Layers size={15} />
-                <span>Semua Tampilan (Matriks + Foto)</span>
+                <Layers size={14} className="shrink-0" />
+                <span className="hidden sm:inline">Semua Tampilan (Matriks + Foto)</span>
+                <span className="sm:hidden">Semua View</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setDisplayMode('matrix')}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                   displayMode === 'matrix'
                     ? 'bg-teal-600 text-white shadow-xs'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
-                <Table2 size={15} />
-                <span>Papan Ketersediaan Bed</span>
+                <Table2 size={14} className="shrink-0" />
+                <span className="hidden sm:inline">Papan Ketersediaan Bed</span>
+                <span className="sm:hidden">Status Bed</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setDisplayMode('cards')}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                   displayMode === 'cards'
                     ? 'bg-teal-600 text-white shadow-xs'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 }`}
               >
-                <BedDouble size={15} />
-                <span>Katalog Fasilitas &amp; Foto</span>
+                <BedDouble size={14} className="shrink-0" />
+                <span className="hidden sm:inline">Katalog Fasilitas &amp; Foto</span>
+                <span className="sm:hidden">Katalog Foto</span>
               </button>
             </div>
 
-            <div className="text-xs text-slate-500 font-medium hidden md:flex items-center gap-2 pr-2">
+            <div className="text-xs text-slate-500 font-medium hidden lg:flex items-center gap-2 pr-2 shrink-0">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Pembaruan Langsung Terverifikasi</span>
             </div>
@@ -631,45 +654,45 @@ export default function InpatientRoomsPage() {
             <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
               
               {/* Header Bar */}
-              <div className="px-6 py-5 bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="px-4 py-4 sm:px-6 sm:py-5 bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
                     <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
-                    <span className="text-[11px] font-bold tracking-widest text-emerald-300 uppercase font-mono">
+                    <span className="text-[10px] sm:text-[11px] font-bold tracking-widest text-emerald-300 uppercase font-mono">
                       INFORMASI RESMI RAWAT INAP
                     </span>
                   </div>
-                  <h2 className="font-heading text-xl sm:text-2xl font-bold text-white tracking-tight">
-                    Papan Ketersediaan Tempat Tidur Pasien Real-Time
+                  <h2 className="font-heading text-lg sm:text-2xl font-bold text-white tracking-tight">
+                    Papan Ketersediaan Tempat Tidur Real-Time
                   </h2>
                   <p className="text-xs text-slate-300 mt-0.5">
                     Informasi kapasitas dan status ranjang per kelas perawatan terkini Naray Hospital Kota Dumai
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 md:pt-0 border-t border-white/10 md:border-0">
                   <div className="text-left md:text-right">
-                    <span className="text-[11px] text-slate-400 block font-mono">Pembaruan Terakhir:</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-400 block font-mono">Pembaruan Terakhir:</span>
                     <span className="text-xs font-bold text-emerald-400 font-mono">{bedStats.lastUpdate} WIB</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleRefresh}
                     disabled={isRefreshing}
-                    className="h-10 px-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-2 border border-white/20 transition-all cursor-pointer disabled:opacity-50"
+                    className="h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 sm:gap-2 border border-white/20 transition-all cursor-pointer disabled:opacity-50"
                     title="Perbarui informasi tempat tidur"
                   >
-                    <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
-                    <span className="hidden sm:inline">Perbarui</span>
+                    <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
+                    <span>Perbarui</span>
                   </button>
                 </div>
               </div>
 
-              {/* Table Body */}
-              <div className="overflow-x-auto">
+              {/* ── Desktop View: Full Matrix Table (md and up) ── */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500 font-mono">
@@ -753,6 +776,98 @@ export default function InpatientRoomsPage() {
                   </tbody>
                 </table>
               </div>
+
+              {/* ── Mobile View: High-Information Room Cards (Below md) ── */}
+              <div className="md:hidden p-3 space-y-3 bg-slate-50/70">
+                {simrsLiveList.map((row, idx) => {
+                  const total = Number(row.total || 0);
+                  const tersedia = Number(row.tersedia || 0);
+                  const terpakai = Number(row.terpakai !== undefined ? row.terpakai : Math.max(0, total - tersedia));
+                  const bor = total > 0 ? Math.round((terpakai / total) * 100) : 0;
+                  const isAvail = tersedia > 0;
+
+                  return (
+                    <div 
+                      key={idx}
+                      onClick={() => scrollToRoom(row.kelas)}
+                      className="bg-white rounded-2xl border border-slate-200/90 p-3.5 shadow-2xs hover:border-teal-500 transition-all cursor-pointer active:scale-[0.99]"
+                    >
+                      {/* Card Header */}
+                      <div className="flex items-start justify-between gap-2 mb-2.5">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className={`w-3 h-3 rounded-full shrink-0 ${isAvail ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                          <div className="min-w-0">
+                            <h4 className="font-heading font-extrabold text-slate-900 text-sm leading-tight truncate">
+                              {row.kelas}
+                            </h4>
+                            <p className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5 truncate">
+                              {row.kelas.includes('VIP') ? 'Suite & VVIP Pistillum' :
+                               row.kelas.includes('KELAS I') ? 'Kelas 1 (Green Petals)' :
+                               row.kelas.includes('KELAS II') ? 'Kelas 2 (Red Petals)' :
+                               row.kelas.includes('KELAS III') ? 'Kelas 3 Reguler (Seroja)' :
+                               row.kelas.includes('ISOLASI') ? 'Ruang Tekanan Negatif HEPA' :
+                               row.kelas.includes('INTENSIF') ? 'ICU Staments & Ventilator' : 'Rawat Inap Terpadu'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Status Badge */}
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                          isAvail 
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isAvail ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          <span>{isAvail ? 'Tersedia' : 'Penuh'}</span>
+                        </span>
+                      </div>
+
+                      {/* 3-Metrics Box */}
+                      <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2 rounded-xl border border-slate-100 text-center mb-2.5">
+                        <div className="bg-white rounded-lg py-1 px-1 border border-slate-200/60 shadow-2xs">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase font-mono block">TOTAL</span>
+                          <span className="font-heading font-black text-slate-800 text-xs sm:text-sm">{total} Bed</span>
+                        </div>
+                        <div className={`rounded-lg py-1 px-1 border shadow-2xs ${
+                          isAvail ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-slate-100 text-slate-400 border-slate-200'
+                        }`}>
+                          <span className={`text-[9px] font-bold uppercase font-mono block ${isAvail ? 'text-emerald-100' : 'text-slate-400'}`}>KOSONG</span>
+                          <span className="font-heading font-black text-xs sm:text-sm">{tersedia} Bed</span>
+                        </div>
+                        <div className="bg-white rounded-lg py-1 px-1 border border-slate-200/60 shadow-2xs">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase font-mono block">TERISI</span>
+                          <span className="font-heading font-black text-slate-700 text-xs sm:text-sm">{terpakai} Pasien</span>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar BOR */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="text-slate-500">Tingkat Keterisian:</span>
+                          <span className={`font-bold ${bor >= 90 ? 'text-rose-600' : bor >= 70 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                            {bor}% ({terpakai}/{total} Bed)
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              bor >= 90 ? 'bg-rose-500' : bor >= 70 ? 'bg-amber-500' : 'bg-emerald-500'
+                            }`}
+                            style={{ width: `${bor}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Action Link Footer */}
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-teal-700 font-semibold">
+                        <span>Lihat foto &amp; fasilitas kamar ini</span>
+                        <ChevronRight size={13} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
             </div>
           </div>
         )}

@@ -189,76 +189,96 @@ export default function McuPackagePage() {
 
         {/* ── 3. Real-Time 4-Cards Stat Strip (Matching InpatientRoomsPage) ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
             {/* Stat 1: 100% Dokter Spesialis */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                <Stethoscope size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                  100%
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   DOKTER SPESIALIS
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
                     100%
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Tatap Muka</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Tatap Muka</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 2: Hasil Hari yang Sama */}
-            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Clock size={24} />
+            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  RME Resmi
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono leading-tight">
                   HASIL REKAM MEDIS
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-xl sm:text-2xl font-black text-emerald-950">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-emerald-950 leading-tight">
                     Hari Sama
                   </span>
-                  <span className="text-xs font-semibold text-emerald-700">RME Resmi</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-emerald-700">RME Resmi</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 3: Lab & Radiologi Digital */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
-                <Microscope size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                  <Microscope className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">
+                  Presisi
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   TEKNOLOGI MEDIS
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
                     Digital Lab
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Presisi</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Presisi</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 4: Personal & Korporasi */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <Building2 size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
+                  Mitra RS
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   LAYANAN PASIEN
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-xl sm:text-2xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
                     Korporasi
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">&amp; Personal</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">&amp; Personal</span>
                 </div>
               </div>
             </div>
@@ -271,7 +291,7 @@ export default function McuPackagePage() {
           <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xs border border-slate-200/90 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
             
             {/* Category Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none" role="tablist" aria-label="Kategori MCU">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none -mx-0.5 px-0.5" role="tablist" aria-label="Kategori MCU">
               {categories.map((cat) => {
                 const isActive = activeCategory === cat.id;
                 return (
@@ -281,7 +301,7 @@ export default function McuPackagePage() {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                       isActive 
                         ? 'bg-teal-600 text-white shadow-sm scale-[1.02]' 
                         : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/70'

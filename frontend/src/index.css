@@ -136,6 +136,21 @@
   background: #94A3B8;
 }
 
+/* Scrollbar removal utilities for clean mobile UI */
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Modal Overlay & Animation */
 .modal-overlay {
   position: fixed;

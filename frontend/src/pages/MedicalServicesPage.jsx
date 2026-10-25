@@ -179,76 +179,96 @@ export default function MedicalServicesPage() {
 
         {/* ── 3. Real-Time 4-Cards Stat Strip (Matching InpatientRoomsPage) ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
             {/* Stat 1: Centers of Excellence */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                <Sparkles size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                  CoE
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   PUSAT UNGGULAN
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
                     {(centersOfExcellence || []).length || 6}
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Divisi CoE</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Divisi CoE</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 2: Fasilitas Penunjang */}
-            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Cpu size={24} />
+            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  Diagnostik
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono leading-tight">
                   UNIT DIAGNOSTIK
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-emerald-950">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-emerald-950 leading-tight">
                     {(allFacilities || []).length || 6}
                   </span>
-                  <span className="text-xs font-semibold text-emerald-700">Unit Siap</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-emerald-700">Unit Siap</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 3: Tim Dokter Spesialis */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
-                <Users size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">
+                  Medis
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   DOKTER SPESIALIS
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
                     {doctors?.length || 30}
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Spesialis</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Spesialis</span>
                 </div>
               </div>
             </div>
 
             {/* Stat 4: IGD 24 Jam */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
-                <Clock size={24} />
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
+                  24 Jam
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
                   IGD &amp; TRAUMA
                 </span>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
                     24 Jam
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">Siaga Nonstop</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Siaga Nonstop</span>
                 </div>
               </div>
             </div>
@@ -258,27 +278,28 @@ export default function MedicalServicesPage() {
 
         {/* ── 4. Segmented Filter & Live Search Toolbar (Matching InpatientRoomsPage) ── */}
         <div id="katalog-layanan" className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-slate-200/90 flex flex-col gap-4">
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-xs border border-slate-200/90 flex flex-col gap-4">
             
             {/* Row 1: Primary Tabs & Search Input */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
               
               {/* Primary Tabs */}
-              <div className="inline-flex p-1 rounded-xl bg-slate-100/80 border border-slate-200/80 gap-1 overflow-x-auto max-w-full" role="tablist">
+              <div className="inline-flex p-1 rounded-xl bg-slate-100/80 border border-slate-200/80 gap-1 overflow-x-auto max-w-full scrollbar-none" role="tablist">
                 <button
                   type="button"
                   role="tab"
                   aria-selected={activeTab === 'all'}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'all' 
                       ? 'bg-teal-700 text-white shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                   onClick={() => setActiveTab('all')}
                 >
-                  <Layers size={15} />
-                  <span>Semua Layanan</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${
+                  <Layers size={14} className="shrink-0" />
+                  <span className="hidden sm:inline">Semua Layanan</span>
+                  <span className="sm:hidden">Semua</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {(centersOfExcellence || []).length + (allFacilities || []).length}
@@ -289,16 +310,17 @@ export default function MedicalServicesPage() {
                   type="button"
                   role="tab"
                   aria-selected={activeTab === 'centers'}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'centers' 
                       ? 'bg-teal-700 text-white shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                   onClick={() => setActiveTab('centers')}
                 >
-                  <Sparkles size={15} />
-                  <span>Pusat Unggulan (CoE)</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${
+                  <Sparkles size={14} className="shrink-0" />
+                  <span className="hidden sm:inline">Pusat Unggulan (CoE)</span>
+                  <span className="sm:hidden">Pusat Unggulan</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'centers' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {(centersOfExcellence || []).length}
@@ -309,16 +331,17 @@ export default function MedicalServicesPage() {
                   type="button"
                   role="tab"
                   aria-selected={activeTab === 'facilities'}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'facilities' 
                       ? 'bg-teal-700 text-white shadow-xs' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                   onClick={() => setActiveTab('facilities')}
                 >
-                  <Cpu size={15} />
-                  <span>Fasilitas Diagnostik</span>
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold leading-none ${
+                  <Cpu size={14} className="shrink-0" />
+                  <span className="hidden sm:inline">Fasilitas Diagnostik</span>
+                  <span className="sm:hidden">Diagnostik</span>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'facilities' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
                     {(allFacilities || []).length}
