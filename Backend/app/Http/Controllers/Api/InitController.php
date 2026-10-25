@@ -82,6 +82,7 @@ class InitController extends Controller
         $force = $request->boolean('refresh') || $request->boolean('force');
         $simrsBeds = $simrsService->getBedAvailability();
         $simrsDoctorSchedules = $simrsService->getDoctorSchedules($force);
+        $simrsSurgeries = $simrsService->getSurgerySchedule(null, null, $force);
 
         // Auto-sync avatar SIMRS ke dokter di DB jika foto di DB masih kosong atau default
         if (!empty($simrsDoctorSchedules['jadwal_dokter'])) {
@@ -115,6 +116,7 @@ class InitController extends Controller
                 'room_types' => $roomTypes,
                 'simrs_beds' => $simrsBeds,
                 'simrs_doctor_schedules' => $simrsDoctorSchedules,
+                'simrs_surgeries' => $simrsSurgeries,
                 'mcu_packages' => $mcuPackages,
                 'media' => $media,
                 'insurance_partners' => $insurancePartners,

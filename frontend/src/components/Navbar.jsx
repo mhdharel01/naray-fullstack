@@ -19,7 +19,8 @@ import {
   BookOpen,
   MapPin,
   HelpCircle,
-  FileText
+  FileText,
+  Activity
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 
@@ -134,6 +135,12 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
       icon: Building2
     },
     {
+      label: 'Jadwal Operasi IBS',
+      desc: 'Transparansi kamar bedah & SIMRS',
+      to: '/jadwal-operasi',
+      icon: Activity
+    },
+    {
       label: 'Kontak & Lokasi',
       desc: 'Alamat, peta rujukan & nomor telepon',
       to: '/kontak',
@@ -141,7 +148,7 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
     }
   ];
 
-  const isDropdownActive = ['/berita-artikel', '/galeri-video', '/profil', '/kontak'].some(p => location.pathname.startsWith(p));
+  const isDropdownActive = ['/berita-artikel', '/galeri-video', '/profil', '/kontak', '/jadwal-operasi', '/operasi'].some(p => location.pathname.startsWith(p));
 
   return (
     <header 

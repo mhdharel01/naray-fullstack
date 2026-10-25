@@ -38,8 +38,9 @@ class SimrsController extends Controller
     {
         $from = $request->query('from');
         $to = $request->query('to');
+        $force = $request->boolean('refresh') || $request->boolean('force');
 
-        $data = $this->simrsService->getSurgerySchedule($from, $to);
+        $data = $this->simrsService->getSurgerySchedule($from, $to, $force);
 
         return response()->json([
             'status' => 'success',

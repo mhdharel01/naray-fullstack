@@ -121,6 +121,12 @@ export const api = {
     });
   },
 
+  // 10b. SIMRS Surgery Schedules Feed
+  getSurgerySchedules: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return fetchApi(`/ruangan/operasi${query ? `?${query}` : ''}`);
+  },
+
   // 11. Admin Authentication & Dashboard
   adminLogin: (credentials) => {
     return fetchApi('/admin/login', {

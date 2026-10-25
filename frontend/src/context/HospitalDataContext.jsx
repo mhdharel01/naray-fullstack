@@ -189,6 +189,7 @@ export function HospitalDataProvider({ children }) {
   const [doctorLeaves, setDoctorLeaves] = useState([]);
   const [simrsBedData, setSimrsBedData] = useState(null);
   const [simrsDoctorSchedules, setSimrsDoctorSchedules] = useState(null);
+  const [simrsSurgeryData, setSimrsSurgeryData] = useState(null);
   const [bannerSlides, setBannerSlides] = useState(() => getStoredData('naray_banner_slides', DEFAULT_BANNER_SLIDES));
   const [leadershipMessage, setLeadershipMessage] = useState(() => getStoredData('naray_leadership_message', DEFAULT_LEADERSHIP_MESSAGE));
   const [hospitalInfo, setHospitalInfo] = useState(() => fallbackHospitalInfo);
@@ -941,6 +942,9 @@ export function HospitalDataProvider({ children }) {
         }
         if (d.simrs_beds) {
           setSimrsBedData(d.simrs_beds);
+        }
+        if (d.simrs_surgeries) {
+          setSimrsSurgeryData(d.simrs_surgeries);
         }
         if (Array.isArray(d.mcu_packages) && d.mcu_packages.length > 0) {
           setMcuPackages(d.mcu_packages.map(mapMcu));
@@ -2407,6 +2411,19 @@ export function HospitalDataProvider({ children }) {
     loadBackendData();
   };
 
+  const refreshSurgeryData = async (force = true) => {
+    try {
+      const res = await api.getSurgerySchedules({ force: force ? '1' : '0' });
+      if (res?.data) {
+        setSimrsSurgeryData(res.data);
+        return res.data;
+      }
+    } catch (e) {
+      console.warn('Failed refreshing surgery schedule:', e);
+    }
+    return null;
+  };
+
   return (
     <HospitalDataContext.Provider
       value={{
@@ -2442,6 +2459,8 @@ export function HospitalDataProvider({ children }) {
         inpatientRooms,
         simrsBedData,
         simrsDoctorSchedules,
+        simrsSurgeryData,
+        refreshSurgeryData,
         mcuPackages,
         galleryActivities,
         videoList,

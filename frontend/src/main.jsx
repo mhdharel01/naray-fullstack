@@ -18,6 +18,7 @@ import MedicalServicesPage from './pages/MedicalServicesPage.jsx'
 import InpatientRoomsPage from './pages/InpatientRoomsPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import ContactPage from './pages/ContactPage.jsx'
+import SurgerySchedulePage from './pages/SurgerySchedulePage.jsx'
 
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -144,6 +145,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="/dokter-jadwal" element={<DoctorSchedulePage />} />
             <Route path="/dokter/:slug" element={<DoctorDetailPage />} />
             <Route path="/dokter-detail/:slug" element={<DoctorDetailPage />} />
+            <Route path="/jadwal-operasi" element={<SurgerySchedulePage />} />
+            <Route path="/operasi" element={<SurgerySchedulePage />} />
             <Route path="/layanan-medis" element={<MedicalServicesPage />} />
             <Route path="/kamar-rawat-inap" element={<InpatientRoomsPage />} />
             <Route path="/kamar" element={<InpatientRoomsPage />} />
