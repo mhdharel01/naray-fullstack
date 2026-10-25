@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -47,7 +48,7 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  // Close dropdown on click outside or escape key
+  // Close dropdown or mobile drawer on click outside or escape key
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -57,6 +58,7 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setInfoDropdownOpen(false);
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -66,6 +68,17 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
+
+  // Lock body scroll when mobile menu is open to prevent background page scrolling
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [mobileMenuOpen]);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -138,7 +151,7 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
           : 'bg-white border-b border-slate-100 py-3 sm:py-3.5'
       }`}
     >
-      <div className="max-w-[1380px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+      <div className="relative z-50 max-w-[1380px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
         
         {/* Brand Logo & Tagline */}
         <Link 
@@ -298,17 +311,32 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
             type="button"
             className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Tutup Menu' : 'Buka Menu Navigasi'}
+            aria-label={mobileMenuOpen ? 'Tutup Menu Navigasi' : 'Buka Menu Navigasi'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-drawer"
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={22} className="text-slate-900" /> : <Menu size={22} className="text-slate-700" />}
           </button>
         </div>
 
       </div>
 
-      {/* ── Mobile Menu Drawer (Enhanced Structure & Grouping) ── */}
+      {/* ── Mobile Menu Backdrop (Portaled to body to ensure true full-viewport overlay) ── */}
+      {mobileMenuOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 lg:hidden transition-opacity duration-200"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />,
+        document.body
+      )}
+
+      {/* ── Mobile Menu Drawer (Positioned absolute relative to sticky header) ── */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-full bg-white/98 backdrop-blur-xl border-b border-slate-200 shadow-2xl px-5 py-6 z-50 max-h-[calc(100vh-80px)] overflow-y-auto">
+        <div 
+          id="mobile-nav-drawer"
+          className="lg:hidden absolute inset-x-0 top-full bg-white border-b border-slate-200 shadow-2xl px-5 py-6 z-50 max-h-[calc(100vh-72px)] overflow-y-auto animate-in slide-in-from-top-2 duration-200"
+        >
           
           <div className="mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono block mb-2 px-1">

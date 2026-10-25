@@ -98,7 +98,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans w-full max-w-full">
       {/* 0. Sticky Admin Status Banner (Only visible when Admin Mode is active) */}
       <AdminBar onShowToast={showToast} />
 
