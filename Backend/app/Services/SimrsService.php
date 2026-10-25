@@ -139,7 +139,7 @@ class SimrsService
      */
     public function getSurgerySchedule(?string $from = null, ?string $to = null, bool $forceRefresh = false): ?array
     {
-        $from = $from ?? now()->format('Y-m-d');
+        $from = $from ?? now()->subDays(6)->format('Y-m-d');
         $to = $to ?? now()->addDays(7)->format('Y-m-d');
         $cacheKey = "simrs_operasi_{$from}_{$to}";
 
@@ -161,12 +161,12 @@ class SimrsService
 
                         if ($response->successful()) {
                             $json = $response->json();
-                            if (isset($json['data']['jadwal_operasi']) && !empty($json['data']['jadwal_operasi'])) {
+                            if (isset($json['data']['jadwal_operasi'])) {
                                 return [
                                     'source' => 'simrs_live',
                                     'success' => true,
                                     'jadwal_operasi' => $json['data']['jadwal_operasi'],
-                                    'last_fetched' => now()->format('d/m/Y H:i:s'),
+                                    'last_fetched' => $json['data']['last_fetched'] ?? now()->format('d/m/Y H:i:s'),
                                 ];
                             }
                         }

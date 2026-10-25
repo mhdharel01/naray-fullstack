@@ -900,3 +900,8 @@ Route::post('/appointments', [
     PublicAppointmentController::class,
     'store'
 ]);
+
+// SIMRS Feed Endpoints
+Route::get('/kamar/persediaan', [SimrsController::class, 'beds']);
+Route::get('/ruangan/operasi', [SimrsController::class, 'surgeries']);
+Route::get('/jadwal-dokter-simrs', [SimrsController::class, 'doctorSchedules']);
