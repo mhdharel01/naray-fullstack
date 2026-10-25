@@ -137,7 +137,7 @@ export default function GalleryVideoPage() {
                 </span>
                 <span>Dokumentasi Resmi &amp; Publikasi</span>
                 <span className="text-emerald-300">•</span>
-                <span className="font-mono text-[11px] text-emerald-700">Arsip Multimedia SIMRS</span>
+                <span className="font-mono text-[11px] text-emerald-700">Dokumentasi &amp; Edukasi Kesehatan</span>
               </div>
 
               <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">

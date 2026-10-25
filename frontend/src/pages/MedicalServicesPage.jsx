@@ -136,7 +136,7 @@ export default function MedicalServicesPage() {
             </nav>
             <span className="text-xs text-slate-500 font-mono hidden sm:inline-flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Standar Akreditasi KARS Paripurna • 30 Dokter Spesialis SIMRS
+              Standar Akreditasi KARS Paripurna • 30 Dokter Spesialis Berpengalaman
             </span>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function MedicalServicesPage() {
                 Pelayanan Medis &amp; Fasilitas Terpadu
               </h1>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-                Menghadirkan 6 Pusat Unggulan Terpadu (Centers of Excellence) dan fasilitas penunjang medis berstandar KARS Paripurna di Kota Dumai, didukung 30 dokter spesialis SIMRS terintegrasi dan IGD 24 Jam siaga cepat.
+                Menghadirkan 6 Pusat Unggulan Terpadu (Centers of Excellence) dan fasilitas penunjang medis berstandar KARS Paripurna di Kota Dumai, didukung 30 dokter spesialis berdedikasi dan IGD 24 Jam siaga cepat.
               </p>
             </div>
 
@@ -647,7 +647,7 @@ export default function MedicalServicesPage() {
               </div>
 
               <span className="text-xs text-slate-400 hidden sm:inline-block font-mono">
-                Integrasi SIMRS Dekago v2 &amp; BPJS V-Claim
+                Sistem Pelayanan Terpadu &amp; BPJS V-Claim
               </span>
             </div>
 

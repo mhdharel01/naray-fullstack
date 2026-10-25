@@ -136,7 +136,7 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
     },
     {
       label: 'Jadwal Operasi IBS',
-      desc: 'Transparansi kamar bedah & SIMRS',
+      desc: 'Informasi pelayanan kamar bedah',
       to: '/jadwal-operasi',
       icon: Activity
     },

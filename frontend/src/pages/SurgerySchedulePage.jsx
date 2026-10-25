@@ -182,15 +182,15 @@ export default function SurgerySchedulePage() {
               Jadwal Operasi Rumah Sakit
             </h1>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal mb-3">
-              Pilih hari untuk melihat jadwal operasi dokter spesialis dari hari ini dan hari mendatang. Data disinkronkan langsung secara real-time dengan SIMRS Naray Hospital.
+              Pilih hari untuk melihat jadwal tindakan operasi dokter spesialis terkini. Informasi diperbarui secara berkala demi kepastian dan transparansi pelayanan pasien.
             </p>
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                SIMRS Real-Time Live
+                Pembaruan Terkini
               </span>
               <span className="text-xs text-slate-500 font-medium">
-                Periode: Hari ini s/d 14 hari ke depan
+                Periode: Hari ini s/d 7 hari ke depan
               </span>
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function SurgerySchedulePage() {
           <div className="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 sm:p-4.5 flex items-start gap-3 my-6 shadow-2xs">
             <Info size={20} className="text-amber-600 shrink-0 mt-0.5" />
             <p className="text-xs sm:text-sm text-amber-900 leading-relaxed font-normal m-0">
-              <strong>Transparansi Pelayanan Kamar Bedah.</strong> Jadwal operasi disinkronkan langsung dari SIMRS Naray Hospital. Sesuai ketentuan perlindungan data medis dan UU PDP, identitas nama pasien dirahasiakan ke publik.
+              <strong>Privasi & Keamanan Pasien Terjaga.</strong> Jadwal tindakan operasi ditampilkan secara transparan untuk kepastian pelayanan dokter spesialis. Sesuai ketentuan perlindungan privasi medis dan UU PDP, data pribadi pasien dirahasiakan ke publik.
             </p>
           </div>
 
@@ -429,7 +429,7 @@ export default function SurgerySchedulePage() {
                 Belum Ada Jadwal Operasi Terdaftar
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto mb-6 leading-relaxed">
-                Data diambil langsung secara <strong>real-time dari API SIMRS</strong> untuk periode <strong>hari ini dan hari mendatang</strong>. Saat ini belum ada antrean tindakan operasi yang dijadwalkan oleh staf bedah/IBS di sistem SIMRS.
+                Saat ini belum ada jadwal tindakan operasi yang terdaftar untuk periode <strong>hari ini dan hari mendatang</strong>. Informasi jadwal akan otomatis diperbarui setiap kali terdapat rencana tindakan baru dari dokter spesialis bedah.
               </p>
               <button
                 type="button"
@@ -438,7 +438,7 @@ export default function SurgerySchedulePage() {
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm font-bold shadow-sm transition-all cursor-pointer"
               >
                 <RefreshCw size={15} className={isRefreshing ? 'animate-spin' : ''} />
-                <span>{isRefreshing ? 'Memperbarui...' : 'Periksa Ulang Data SIMRS'}</span>
+                <span>{isRefreshing ? 'Memperbarui...' : 'Perbarui Informasi'}</span>
               </button>
             </div>
           ) : (

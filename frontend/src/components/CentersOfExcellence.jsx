@@ -85,7 +85,7 @@ export function CentersOfExcellence({ onSelectCenter, onOpenEmergency }) {
       name: 'Laboratorium',
       icon: FlaskConical,
       iconBg: 'bg-teal-50 text-teal-600 border-teal-100',
-      description: 'Pemeriksaan spesimen darah dan cairan klinis cepat, akurat, dan terintegrasi sistem SIMRS.',
+      description: 'Pemeriksaan spesimen darah dan cairan klinis cepat, akurat, dan terintegrasi dengan rekam medis terpadu.',
       badge: '24 JAM',
       badgeColor: 'text-teal-700 bg-teal-50/80',
       action: 'services'

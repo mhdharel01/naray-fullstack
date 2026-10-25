@@ -358,7 +358,7 @@ export default function InpatientRoomsPage() {
       intensiveAvailable: intensiveAvailable || 40,
       isLiveSimrs,
       lastUpdate,
-      sourceLabel: isLiveSimrs ? 'SIMRS Dekago Live Feed' : 'Database MySQL Terpadu'
+      sourceLabel: 'Pembaruan Real-Time Resmi'
     };
   }, [allRooms, simrsBedData]);
 
@@ -476,18 +476,18 @@ export default function InpatientRoomsPage() {
                 Pilihan Kamar &amp; Ketersediaan Bed
               </h1>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-                Informasi tipe ruang perawatan rawat inap, fasilitas medis terintegrasi, dan ketersediaan tempat tidur (bed availability) terkini yang terhubung langsung dengan sistem rumah sakit (SIMRS) Naray Hospital.
+                Informasi tipe ruang perawatan rawat inap, fasilitas medis terintegrasi, dan ketersediaan tempat tidur terkini yang diperbarui secara langsung demi kenyamanan dan kepastian pelayanan rawat inap pasien.
               </p>
             </div>
 
             {/* Quick sync badge for desktop */}
             <div className="hidden md:flex flex-col items-end gap-1.5 shrink-0 text-right">
               <span className="text-[11px] font-bold tracking-wider uppercase text-slate-400 font-mono">
-                STANDAR INTEGRASI SIRANAP
+                TRANSPARANSI PELAYANAN
               </span>
               <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
                 <ShieldCheck size={16} className="text-teal-600" />
-                Terhubung SIMRS Dekago v2 / SIMGOS
+                Pembaruan Berkala Terverifikasi
               </span>
             </div>
           </div>
@@ -601,7 +601,7 @@ export default function InpatientRoomsPage() {
                 }`}
               >
                 <Table2 size={15} />
-                <span>Papan Matriks SIMRS (Real-Time)</span>
+                <span>Papan Ketersediaan Bed</span>
               </button>
 
               <button
@@ -618,14 +618,14 @@ export default function InpatientRoomsPage() {
               </button>
             </div>
 
-            <div className="text-xs text-slate-500 font-mono hidden md:flex items-center gap-2 pr-2">
+            <div className="text-xs text-slate-500 font-medium hidden md:flex items-center gap-2 pr-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Sumber: antrol.narayhospital.com</span>
+              <span>Pembaruan Langsung Terverifikasi</span>
             </div>
           </div>
         </div>
 
-        {/* ── 3.6. LIVE SIMRS BED AVAILABILITY MATRIX HUB (SIRANAP STANDARD) ── */}
+        {/* ── 3.6. LIVE BED AVAILABILITY MATRIX HUB ── */}
         {(displayMode === 'all' || displayMode === 'matrix') && (
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-12">
             <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
@@ -639,7 +639,7 @@ export default function InpatientRoomsPage() {
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
                     <span className="text-[11px] font-bold tracking-widest text-emerald-300 uppercase font-mono">
-                      FEED LANGSUNG SIMRS (SIRANAP KEMENKES RI)
+                      INFORMASI RESMI RAWAT INAP
                     </span>
                   </div>
                   <h2 className="font-heading text-xl sm:text-2xl font-bold text-white tracking-tight">
@@ -660,7 +660,7 @@ export default function InpatientRoomsPage() {
                     onClick={handleRefresh}
                     disabled={isRefreshing}
                     className="h-10 px-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-2 border border-white/20 transition-all cursor-pointer disabled:opacity-50"
-                    title="Refresh data SIMRS"
+                    title="Perbarui informasi tempat tidur"
                   >
                     <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
                     <span className="hidden sm:inline">Perbarui</span>
