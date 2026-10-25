@@ -16,9 +16,7 @@ import {
   Stethoscope,
   BedDouble,
   Building2,
-  BookOpen,
   MapPin,
-  HelpCircle,
   FileText,
   Activity
 } from 'lucide-react';
@@ -27,8 +25,9 @@ import { useHospitalData } from '../context/HospitalDataContext';
 export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [infoDropdownOpen, setInfoDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'patient' | 'media' | 'about' | null
+
+  const navContainerRef = useRef(null);
   const timeoutRef = useRef(null);
 
   const { isAdmin, hospitalInfo = {} } = useHospitalData();
@@ -45,20 +44,20 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
 
   // Close dropdown and drawer on route change
   useEffect(() => {
-    setInfoDropdownOpen(false);
+    setActiveDropdown(null);
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
   // Close dropdown or mobile drawer on click outside or escape key
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setInfoDropdownOpen(false);
+      if (navContainerRef.current && !navContainerRef.current.contains(event.target)) {
+        setActiveDropdown(null);
       }
     };
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setInfoDropdownOpen(false);
+        setActiveDropdown(null);
         setMobileMenuOpen(false);
       }
     };
@@ -81,74 +80,104 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
     }
   }, [mobileMenuOpen]);
 
-  const handleMouseEnter = () => {
+  const handleOpenDropdown = (menuKey) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    setInfoDropdownOpen(true);
+    setActiveDropdown(menuKey);
   };
 
-  const handleMouseLeave = () => {
+  const handleCloseDropdown = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
     timeoutRef.current = setTimeout(() => {
-      setInfoDropdownOpen(false);
-    }, 220);
+      setActiveDropdown(null);
+    }, 180);
   };
 
-  const handleDropdownToggle = (e) => {
+  const handleToggleDropdown = (menuKey, e) => {
     e.preventDefault();
     e.stopPropagation();
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    setInfoDropdownOpen((prev) => !prev);
+    setActiveDropdown((prev) => (prev === menuKey ? null : menuKey));
   };
 
-  // ── Primary Navigation Items (Revamped Grammar & Positioning) ──
-  const primaryNavItems = [
-    { label: 'Beranda', to: '/' },
-    { label: 'Layanan Medis', to: '/layanan-medis' },
-    { label: 'Jadwal Dokter', to: '/dokter-jadwal' },
-    { label: 'Rawat Inap', to: '/kamar-rawat-inap' },
-    { label: 'Paket MCU', to: '/paket-mcu' },
+  // ── 1. Layanan Pasien & Medis ──
+  const patientNavItems = [
+    {
+      label: 'Jadwal Dokter Spesialis',
+      desc: 'Jadwal praktik poliklinik & cari dokter',
+      to: '/dokter-jadwal',
+      icon: Stethoscope,
+    },
+    {
+      label: 'Kamar Rawat Inap & Bed',
+      desc: 'Ketersediaan ranjang & fasilitas kamar',
+      to: '/kamar-rawat-inap',
+      icon: BedDouble,
+    },
+    {
+      label: 'Jadwal Tindakan Operasi',
+      desc: 'Transparansi kamar bedah sentral (IBS)',
+      to: '/jadwal-operasi',
+      icon: Activity,
+    },
+    {
+      label: 'Layanan Medis & Fasilitas',
+      desc: 'IGD 24 Jam, Centers of Excellence & Poli',
+      to: '/layanan-medis',
+      icon: HeartPulse,
+    },
+    {
+      label: 'Paket Medical Check Up',
+      desc: 'Paket skrining & pemeriksaan kesehatan',
+      to: '/paket-mcu',
+      icon: Sparkles,
+    },
   ];
 
-  // ── Dropdown: Informasi & Edukasi Publik ──
-  const infoDropdownItems = [
+  // ── 2. Berita & Edukasi Kesehatan ──
+  const mediaNavItems = [
     {
       label: 'Artikel & Edukasi Sehat',
-      desc: 'Panduan medis dokter spesialis',
+      desc: 'Tips & panduan medis dokter spesialis',
       to: '/berita-artikel',
-      icon: FileText
+      icon: FileText,
     },
     {
       label: 'Galeri & Video Kegiatan',
-      desc: 'Dokumentasi fasilitas & bakti sosial',
+      desc: 'Dokumentasi bakti sosial & fasilitas RS',
       to: '/galeri-video',
-      icon: Film
+      icon: Film,
     },
+  ];
+
+  // ── 3. Tentang Rumah Sakit ──
+  const aboutNavItems = [
     {
       label: 'Profil Rumah Sakit',
       desc: 'Visi, misi, manajemen & mutu KARS',
       to: '/profil',
-      icon: Building2
-    },
-    {
-      label: 'Jadwal Operasi IBS',
-      desc: 'Informasi pelayanan kamar bedah',
-      to: '/jadwal-operasi',
-      icon: Activity
+      icon: Building2,
     },
     {
       label: 'Kontak & Lokasi',
       desc: 'Alamat, peta rujukan & nomor telepon',
       to: '/kontak',
-      icon: MapPin
-    }
+      icon: MapPin,
+    },
   ];
 
-  const isDropdownActive = ['/berita-artikel', '/galeri-video', '/profil', '/kontak', '/jadwal-operasi', '/operasi'].some(p => location.pathname.startsWith(p));
+  // Active status helpers
+  const isHomeActive = location.pathname === '/' || location.pathname === '';
+  const isPatientActive = ['/dokter-jadwal', '/dokter', '/kamar-rawat-inap', '/kamar', '/jadwal-operasi', '/operasi', '/layanan-medis', '/paket-mcu'].some(p => location.pathname.startsWith(p));
+  const isMediaActive = ['/berita-artikel', '/artikel', '/berita', '/galeri-video'].some(p => location.pathname.startsWith(p));
+  const isAboutActive = ['/profil', '/tentang-kami', '/kontak', '/hubungi-kami'].some(p => location.pathname.startsWith(p));
 
   return (
     <header 
@@ -183,71 +212,67 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
           </div>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1" aria-label="Navigasi Utama">
+        {/* Desktop Navigation Links (Clean 3 Groups + Beranda) */}
+        <nav 
+          ref={navContainerRef}
+          className="hidden lg:flex items-center gap-1" 
+          aria-label="Navigasi Utama"
+        >
           <ul className="flex items-center gap-1 list-none m-0 p-0">
-            {primaryNavItems.map((item, idx) => {
-              const isActive = item.to === '/' 
-                ? location.pathname === '/' || location.pathname === ''
-                : location.pathname.startsWith(item.to);
+            {/* 1. Beranda */}
+            <li>
+              <Link
+                to="/"
+                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  isHomeActive
+                    ? 'text-teal-800 bg-teal-50 border border-teal-200/70 font-bold shadow-2xs'
+                    : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50'
+                }`}
+              >
+                Beranda
+              </Link>
+            </li>
 
-              return (
-                <li key={idx}>
-                  <Link
-                    to={item.to}
-                    className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                      isActive
-                        ? 'text-teal-800 bg-teal-50 border border-teal-200/70 font-bold shadow-2xs'
-                        : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-
-            {/* Dropdown "Informasi & Publikasi" */}
+            {/* 2. Dropdown: Layanan Pasien */}
             <li
               className="relative"
-              ref={dropdownRef}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              onMouseEnter={() => handleOpenDropdown('patient')}
+              onMouseLeave={handleCloseDropdown}
             >
               <button
                 type="button"
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                  infoDropdownOpen || isDropdownActive
+                  activeDropdown === 'patient' || isPatientActive
                     ? 'text-teal-800 bg-teal-50 border border-teal-200/70 font-bold shadow-2xs'
                     : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50'
                 }`}
-                onClick={handleDropdownToggle}
+                onClick={(e) => handleToggleDropdown('patient', e)}
                 aria-haspopup="true"
-                aria-expanded={infoDropdownOpen}
+                aria-expanded={activeDropdown === 'patient'}
               >
-                <span>Informasi</span>
+                <span>Layanan Pasien</span>
                 <ChevronDown 
                   size={14} 
                   className={`transition-transform duration-200 text-slate-400 ${
-                    infoDropdownOpen ? 'rotate-180 text-teal-600' : ''
+                    activeDropdown === 'patient' ? 'rotate-180 text-teal-600' : ''
                   }`} 
                 />
               </button>
 
-              {/* Dropdown Panel Menu */}
-              {infoDropdownOpen && (
+              {activeDropdown === 'patient' && (
                 <div
-                  className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-md"
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
+                  className="absolute top-full left-0 mt-2 w-84 bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-md"
+                  onMouseEnter={() => handleOpenDropdown('patient')}
+                  onMouseLeave={handleCloseDropdown}
                 >
-                  <div className="px-3 py-1.5 mb-1 border-b border-slate-100">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-                      Publikasi &amp; Tentang RS
+                  <div className="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 font-mono">
+                      Pelayanan Medis &amp; Pasien
                     </span>
+                    <span className="text-[10px] text-slate-400 font-medium font-mono">5 Layanan</span>
                   </div>
 
-                  {infoDropdownItems.map((sub, sIdx) => {
+                  {patientNavItems.map((sub, sIdx) => {
                     const IconComp = sub.icon;
                     const isSubActive = location.pathname.startsWith(sub.to);
                     return (
@@ -259,7 +284,141 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
                             ? 'bg-teal-50 text-teal-900 font-semibold' 
                             : 'hover:bg-slate-50 text-slate-700'
                         }`}
-                        onClick={() => setInfoDropdownOpen(false)}
+                        onClick={() => setActiveDropdown(null)}
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                          <IconComp size={17} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs sm:text-sm font-bold leading-snug">{sub.label}</span>
+                          <span className="text-[11px] text-slate-500 font-normal leading-normal">{sub.desc}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </li>
+
+            {/* 3. Dropdown: Berita & Edukasi */}
+            <li
+              className="relative"
+              onMouseEnter={() => handleOpenDropdown('media')}
+              onMouseLeave={handleCloseDropdown}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  activeDropdown === 'media' || isMediaActive
+                    ? 'text-teal-800 bg-teal-50 border border-teal-200/70 font-bold shadow-2xs'
+                    : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50'
+                }`}
+                onClick={(e) => handleToggleDropdown('media', e)}
+                aria-haspopup="true"
+                aria-expanded={activeDropdown === 'media'}
+              >
+                <span>Berita &amp; Edukasi</span>
+                <ChevronDown 
+                  size={14} 
+                  className={`transition-transform duration-200 text-slate-400 ${
+                    activeDropdown === 'media' ? 'rotate-180 text-teal-600' : ''
+                  }`} 
+                />
+              </button>
+
+              {activeDropdown === 'media' && (
+                <div
+                  className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-md"
+                  onMouseEnter={() => handleOpenDropdown('media')}
+                  onMouseLeave={handleCloseDropdown}
+                >
+                  <div className="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 font-mono">
+                      Konten &amp; Edukasi Sehat
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium font-mono">Publikasi</span>
+                  </div>
+
+                  {mediaNavItems.map((sub, sIdx) => {
+                    const IconComp = sub.icon;
+                    const isSubActive = location.pathname.startsWith(sub.to);
+                    return (
+                      <Link
+                        key={sIdx}
+                        to={sub.to}
+                        className={`flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 ${
+                          isSubActive 
+                            ? 'bg-teal-50 text-teal-900 font-semibold' 
+                            : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                        onClick={() => setActiveDropdown(null)}
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+                          <IconComp size={17} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-xs sm:text-sm font-bold leading-snug">{sub.label}</span>
+                          <span className="text-[11px] text-slate-500 font-normal leading-normal">{sub.desc}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </li>
+
+            {/* 4. Dropdown: Tentang RS */}
+            <li
+              className="relative"
+              onMouseEnter={() => handleOpenDropdown('about')}
+              onMouseLeave={handleCloseDropdown}
+            >
+              <button
+                type="button"
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  activeDropdown === 'about' || isAboutActive
+                    ? 'text-teal-800 bg-teal-50 border border-teal-200/70 font-bold shadow-2xs'
+                    : 'text-slate-600 hover:text-teal-700 hover:bg-slate-50'
+                }`}
+                onClick={(e) => handleToggleDropdown('about', e)}
+                aria-haspopup="true"
+                aria-expanded={activeDropdown === 'about'}
+              >
+                <span>Tentang RS</span>
+                <ChevronDown 
+                  size={14} 
+                  className={`transition-transform duration-200 text-slate-400 ${
+                    activeDropdown === 'about' ? 'rotate-180 text-teal-600' : ''
+                  }`} 
+                />
+              </button>
+
+              {activeDropdown === 'about' && (
+                <div
+                  className="absolute top-full right-0 lg:left-0 mt-2 w-80 bg-white rounded-2xl shadow-xl shadow-slate-900/10 border border-slate-200/90 p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-md"
+                  onMouseEnter={() => handleOpenDropdown('about')}
+                  onMouseLeave={handleCloseDropdown}
+                >
+                  <div className="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 font-mono">
+                      Institusi Naray Hospital
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium font-mono">Profil</span>
+                  </div>
+
+                  {aboutNavItems.map((sub, sIdx) => {
+                    const IconComp = sub.icon;
+                    const isSubActive = location.pathname.startsWith(sub.to);
+                    return (
+                      <Link
+                        key={sIdx}
+                        to={sub.to}
+                        className={`flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 ${
+                          isSubActive 
+                            ? 'bg-teal-50 text-teal-900 font-semibold' 
+                            : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                        onClick={() => setActiveDropdown(null)}
                       >
                         <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                           <IconComp size={17} />
@@ -344,29 +503,43 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
           id="mobile-nav-drawer"
           className="lg:hidden absolute inset-x-0 top-full bg-white border-b border-slate-200 shadow-2xl px-5 py-6 z-50 max-h-[calc(100vh-72px)] overflow-y-auto animate-in slide-in-from-top-2 duration-200"
         >
-          
+          {/* Beranda Link */}
           <div className="mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono block mb-2 px-1">
-              Layanan Utama Rumah Sakit
+            <Link
+              to="/"
+              className={`block px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                isHomeActive 
+                  ? 'text-teal-800 bg-teal-50 font-bold border border-teal-200/60' 
+                  : 'text-slate-700 hover:bg-slate-50'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Beranda
+            </Link>
+          </div>
+
+          {/* Seksi 1: Layanan Pasien & Medis */}
+          <div className="my-3 pt-3 border-t border-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 font-mono block mb-2 px-1">
+              Layanan Pasien &amp; Medis
             </span>
             <ul className="flex flex-col gap-1 list-none p-0 m-0">
-              {primaryNavItems.map((item, idx) => {
-                const isActive = item.to === '/' 
-                  ? location.pathname === '/' || location.pathname === ''
-                  : location.pathname.startsWith(item.to);
-
+              {patientNavItems.map((item, idx) => {
+                const IconComp = item.icon;
+                const isItemActive = location.pathname.startsWith(item.to);
                 return (
-                  <li key={idx}>
+                  <li key={`patient-${idx}`}>
                     <Link
                       to={item.to}
-                      className={`block px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                        isActive 
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        isItemActive 
                           ? 'text-teal-800 bg-teal-50 font-bold border border-teal-200/60' 
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      {item.label}
+                      <IconComp size={17} className="text-teal-600 shrink-0" />
+                      <span>{item.label}</span>
                     </Link>
                   </li>
                 );
@@ -374,27 +547,57 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
             </ul>
           </div>
 
-          <div className="my-4 pt-3 border-t border-slate-100">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-mono block mb-2 px-1">
-              Informasi &amp; Edukasi
+          {/* Seksi 2: Berita & Edukasi Sehat */}
+          <div className="my-3 pt-3 border-t border-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 font-mono block mb-2 px-1">
+              Berita &amp; Edukasi Sehat
             </span>
             <ul className="flex flex-col gap-1 list-none p-0 m-0">
-              {infoDropdownItems.map((sub, idx) => {
-                const IconComp = sub.icon;
-                const isSubActive = location.pathname.startsWith(sub.to);
+              {mediaNavItems.map((item, idx) => {
+                const IconComp = item.icon;
+                const isItemActive = location.pathname.startsWith(item.to);
                 return (
-                  <li key={`sub-${idx}`}>
+                  <li key={`media-${idx}`}>
                     <Link
-                      to={sub.to}
+                      to={item.to}
                       className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                        isSubActive 
+                        isItemActive 
                           ? 'text-teal-800 bg-teal-50 font-bold border border-teal-200/60' 
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      <IconComp size={16} className="text-teal-600 shrink-0" />
-                      <span>{sub.label}</span>
+                      <IconComp size={17} className="text-teal-600 shrink-0" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* Seksi 3: Tentang Rumah Sakit */}
+          <div className="my-3 pt-3 border-t border-slate-100">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-teal-700 font-mono block mb-2 px-1">
+              Tentang Rumah Sakit
+            </span>
+            <ul className="flex flex-col gap-1 list-none p-0 m-0">
+              {aboutNavItems.map((item, idx) => {
+                const IconComp = item.icon;
+                const isItemActive = location.pathname.startsWith(item.to);
+                return (
+                  <li key={`about-${idx}`}>
+                    <Link
+                      to={item.to}
+                      className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                        isItemActive 
+                          ? 'text-teal-800 bg-teal-50 font-bold border border-teal-200/60' 
+                          : 'text-slate-700 hover:bg-slate-50'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <IconComp size={17} className="text-teal-600 shrink-0" />
+                      <span>{item.label}</span>
                     </Link>
                   </li>
                 );
