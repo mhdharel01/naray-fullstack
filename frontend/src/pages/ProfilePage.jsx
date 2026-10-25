@@ -26,8 +26,9 @@ import { PageLayout } from '../layouts/PageLayout';
 import { hospitalInfo } from '../data/hospitalData';
 
 export default function ProfilePage() {
-  const { leadershipMessage = DEFAULT_LEADERSHIP_MESSAGE, formatImageUrl } = useHospitalData();
+  const { leadershipMessage = DEFAULT_LEADERSHIP_MESSAGE, formatImageUrl, doctors } = useHospitalData();
   const leader = leadershipMessage || DEFAULT_LEADERSHIP_MESSAGE;
+  const totalDoctorsCount = doctors?.length || 31;
   const rawImage = formatImageUrl ? formatImageUrl(leader.image, '/images/doctors/doctor-male-default.jpg') : (leader.image || '/images/doctors/doctor-male-default.jpg');
   const leaderImg = (rawImage && !rawImage.includes('.svg')) ? rawImage : '/images/doctors/doctor-male-default.jpg';
 
@@ -79,7 +80,7 @@ export default function ProfilePage() {
     },
     {
       year: 'Kapasitas & Fasilitas',
-      title: '101 Tempat Tidur & Rawat Intensif',
+      title: '104 Tempat Tidur & Rawat Intensif',
       desc: 'Menyediakan ruang rawat inap bertingkat kenyamanan tinggi, dari Suite VIP Pistillum hingga ICU Staments dengan ventilator dan monitor hemodinamik.'
     },
     {
@@ -112,7 +113,7 @@ export default function ProfilePage() {
         </div>
 
         {/* ── 2. Hero Header Section ── */}
-        <div className="bg-gradient-to-b from-teal-900 via-slate-900 to-slate-950 text-white relative overflow-hidden py-16 sm:py-24">
+        <div className="bg-gradient-to-b from-teal-900 via-slate-900 to-slate-950 text-white relative overflow-hidden py-14 sm:py-24">
           <div className="absolute inset-0 bg-[radial-gradient(#0d9488_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
           <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="max-w-3xl">
@@ -131,50 +132,98 @@ export default function ProfilePage() {
         </div>
 
         {/* ── 3. Quick Stats Metric Strip ── */}
-        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 -mt-7 sm:-mt-9 relative z-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 border border-teal-100">
-                <BedDouble size={24} />
+            {/* Stat 1: Kapasitas Rawat */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <BedDouble className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                  Kapasitas
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">KAPASITAS RAWAT</span>
-                <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">101 Bed</span>
-                <span className="text-xs text-slate-500 block">Kamar Modern &amp; ICU</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-100">
-                <Stethoscope size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">TENAGA MEDIS</span>
-                <span className="font-heading text-2xl sm:text-3xl font-black text-slate-900">19+</span>
-                <span className="text-xs text-slate-500 block">Dokter Spesialis Ahli</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-100">
-                <Award size={24} />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">MUTU PELAYANAN</span>
-                <span className="font-heading text-xl sm:text-2xl font-black text-amber-700">Paripurna</span>
-                <span className="text-xs text-slate-500 block">Bintang 5 Kemenkes RI</span>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  KAPASITAS RAWAT
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+                    104
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bed Rawat</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-red-50 text-red-700 flex items-center justify-center shrink-0 border border-red-100">
-                <Clock size={24} />
+            {/* Stat 2: Tenaga Medis */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  Spesialis
+                </span>
               </div>
-              <div>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono">LAYANAN DARURAT</span>
-                <span className="font-heading text-2xl sm:text-3xl font-black text-red-700">24 Jam</span>
-                <span className="text-xs text-slate-500 block">IGD &amp; Ambulans Cepat</span>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  TENAGA MEDIS
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+                    {totalDoctorsCount}+
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Dokter Ahli</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Stat 3: Mutu Pelayanan */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <Award className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
+                  KARS
+                </span>
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  MUTU PELAYANAN
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-lg sm:text-2xl font-black text-amber-700 leading-tight">
+                    Paripurna
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Bintang 5</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Stat 4: Layanan Darurat */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+              <div className="flex items-center justify-between">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-100">
+                  Nonstop
+                </span>
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                  LAYANAN DARURAT
+                </span>
+                <div className="flex items-baseline gap-1 mt-0.5">
+                  <span className="font-heading text-xl sm:text-3xl font-black text-rose-700 leading-tight">
+                    24 Jam
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">IGD Cepat</span>
+                </div>
               </div>
             </div>
 
@@ -247,96 +296,115 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* ── 5. Visi & Misi Rumah Sakit ── */}
-        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mt-24">
-          <div className="text-center max-w-2xl mx-auto mb-12">
+        {/* ── 5. Visi & Misi Rumah Sakit (Autentik Ketetapan Naray Hospital) ── */}
+        <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mt-20 sm:mt-24">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
             <span className="text-xs font-bold uppercase tracking-widest text-teal-600 block mb-2 font-mono">
               ARAH &amp; TUJUAN STRATEGIS
             </span>
             <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
               Visi &amp; Misi Naray Hospital
             </h2>
+            <p className="text-sm text-slate-600 mt-2">
+              Landasan cita-cita luhur dan komitmen pelayanan kesehatan kami di Kota Dumai.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
             
             {/* Card Visi */}
-            <div className="lg:col-span-5 bg-gradient-to-br from-teal-800 to-slate-900 text-white rounded-3xl p-8 sm:p-10 shadow-lg flex flex-col justify-between">
-              <div>
+            <div className="lg:col-span-5 bg-gradient-to-br from-teal-800 via-teal-900 to-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-lg flex flex-col justify-between relative overflow-hidden border border-teal-700/50">
+              <div className="absolute top-0 right-0 -mr-10 -mt-10 w-44 h-44 rounded-full bg-teal-500/10 blur-2xl pointer-events-none" />
+              
+              <div className="relative z-10">
                 <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-400/30 text-teal-300 flex items-center justify-center mb-6">
                   <Target size={24} />
                 </div>
-                <span className="text-xs font-bold uppercase tracking-widest text-teal-300 block mb-2 font-mono">
-                  VISI RUMAH SAKIT
+                <span className="text-xs font-bold uppercase tracking-widest text-teal-300 block mb-3 font-mono">
+                  VISI
                 </span>
-                <h3 className="font-heading text-2xl font-bold leading-snug mb-4">
-                  Menjadi Pusat Layanan Kesehatan Rujukan Terdepan dan Terpercaya di Riau
+                <h3 className="font-heading text-xl sm:text-2xl lg:text-3xl font-black leading-snug mb-4 tracking-tight uppercase">
+                  Menjadi Rumah Sakit Terpercaya dalam Pelayanan Kesehatan di Kota Dumai
                 </h3>
-                <p className="text-sm text-slate-300 leading-relaxed font-normal">
-                  Memberikan pelayanan kesehatan berstandar nasional yang mengintegrasikan keahlian klinis, inovasi teknologi digital, serta keramahan yang tulus demi keselamatan pasien.
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                  Komitmen teguh Naray Hospital untuk senantiasa menjadi pilihan utama dan mitra terpercaya masyarakat Kota Dumai dalam memperoleh asuhan medis berkualitas tinggi, aman, modern, dan berorientasi pada kepuasan pasien.
                 </p>
               </div>
 
-              <div className="mt-8 pt-6 border-t border-teal-700/50 flex items-center gap-3 text-xs text-teal-200">
-                <Sparkles size={16} />
-                <span>Pelayanan Berorientasi Mutu dan Keselamatan Pasien</span>
+              <div className="mt-8 pt-6 border-t border-teal-700/50 flex items-center gap-3 text-xs text-teal-200 relative z-10 font-medium">
+                <Sparkles size={16} className="shrink-0 text-teal-300" />
+                <span>Pelayanan Berorientasi Mutu &amp; Kepercayaan Dumai</span>
               </div>
             </div>
 
-            {/* Card Misi (4 Pilar) */}
-            <div className="lg:col-span-7 bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/90 shadow-xs flex flex-col justify-between">
+            {/* Card Misi (3 Komitmen Utama Sesuai Ketetapan RS) */}
+            <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/90 shadow-xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
                     <Compass size={24} />
                   </div>
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-sky-700 block font-mono">
-                      MISI UTAMA
+                    <span className="text-xs font-bold uppercase tracking-widest text-teal-700 block font-mono">
+                      MISI
                     </span>
-                    <h3 className="font-heading text-xl font-bold text-slate-900">
-                      Komitmen Operasional Naray Hospital
+                    <h3 className="font-heading text-lg sm:text-xl font-bold text-slate-900">
+                      3 Komitmen Utama Pelayanan
                     </h3>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="font-heading text-sm font-black text-teal-600 bg-teal-50 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-teal-100">
-                      01
+                <div className="space-y-3.5 sm:space-y-4">
+                  {/* Misi 1 */}
+                  <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-teal-300 transition-colors">
+                    <span className="font-heading text-xs sm:text-sm font-black text-teal-700 bg-teal-100/80 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-teal-200">
+                      1
                     </span>
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal m-0">
-                      Memberikan pelayanan medis komprehensif, cepat, tepat, dan terjangkau bagi seluruh lapisan masyarakat tanpa membeda-bedakan.
-                    </p>
+                    <div>
+                      <h4 className="font-heading text-sm sm:text-base font-extrabold text-slate-900 tracking-tight mb-1 uppercase">
+                        Melayani dengan Sepenuh Hati
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal m-0">
+                        Memberikan asuhan keperawatan dan penanganan medis yang ramah, hangat, penuh empati, serta menjunjung tinggi rasa hormat dan kenyamanan setiap pasien dan keluarga.
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="font-heading text-sm font-black text-teal-600 bg-teal-50 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-teal-100">
-                      02
+                  {/* Misi 2 */}
+                  <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-teal-300 transition-colors">
+                    <span className="font-heading text-xs sm:text-sm font-black text-teal-700 bg-teal-100/80 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-teal-200">
+                      2
                     </span>
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal m-0">
-                      Mengembangkan sarana prasarana diagnostik mutakhir dan digitalisasi rumah sakit untuk memastikan ketepatan penegakan diagnosis.
-                    </p>
+                    <div>
+                      <h4 className="font-heading text-sm sm:text-base font-extrabold text-slate-900 tracking-tight mb-1 uppercase">
+                        Menyediakan Sumber Daya Manusia yang Profesional
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal m-0">
+                        Menghadirkan dokter spesialis berdedikasi, tenaga kesehatan tersertifikasi, dan staf yang kompeten, berintegritas tinggi, serta konsisten meningkatkan keahlian klinis.
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="font-heading text-sm font-black text-teal-600 bg-teal-50 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-teal-100">
-                      03
+                  {/* Misi 3 */}
+                  <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/70 hover:border-teal-300 transition-colors">
+                    <span className="font-heading text-xs sm:text-sm font-black text-teal-700 bg-teal-100/80 w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border border-teal-200">
+                      3
                     </span>
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal m-0">
-                      Meningkatkan kompetensi, profesionalisme, dan rasa empati seluruh tenaga medis dan staf pendukung melalui pendidikan berkelanjutan.
-                    </p>
-                  </div>
-
-                  <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="font-heading text-sm font-black text-teal-600 bg-teal-50 w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-teal-100">
-                      04
-                    </span>
-                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal m-0">
-                      Menciptakan lingkungan rumah sakit yang bersih, higienis, aman, dan ramah lingkungan sesuai regulasi Kemenkes RI.
-                    </p>
+                    <div>
+                      <h4 className="font-heading text-sm sm:text-base font-extrabold text-slate-900 tracking-tight mb-1 uppercase">
+                        Mewujudkan Pelayanan Kesehatan Bermutu Berbasis Teknologi Digital
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal m-0">
+                        Mengintegrasikan sarana diagnostik modern, fasilitas medis terpadu, dan Rekam Medis Elektronik (RME) demi kepastian, kecepatan, dan transparansi proses perawatan pasien.
+                      </p>
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-500 font-medium">
+                <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                <span>Terakreditasi KARS Paripurna Bintang Lima Kemenkes RI</span>
               </div>
             </div>
 

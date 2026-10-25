@@ -19,8 +19,14 @@ export const hospitalInfo = {
   email: "kawannaray@narayhospital.com",
   address: "Jl. Dr. Wahidin No.98-99, Purnama, Kec. Dumai Barat, Kota Dumai, Riau 28823",
   operatingHours: "IGD & Rawat Inap 24 Jam | Poliklinik Spesialis: Senin - Sabtu 09:00 - 21:00 WIB",
-  totalBeds: "101 Tempat Tidur",
-  totalDoctors: "19+ Dokter Spesialis",
+  vision: "Menjadi Rumah Sakit Terpercaya dalam Pelayanan Kesehatan di Kota Dumai",
+  mission: [
+    "Melayani dengan Sepenuh Hati",
+    "Menyediakan Sumber Daya Manusia yang Profesional",
+    "Mewujudkan Pelayanan Kesehatan Bermutu Berbasis Teknologi Digital"
+  ],
+  totalBeds: "104 Tempat Tidur",
+  totalDoctors: "30+ Dokter Spesialis",
   totalPolis: "13 Poliklinik Terpadu",
   instagram: "https://www.instagram.com/narayhospital",
   youtube: "https://www.youtube.com/@NarayHospital",
