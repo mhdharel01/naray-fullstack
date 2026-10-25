@@ -98,6 +98,9 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     font-family: var(--font-body);
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
   }
 
   body {
@@ -106,6 +109,9 @@
     color: #0F172A;
     line-height: 1.6;
     overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+    position: relative;
   }
 
   h1, h2, h3, h4, h5, h6 {

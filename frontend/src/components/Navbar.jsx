@@ -138,7 +138,7 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
           : 'bg-white border-b border-slate-100 py-3 sm:py-3.5'
       }`}
     >
-      <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+      <div className="max-w-[1380px] mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between gap-2 sm:gap-4 min-w-0">
         
         {/* Brand Logo & Tagline */}
         <Link 
@@ -258,13 +258,13 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
         </nav>
 
         {/* Right CTA Actions */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {isAdmin && (
             <span 
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 text-xs font-bold font-mono" 
+              className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-700 text-[11px] sm:text-xs font-bold font-mono" 
               title="Mode Admin Aktif"
             >
-              <ShieldAlert size={14} /> 
+              <ShieldAlert size={13} /> 
               <span>Admin</span>
             </span>
           )}
@@ -285,21 +285,22 @@ export function Navbar({ onSearchDoctorClick, onOpenEmergency }) {
             href={`https://wa.me/${waNumber}?text=${encodeURIComponent('Halo Naray Hospital Dumai, saya ingin menanyakan informasi dan pendaftaran layanan.')}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 sm:px-4.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm shadow-teal-700/20 hover:shadow-md hover:shadow-teal-700/30 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4.5 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-sm shadow-teal-700/20 hover:shadow-md hover:shadow-teal-700/30 transition-all cursor-pointer shrink-0"
             title="Hubungi Customer Care WhatsApp Naray Hospital"
           >
-            <MessageCircle size={16} />
-            <span>Hubungi Kami</span>
+            <MessageCircle size={15} className="shrink-0" />
+            <span className="hidden xs:inline">Hubungi Kami</span>
+            <span className="xs:hidden">Kontak</span>
           </a>
 
           {/* Mobile Menu Hamburger Toggle */}
           <button
             type="button"
-            className="lg:hidden p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={mobileMenuOpen ? 'Tutup Menu' : 'Buka Menu Navigasi'}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
