@@ -17,17 +17,29 @@ export function FloatingSpeedDial({ onOpenEmergency }) {
     window.open(`https://wa.me/${wa}?text=${text}`, '_blank');
   };
 
+  const handleWhatsAppUGD = () => {
+    const text = encodeURIComponent("Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis gawat darurat.");
+    const waUGD = (hospitalInfo.emergencyHotline || hospitalInfo.ambulanceHotline || '6285363395383').replace(/[^0-9]/g, '');
+    window.open(`https://wa.me/${waUGD}?text=${text}`, '_blank');
+  };
+
+  const handleCallCenter = () => {
+    const text = encodeURIComponent("Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan rumah sakit.");
+    const callCenterWa = (hospitalInfo.callCenter || hospitalInfo.whatsappHotline || '628117529798').replace(/[^0-9]/g, '');
+    window.open(`https://wa.me/${callCenterWa}?text=${text}`, '_blank');
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 select-none">
       {/* Speed Dial Menu Items */}
       {isOpen && (
         <div className="flex flex-col items-end gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          {/* WhatsApp 24 Jam */}
+          {/* WhatsApp Layanan & Poliklinik */}
           <button 
             type="button"
             className="flex items-center gap-3 group cursor-pointer" 
             onClick={handleWhatsApp}
-            title="Chat WhatsApp 24 Jam"
+            title="Chat WhatsApp Informasi & Pendaftaran"
           >
             <span className="px-3 py-1.5 rounded-xl bg-slate-900/90 text-white text-xs font-bold shadow-lg backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
               WhatsApp 24 Jam
@@ -37,37 +49,35 @@ export function FloatingSpeedDial({ onOpenEmergency }) {
             </div>
           </button>
 
-          {/* IGD Emergency */}
+          {/* WhatsApp UGD & Ambulans 24 Jam */}
           <button 
             type="button"
             className="flex items-center gap-3 group cursor-pointer" 
-            onClick={() => {
-              setIsOpen(false);
-              if (onOpenEmergency) onOpenEmergency();
-            }}
-            title="Layanan Gawat Darurat"
+            onClick={handleWhatsAppUGD}
+            title="Chat WhatsApp UGD & Ambulans 24 Jam"
           >
             <span className="px-3 py-1.5 rounded-xl bg-slate-900/90 text-white text-xs font-bold shadow-lg backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
-              UGD &amp; Ambulans 24 Jam
+              WhatsApp UGD &amp; Ambulans 24 Jam
             </span>
             <div className="w-12 h-12 rounded-2xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:scale-105 transition-all">
               <Ambulance size={22} className="animate-pulse" />
             </div>
           </button>
 
-          {/* Call Center */}
-          <a 
-            href={`tel:${hospitalInfo.emergencyHotline.replace(/[^0-9+]/g, '')}`} 
+          {/* WhatsApp Call Center */}
+          <button 
+            type="button"
+            onClick={handleCallCenter}
             className="flex items-center gap-3 group cursor-pointer"
-            title="Call Center Naray"
+            title="Chat WhatsApp Call Center Naray"
           >
             <span className="px-3 py-1.5 rounded-xl bg-slate-900/90 text-white text-xs font-bold shadow-lg backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
-              Call Center {hospitalInfo.callCenter}
+              WhatsApp Call Center {hospitalInfo.callCenter || '+62 811-7529-798'}
             </span>
             <div className="w-12 h-12 rounded-2xl bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white flex items-center justify-center shadow-lg shadow-teal-600/30 group-hover:scale-105 transition-all">
               <Headphones size={22} />
             </div>
-          </a>
+          </button>
         </div>
       )}
 

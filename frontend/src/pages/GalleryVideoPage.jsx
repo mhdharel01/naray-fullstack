@@ -694,11 +694,13 @@ export default function GalleryVideoPage() {
                 <span>Hubungi Humas via WhatsApp</span>
               </a>
               <a
-                href={`tel:${emergencyPhone}`}
+                href={`https://wa.me/${(hospitalInfo?.emergencyHotline || emergencyPhone || '6285363395383').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all text-center cursor-pointer"
               >
-                <PhoneCall size={16} />
-                <span>Telepon UGD: (0765) 31234</span>
+                <MessageCircle size={16} />
+                <span>WhatsApp UGD: {hospitalInfo?.emergencyHotline || emergencyPhone || '+62 853-6339-5383'}</span>
               </a>
             </div>
           </section>

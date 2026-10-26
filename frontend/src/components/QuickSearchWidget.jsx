@@ -77,7 +77,7 @@ export function QuickSearchWidget({
         if (onOpenEmergency) {
           onOpenEmergency();
         } else {
-          window.open('tel:+6285363395383');
+          window.open(`https://wa.me/6285363395383?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`, '_blank');
         }
       }
     }

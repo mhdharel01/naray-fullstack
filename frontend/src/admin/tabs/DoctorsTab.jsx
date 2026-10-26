@@ -383,9 +383,11 @@ export default function DoctorsTab({
                 <div className="flex items-center gap-4 pt-1 flex-wrap text-xs text-slate-600">
                   {doc.phone && (
                     <a
-                      href={`tel:${doc.phone.replace(/[^0-9+]/g, '')}`}
+                      href={`https://wa.me/${doc.phone.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 hover:text-teal-700 font-semibold transition-colors"
-                      title="Hubungi Telepon / WhatsApp"
+                      title="Hubungi WhatsApp Dokter"
                     >
                       <Phone size={13} className="text-teal-600" />
                       <span>{doc.phone}</span>

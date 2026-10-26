@@ -183,7 +183,7 @@ export function HeroBanner({ onScrollToSection, onOpenEmergency }) {
                     <button
                       type="button"
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm sm:text-base shadow-lg shadow-red-600/30 hover:-translate-y-0.5 transition-all cursor-pointer"
-                      onClick={onOpenEmergency || (() => window.open(`tel:${hospitalInfo.emergencyHotline}`))}
+                      onClick={onOpenEmergency || (() => window.open(`https://wa.me/6285363395383?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`, '_blank'))}
                     >
                       <PhoneCall size={18} className="animate-bounce" />
                       <span>{slide.ctaPrimary}</span>

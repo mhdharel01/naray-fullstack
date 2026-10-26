@@ -315,11 +315,13 @@ export default function DoctorDetailPage() {
                   </a>
 
                   <a
-                    href={`tel:${hospitalInfo.emergencyHotline || '+6285363395383'}`}
-                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all"
+                    href={`https://wa.me/628117529798?text=${encodeURIComponent('Halo Call Center Naray Hospital, saya ingin bertanya tentang jadwal dokter ' + (doctor.name || ''))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all cursor-pointer"
                   >
-                    <PhoneCall size={16} />
-                    <span>Call Center ({hospitalInfo.emergencyHotline || '+62 853-6339-5383'})</span>
+                    <MessageCircle size={16} />
+                    <span>WhatsApp Call Center ({hospitalInfo.callCenter || '+62 811-7529-798'})</span>
                   </a>
 
                   <button
@@ -602,10 +604,13 @@ export default function DoctorDetailPage() {
                   Butuh penanganan gawat darurat segera? IGD Naray Hospital Dumai siaga 24 jam dengan tim dokter jaga dan ambulans.
                 </p>
                 <a
-                  href={`tel:${hospitalInfo.emergencyHotline || '+6285363395383'}`}
-                  className="inline-flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm transition-all text-center"
+                  href={`https://wa.me/6285363395383?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan darurat.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm transition-all text-center cursor-pointer"
                 >
-                  <span>Hubungi IGD: {hospitalInfo.emergencyHotline || '+62 853-6339-5383'}</span>
+                  <MessageCircle size={15} />
+                  <span>WhatsApp UGD: {hospitalInfo.emergencyHotline || '+62 853-6339-5383'}</span>
                 </a>
               </div>
 

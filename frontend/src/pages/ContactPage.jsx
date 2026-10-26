@@ -112,11 +112,13 @@ export default function ContactPage() {
               </div>
 
               <a 
-                href={`tel:${rawEmergency}`}
-                className="w-full h-11 rounded-xl bg-white text-red-700 hover:bg-red-50 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all"
+                href={`https://wa.me/${rawEmergency.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-11 rounded-xl bg-white text-red-700 hover:bg-red-50 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
               >
-                <PhoneCall size={16} />
-                <span>{info.emergencyHotline}</span>
+                <MessageCircle size={16} />
+                <span>WhatsApp UGD: {info.emergencyHotline}</span>
               </a>
             </div>
 
@@ -166,11 +168,13 @@ export default function ContactPage() {
               </div>
 
               <a 
-                href={`tel:${rawPhone}`}
-                className="w-full h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
+                href={`https://wa.me/${rawPhone}?text=${encodeURIComponent('Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi umum.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-11 rounded-xl bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
-                <Phone size={16} />
-                <span>{info.phone}</span>
+                <MessageCircle size={16} />
+                <span>WhatsApp: {info.phone}</span>
               </a>
             </div>
 

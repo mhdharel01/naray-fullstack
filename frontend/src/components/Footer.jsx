@@ -104,9 +104,15 @@ export function Footer() {
                 <Ambulance size={20} className="animate-pulse" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[11px] font-bold uppercase tracking-wide text-red-300">UGD &amp; Ambulans 24 Jam</span>
-                <a href={`tel:${rawEmergency}`} className="text-base font-extrabold text-white hover:text-red-300 transition-colors tracking-wide">
-                  {hospitalInfo.emergencyHotline}
+                <span className="text-[11px] font-bold uppercase tracking-wide text-red-300">WhatsApp UGD &amp; Ambulans 24 Jam</span>
+                <a 
+                  href={`https://wa.me/${rawEmergency.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-base font-extrabold text-white hover:text-red-300 transition-colors tracking-wide flex items-center gap-1.5"
+                >
+                  <MessageCircle size={15} className="text-emerald-400" />
+                  <span>{hospitalInfo.emergencyHotline}</span>
                 </a>
               </div>
             </div>

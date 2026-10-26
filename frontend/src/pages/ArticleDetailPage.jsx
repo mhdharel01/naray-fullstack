@@ -460,11 +460,13 @@ export default function ArticleDetailPage() {
                   Dokter emergensi dan armada ambulans siaga 24 jam penuh di kawasan Kota Dumai.
                 </p>
                 <a
-                  href={`tel:${hospitalInfo.emergencyHotline || '+6285363395383'}`}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-all"
+                  href={`https://wa.me/${(hospitalInfo?.emergencyHotline || '6285363395383').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
                 >
-                  <PhoneCall size={14} />
-                  <span>Telepon UGD: (0765) 31234</span>
+                  <MessageCircle size={14} />
+                  <span>WhatsApp UGD: {hospitalInfo?.emergencyHotline || '+62 853-6339-5383'}</span>
                 </a>
               </div>
 
@@ -575,11 +577,13 @@ export default function ArticleDetailPage() {
                 <span>Lihat Jadwal Dokter</span>
               </Link>
               <a
-                href={`tel:${hospitalInfo.emergencyHotline || '+6285363395383'}`}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all"
+                href={`https://wa.me/${(hospitalInfo?.callCenter || hospitalInfo?.whatsappHotline || '628117529798').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all cursor-pointer"
               >
-                <PhoneCall size={16} />
-                <span>Hubungi Call Center</span>
+                <MessageCircle size={16} />
+                <span>WhatsApp Call Center: {hospitalInfo?.callCenter || '+62 811-7529-798'}</span>
               </a>
             </div>
           </section>

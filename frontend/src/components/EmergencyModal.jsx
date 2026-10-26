@@ -3,7 +3,8 @@ import {
   X, 
   PhoneCall, 
   HeartPulse, 
-  MapPin
+  MapPin,
+  MessageCircle
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 
@@ -51,18 +52,32 @@ export function EmergencyModal({ onClose }) {
         {/* Main Emergency Call Band */}
         <div className="p-6 sm:p-8 bg-red-50/50 border-b border-red-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex flex-col">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-red-700">Nomor Telepon Darurat UGD:</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-red-700">Nomor WhatsApp &amp; Siaga UGD:</span>
             <strong className="font-heading text-2xl font-black text-slate-900 tracking-tight">{emNumber}</strong>
             <span className="text-xs text-slate-600 mt-0.5">Call Center: <strong className="text-slate-800">{callCenterNum}</strong></span>
           </div>
 
-          <a 
-            href={`tel:${emNumber.replace(/[^0-9+]/g, '')}`} 
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-sm shadow-md shadow-red-600/30 transition-all cursor-pointer"
-          >
-            <PhoneCall size={18} className="animate-bounce" />
-            <span>Panggil UGD</span>
-          </a>
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            <a 
+              href={`https://wa.me/${emNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 transition-all cursor-pointer"
+            >
+              <MessageCircle size={17} className="animate-bounce" />
+              <span>WhatsApp UGD & Ambulans</span>
+            </a>
+            <a 
+              href={`https://wa.me/${callCenterNum.replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi.")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl bg-slate-100 hover:bg-teal-50 hover:text-teal-700 text-slate-700 font-semibold text-xs border border-slate-200 transition-all cursor-pointer"
+              title="Chat WhatsApp Call Center"
+            >
+              <MessageCircle size={14} />
+              <span>WhatsApp Call Center</span>
+            </a>
+          </div>
         </div>
 
         {/* Modal Body */}

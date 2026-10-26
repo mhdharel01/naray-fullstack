@@ -18,20 +18,16 @@ export function TopBar({ onOpenEmergency }) {
         {/* Left: Emergency Hotline, Call Center & Operating Hours */}
         <div className="flex items-center gap-x-2 sm:gap-x-4 min-w-0">
           <a
-            href={`tel:${emergencyNum.replace(/[^0-9+]/g, '')}`}
+            href={`https://wa.me/${emergencyNum.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo UGD & Ambulans Naray Hospital Dumai, saya membutuhkan bantuan medis darurat.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-red-600 hover:bg-red-500 text-white font-bold text-[11px] sm:text-xs shadow-sm shadow-red-950/40 transition-all cursor-pointer shrink-0 max-w-full"
-            aria-label={`Hubungi UGD 24 Jam di nomor ${emergencyNum}`}
-            onClick={(e) => {
-              if (onOpenEmergency) {
-                e.preventDefault();
-                onOpenEmergency();
-              }
-            }}
+            aria-label={`Hubungi WhatsApp UGD 24 Jam di nomor ${emergencyNum}`}
           >
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-ping shrink-0" />
             <Ambulance size={13} className="text-white shrink-0 sm:w-3.5 sm:h-3.5" />
             <span className="truncate">
-              <span>UGD 24 Jam: </span>
+              <span>WhatsApp UGD: </span>
               <strong className="tracking-wide">{emergencyNum}</strong>
             </span>
           </a>
@@ -39,9 +35,11 @@ export function TopBar({ onOpenEmergency }) {
           <span className="hidden sm:inline-block w-px h-3.5 bg-teal-800/60" role="separator" />
 
           <a
-            href={`tel:${callCenterNum.replace(/[^0-9+]/g, '')}`}
+            href={`https://wa.me/${callCenterNum.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden sm:inline-flex items-center gap-1.5 text-slate-300 hover:text-teal-300 transition-colors"
-            aria-label={`Hubungi Call Center Naray Hospital di ${callCenterNum}`}
+            aria-label={`Hubungi WhatsApp Call Center Naray Hospital di ${callCenterNum}`}
           >
             <Phone size={13} className="text-teal-400 shrink-0" />
             <span>Call Center: <strong className="text-white font-semibold">{callCenterNum}</strong></span>

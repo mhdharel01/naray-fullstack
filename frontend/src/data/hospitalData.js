@@ -980,7 +980,7 @@ Seluruh fasilitas ini dapat diakses oleh pasien umum, asuransi rekanan, maupun B
 
 1. Poliklinik Rawat Jalan Spesialis tutup sementara pada tanggal merah nasional dan kembali beroperasi normal pada hari kerja berikutnya.
 2. Instalasi Gawat Darurat (UGD), Ruang Bersalin (VK), Perawatan Intensif (ICU), Laboratorium, dan Radiologi tetap BUKA 24 JAM PENUH.
-3. Layanan ambulans darurat dapat dihubungi kapan saja melalui hotline (0765) 31234 atau WhatsApp darurat.
+3. Layanan ambulans darurat dapat dihubungi kapan saja melalui WhatsApp UGD +62 853-6339-5383.
 
 Kami senantiasa siap memberikan pertolongan medis terbaik bagi Anda dan keluarga tercinta.`
   },

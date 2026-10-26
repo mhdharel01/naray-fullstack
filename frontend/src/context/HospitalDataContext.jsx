@@ -519,7 +519,7 @@ export function HospitalDataProvider({ children }) {
             specialization_id: 1,
             specialization: { id: 1, name: cleanSpec },
             branch_id: 1,
-            phone: '0765-31234',
+            phone: '+62 811-7529-798',
             email: 'info@narayhospital.com',
             status: 'active',
             isOnLeave: Boolean(item.cuti),
