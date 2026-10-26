@@ -69,47 +69,51 @@ export default function MedicalServicesPage() {
     });
   };
 
-  // Filter Centers
+  // Filter Centers (Active Only)
   const filteredCenters = useMemo(() => {
-    return (centersOfExcellence || []).filter(c => {
-      const matchesSearch = !searchTerm || 
-        (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.tagline || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (c.technologies || []).some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
+    return (centersOfExcellence || [])
+      .filter(c => (c.status || 'active').toLowerCase() === 'active')
+      .filter(c => {
+        const matchesSearch = !searchTerm || 
+          (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (c.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (c.tagline || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (c.technologies || []).some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      let matchesTag = true;
-      if (selectedTag === 'jantung') matchesTag = (c.id || '').includes('jantung') || (c.title || '').toLowerCase().includes('jantung');
-      else if (selectedTag === 'ibu-anak') matchesTag = (c.id || '').includes('ibu-anak') || (c.title || '').toLowerCase().includes('anak');
-      else if (selectedTag === 'bedah') matchesTag = (c.id || '').includes('bedah') || (c.title || '').toLowerCase().includes('bedah');
-      else if (selectedTag === 'organ-dalam') matchesTag = (c.id || '').includes('penyakit-dalam') || (c.title || '').toLowerCase().includes('dalam');
-      else if (selectedTag === 'paru') matchesTag = (c.id || '').includes('paru') || (c.title || '').toLowerCase().includes('paru');
-      else if (selectedTag === 'mata-tht') matchesTag = (c.id || '').includes('mata-tht') || (c.title || '').toLowerCase().includes('mata') || (c.title || '').toLowerCase().includes('tht');
-      else if (selectedTag === 'diagnostik') matchesTag = false;
+        let matchesTag = true;
+        if (selectedTag === 'jantung') matchesTag = (c.id || '').includes('jantung') || (c.title || '').toLowerCase().includes('jantung');
+        else if (selectedTag === 'ibu-anak') matchesTag = (c.id || '').includes('ibu-anak') || (c.title || '').toLowerCase().includes('anak');
+        else if (selectedTag === 'bedah') matchesTag = (c.id || '').includes('bedah') || (c.title || '').toLowerCase().includes('bedah');
+        else if (selectedTag === 'organ-dalam') matchesTag = (c.id || '').includes('penyakit-dalam') || (c.title || '').toLowerCase().includes('dalam');
+        else if (selectedTag === 'paru') matchesTag = (c.id || '').includes('paru') || (c.title || '').toLowerCase().includes('paru');
+        else if (selectedTag === 'mata-tht') matchesTag = (c.id || '').includes('mata-tht') || (c.title || '').toLowerCase().includes('mata') || (c.title || '').toLowerCase().includes('tht');
+        else if (selectedTag === 'diagnostik') matchesTag = false;
 
-      return matchesSearch && matchesTag;
-    });
+        return matchesSearch && matchesTag;
+      });
   }, [centersOfExcellence, searchTerm, selectedTag]);
 
-  // Filter Facilities
+  // Filter Facilities (Active Only)
   const filteredFacilities = useMemo(() => {
-    return (allFacilities || []).filter(f => {
-      const cat = typeof f.category === 'object' ? (f.category?.name || '') : (f.category || f.tag || '');
-      const desc = f.description || f.desc || '';
-      
-      const matchesSearch = !searchTerm || 
-        (f.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cat.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (f.features || []).some(feat => feat.toLowerCase().includes(searchTerm.toLowerCase()));
+    return (allFacilities || [])
+      .filter(f => (f.status || 'active').toLowerCase() === 'active')
+      .filter(f => {
+        const cat = typeof f.category === 'object' ? (f.category?.name || '') : (f.category || f.tag || '');
+        const desc = f.description || f.desc || '';
+        
+        const matchesSearch = !searchTerm || 
+          (f.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+          desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cat.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (f.features || []).some(feat => feat.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      let matchesTag = true;
-      if (selectedTag === 'diagnostik') matchesTag = true;
-      else if (selectedTag === 'bedah') matchesTag = (f.name || '').toLowerCase().includes('bedah') || (f.name || '').toLowerCase().includes('operasi');
-      else if (selectedTag !== 'all') matchesTag = false;
+        let matchesTag = true;
+        if (selectedTag === 'diagnostik') matchesTag = true;
+        else if (selectedTag === 'bedah') matchesTag = (f.name || '').toLowerCase().includes('bedah') || (f.name || '').toLowerCase().includes('operasi');
+        else if (selectedTag !== 'all') matchesTag = false;
 
-      return matchesSearch && matchesTag;
-    });
+        return matchesSearch && matchesTag;
+      });
   }, [allFacilities, searchTerm, selectedTag]);
 
   const totalFilteredCount = (activeTab === 'all' 

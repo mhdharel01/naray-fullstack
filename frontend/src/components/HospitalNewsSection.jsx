@@ -10,21 +10,23 @@ export function HospitalNewsSection({ onSelectArticle }) {
 
   const categories = ['Semua', 'Edukasi Kesehatan', 'Berita', 'Pengumuman'];
 
-  // Smart filter based on selected category
-  const filteredArticles = healthArticles.filter(art => {
-    if (selectedCategory === 'Semua') return true;
-    const cat = (art.category || '').toLowerCase();
-    if (selectedCategory === 'Edukasi Kesehatan') {
-      return cat.includes('edukasi') || cat.includes('kesehatan') || cat.includes('jantung') || cat.includes('anak') || cat.includes('paru') || cat.includes('dalam');
-    }
-    if (selectedCategory === 'Berita') {
-      return cat.includes('berita') || cat.includes('kegiatan') || cat.includes('sosial') || cat.includes('csr') || cat.includes('umum');
-    }
-    if (selectedCategory === 'Pengumuman') {
-      return cat.includes('pengumuman') || cat.includes('layanan') || cat.includes('jadwal') || cat.includes('info');
-    }
-    return true;
-  });
+  // Smart filter based on selected category (published only)
+  const filteredArticles = healthArticles
+    .filter(art => (art.status || 'published').toLowerCase() === 'published')
+    .filter(art => {
+      if (selectedCategory === 'Semua') return true;
+      const cat = (art.category || '').toLowerCase();
+      if (selectedCategory === 'Edukasi Kesehatan') {
+        return cat.includes('edukasi') || cat.includes('kesehatan') || cat.includes('jantung') || cat.includes('anak') || cat.includes('paru') || cat.includes('dalam');
+      }
+      if (selectedCategory === 'Berita') {
+        return cat.includes('berita') || cat.includes('kegiatan') || cat.includes('sosial') || cat.includes('csr') || cat.includes('umum');
+      }
+      if (selectedCategory === 'Pengumuman') {
+        return cat.includes('pengumuman') || cat.includes('layanan') || cat.includes('jadwal') || cat.includes('info');
+      }
+      return true;
+    });
 
   const displayArticles = filteredArticles.slice(0, 3);
 

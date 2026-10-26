@@ -128,7 +128,7 @@ export default function InpatientRoomsPage() {
     const simrsList = Array.isArray(simrsBedData?.persediaan_kamar) ? simrsBedData.persediaan_kamar : [];
 
     return list
-      .filter(r => r && r.name && r.name.toLowerCase() !== 'user' && r.name.trim().length > 2)
+      .filter(r => r && r.name && r.name.toLowerCase() !== 'user' && r.name.trim().length > 2 && (r.status || 'active').toLowerCase() === 'active')
       .map((r, idx) => {
         const nameLower = (r.name || '').toLowerCase();
         let defaultTotal = 15;

@@ -591,6 +591,7 @@ export function HospitalDataProvider({ children }) {
     }
 
     const artSlug = a.slug || (a.title ? a.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : `art-${a.id}`);
+    const normalizedStatus = (a.status || 'published').toLowerCase();
 
     return {
       id: artSlug,
@@ -599,26 +600,31 @@ export function HospitalDataProvider({ children }) {
       title: a.title,
       author: a.author || 'Tim Medis Naray Hospital',
       category: catName,
+      category_id: a.category_id || (a.category && typeof a.category === 'object' ? a.category.id : 1) || 1,
       date: a.published_at ? new Date(a.published_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : (a.date || 'Terbaru'),
       readTime: a.read_time || a.readTime || '4 Menit Baca',
       image: formatImageUrl(a.thumbnail_url || a.image, '/images/discovery/diagnostic-center.jpg'),
       thumbnail_url: a.thumbnail_url || '',
       summary: a.summary || (a.content ? a.content.slice(0, 160) + '...' : ''),
       snippet: a.summary || (a.content ? a.content.slice(0, 160) + '...' : ''),
-      content: a.content
+      content: a.content,
+      status: normalizedStatus,
+      is_active: normalizedStatus === 'published'
     };
   };
 
   const mapFacility = (f) => {
     const cat = f.description?.includes('Kategori:') ? f.description.split('Kategori:')[1].split('\n')[0].trim() : 'Fasilitas Medis';
     const cleanDesc = f.description?.replace(/Kategori:.*\n?/, '') || 'Fasilitas modern Naray Hospital.';
+    const normalizedStatus = (f.status || 'active').toLowerCase();
     return {
       id: `fac-${f.id}`,
       dbId: f.id,
       name: f.name,
       category: cat,
       type: f.type || 'advanced',
-      status: f.status || 'active',
+      status: normalizedStatus,
+      is_active: normalizedStatus === 'active',
       image: formatImageUrl(f.image_url || f.image, '/images/default-image.svg'),
       image_url: f.image_url || '',
       description: cleanDesc,
@@ -630,8 +636,10 @@ export function HospitalDataProvider({ children }) {
     const lines = (c.description || '').split('\n').map(l => l.trim()).filter(Boolean);
     const tagline = lines.length > 1 ? lines[0] : (c.description || 'Pusat Layanan Medis Terpadu');
     const desc = lines.length > 1 ? lines.slice(1).join('\n') : (c.description || 'Pelayanan komprehensif didukung dokter spesialis dan peralatan mutakhir.');
+    const normalizedStatus = (c.status || 'active').toLowerCase();
     return {
       id: c.slug || `center-${c.id}`,
+      slug: c.slug,
       dbId: c.id,
       title: c.name,
       name: c.name,
@@ -639,6 +647,8 @@ export function HospitalDataProvider({ children }) {
       icon: 'HeartPulse',
       tagline: tagline,
       description: desc,
+      status: normalizedStatus,
+      is_active: normalizedStatus === 'active',
       image: formatImageUrl(c.image_url || c.image, '/images/default-image.svg'),
       image_url: c.image_url || '',
       stats: 'Layanan Unggulan',
@@ -820,7 +830,9 @@ export function HospitalDataProvider({ children }) {
       description: cleanDesc,
       features: feats,
       facilities: feats,
-      target: 'Pasien Rawat Inap'
+      target: 'Pasien Rawat Inap',
+      status: (r.status || 'active').toLowerCase(),
+      is_active: (r.status || 'active').toLowerCase() === 'active'
     };
   };
 
@@ -840,19 +852,23 @@ export function HospitalDataProvider({ children }) {
       }
     }
 
+    const normalizedStatus = (m.status || 'active').toLowerCase();
+
     return {
       id: m.slug || `mcu-${m.id}`,
       dbId: m.id,
       name: m.name,
-      badge: 'Paket Rekomendasi',
+      badge: m.badge || 'Paket Rekomendasi',
       price: priceNum ? `Rp ${priceNum.toLocaleString('id-ID')}` : 'Hubungi Naray Care',
       originalPrice: priceNum ? `Rp ${(priceNum * 1.25).toLocaleString('id-ID')}` : '',
-      duration: '2 - 3 Jam',
-      target: 'Pemeriksaan Kesehatan Berkala',
-      highlight: dbHighlight || m.name,
+      duration: m.duration || '2 - 3 Jam',
+      target: m.target || 'Pemeriksaan Kesehatan Berkala',
+      highlight: dbHighlight || m.highlight || m.name,
       image: formatImageUrl(m.image_url || m.image, '/images/default-image.svg'),
       image_url: m.image_url || '',
-      items: dbItems.length > 0 ? dbItems : ['Pemeriksaan Fisik Dokter Spesialis', 'Pemeriksaan Laboratorium Lengkap', 'Resume Medis Komprehensif']
+      items: dbItems.length > 0 ? dbItems : ['Pemeriksaan Fisik Dokter Spesialis', 'Pemeriksaan Laboratorium Lengkap', 'Resume Medis Komprehensif'],
+      status: normalizedStatus,
+      is_active: normalizedStatus === 'active'
     };
   };
 
@@ -871,14 +887,21 @@ export function HospitalDataProvider({ children }) {
         catName = m.description.slice(0, 30);
       }
 
+      const normalizedStatus = (m.status || 'active').toLowerCase();
+
       if (m.type === 'video') {
         dbVideos.push({
           id: `vid-${m.id}`,
           dbId: m.id,
           title: m.title,
           category: catName,
+          category_id: m.category_id,
           youtubeEmbed: m.url,
-          desc: m.description || ''
+          url: m.url,
+          desc: m.description || '',
+          description: m.description || '',
+          status: normalizedStatus,
+          is_active: normalizedStatus === 'active'
         });
       } else {
         dbPhotos.push({
@@ -889,9 +912,13 @@ export function HospitalDataProvider({ children }) {
             ? new Date(m.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
             : 'Terbaru',
           category: catName,
+          category_id: m.category_id,
           image: formatImageUrl(m.url || m.image, '/images/default-image.svg'),
           url: m.url || '',
-          desc: m.description || ''
+          desc: m.description || '',
+          description: m.description || '',
+          status: normalizedStatus,
+          is_active: normalizedStatus === 'active'
         });
       }
     });
@@ -902,7 +929,9 @@ export function HospitalDataProvider({ children }) {
     setIsLoadingBackend(true);
     try {
       // 1. Single Batch Init Endpoint (Hanya 1x request HTTP: pangkas load time dari 3s jadi ~300ms)
-      const initRes = await api.getAppInit();
+      // Jika admin login / adminToken ada, minta seluruh data (termasuk draf & non-aktif)
+      const token = adminToken || (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) : null);
+      const initRes = await api.getAppInit(token ? { all: 1 } : {});
       if (initRes?.success && initRes?.data) {
         const d = initRes.data;
         const leaves = Array.isArray(d.doctor_leaves) ? d.doctor_leaves : [];
@@ -2232,7 +2261,8 @@ export function HospitalDataProvider({ children }) {
         break;
 
       case 'gallery':
-      case 'media': {
+      case 'media':
+      case 'video': {
         const catName = typeof cleanItem.category === 'object'
           ? (cleanItem.category?.name || 'Kegiatan Naray')
           : (cleanItem.category || 'Kegiatan Naray');

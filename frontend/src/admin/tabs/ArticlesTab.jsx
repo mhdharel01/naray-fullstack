@@ -71,8 +71,8 @@ export default function ArticlesTab({
   }, [healthArticles, searchQuery, selectedCategoryFilter, selectedStatusFilter]);
 
   // Metrics
-  const publishedCount = healthArticles.filter(a => (a.status || 'published') === 'published').length;
-  const draftCount = healthArticles.filter(a => a.status === 'draft').length;
+  const publishedCount = healthArticles.filter(a => (a.status || 'published').toLowerCase() === 'published').length;
+  const draftCount = healthArticles.filter(a => (a.status || '').toLowerCase() === 'draft').length;
 
   const toSlug = (text) => (text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 

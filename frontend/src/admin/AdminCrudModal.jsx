@@ -659,6 +659,26 @@ export function AdminCrudModal({
                   />
                 </div>
 
+                <div className="admin-form-half">
+                  <label>Status Paket MCU</label>
+                  <select
+                    name="status"
+                    value={formData.status || 'active'}
+                    onChange={handleChange}
+                  >
+                    <option value="active">Tersedia / Aktif</option>
+                    <option value="inactive">Nonaktif / Arsip</option>
+                  </select>
+                </div>
+
+                <ImageUploadField
+                  label="Unggah Banner / Ilustrasi Paket MCU"
+                  value={formData.image_url || formData.image || ''}
+                  folder="mcu"
+                  onChange={(uploadedUrl) => setFormData(prev => ({ ...prev, image_url: uploadedUrl, image: uploadedUrl }))}
+                  helperText="Format: JPG, PNG, WEBP. Banner paket otomatis dikompresi ringan & aman."
+                />
+
                 <div className="admin-form-full">
                   <label>Ringkasan Pemeriksaan (Highlight)</label>
                   <input

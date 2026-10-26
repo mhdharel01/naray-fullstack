@@ -116,24 +116,29 @@ export default function ArticlePage() {
   // Helper to convert title to canonical slug
   const toSlug = (text) => (text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+  // Filter only published articles for public view
+  const publishedArticles = useMemo(() => {
+    return healthArticles.filter(a => (a.status || 'published').toLowerCase() === 'published');
+  }, [healthArticles]);
+
   // Calculate dynamic article counts per category
   const categoryCounts = useMemo(() => {
-    const counts = { 'Semua': healthArticles.length };
+    const counts = { 'Semua': publishedArticles.length };
     DEFAULT_CATEGORIES.forEach(cat => {
       if (cat !== 'Semua') {
         const catLower = cat.toLowerCase();
-        counts[cat] = healthArticles.filter(a => {
+        counts[cat] = publishedArticles.filter(a => {
           const aCat = (a.category || '').toLowerCase();
           return aCat.includes(catLower) || catLower.includes(aCat);
         }).length;
       }
     });
     return counts;
-  }, [healthArticles]);
+  }, [publishedArticles]);
 
   // Filtered articles
   const filteredArticles = useMemo(() => {
-    return healthArticles.filter((art) => {
+    return publishedArticles.filter((art) => {
       const matchCat =
         selectedCategory === 'Semua' ||
         (art.category || '').toLowerCase().includes(selectedCategory.toLowerCase()) ||
@@ -148,7 +153,7 @@ export default function ArticlePage() {
 
       return matchCat && matchSearch;
     });
-  }, [healthArticles, selectedCategory, searchKeyword]);
+  }, [publishedArticles, selectedCategory, searchKeyword]);
 
   // Pagination computations
   const effectiveItemsPerPage = itemsPerPage === -1 ? filteredArticles.length : itemsPerPage;
@@ -246,7 +251,7 @@ export default function ArticlePage() {
                 onChange={(e) => handleSelectCategory(e.target.value)}
                 className="w-full h-12 px-4 rounded-xl text-xs sm:text-sm text-slate-700 bg-transparent focus:bg-slate-50/50 outline-none cursor-pointer font-medium appearance-none"
               >
-                <option value="Semua">Semua Kategori ({healthArticles.length})</option>
+                <option value="Semua">Semua Kategori ({publishedArticles.length})</option>
                 {DEFAULT_CATEGORIES.filter(c => c !== 'Semua').map((cat) => (
                   <option key={cat} value={cat}>
                     {cat} ({categoryCounts[cat] || 0})

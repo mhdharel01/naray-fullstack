@@ -128,9 +128,9 @@ export default function ArticleDetailPage() {
     }
   };
 
-  // Related articles (pick 3 other articles)
+  // Related articles (pick 3 other published articles)
   const relatedArticles = healthArticles
-    .filter(a => a.id !== article?.id && a.dbId !== article?.dbId)
+    .filter(a => a.id !== article?.id && a.dbId !== article?.dbId && (a.status || 'published').toLowerCase() === 'published')
     .slice(0, 3);
 
   // If article not found

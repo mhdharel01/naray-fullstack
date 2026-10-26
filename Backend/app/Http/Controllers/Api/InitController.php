@@ -25,6 +25,27 @@ class InitController extends Controller
      */
     public function index(Request $request)
     {
+        $token = $request->bearerToken();
+        $isAdmin = false;
+        if (!empty($token)) {
+            try {
+                $tokenModel = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
+                if ($tokenModel) {
+                    $isAdmin = true;
+                }
+            } catch (\Throwable $e) {
+                $isAdmin = false;
+            }
+        }
+        if (!$isAdmin) {
+            $isAdmin = $request->user('sanctum') !== null;
+        }
+
+        $includeAll = $isAdmin
+            || $request->boolean('all')
+            || $request->boolean('include_inactive')
+            || $request->header('X-Admin-Request') === 'true';
+
         $doctors = Doctor::with([
             'specialization',
             'branch',
@@ -36,47 +57,65 @@ class InitController extends Controller
         ->orderBy('name')
         ->get();
 
-        $polikliniks = Poliklinik::where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $polikliniksQuery = Poliklinik::orderBy('name');
+        if (!$includeAll) {
+            $polikliniksQuery->where('status', 'active');
+        }
+        $polikliniks = $polikliniksQuery->get();
 
-        $articles = Article::with('category')
-            ->where('status', 'published')
+        $articlesQuery = Article::with('category')
             ->latest('published_at')
-            ->take(15)
-            ->get();
+            ->latest('id');
+        if (!$includeAll) {
+            $articlesQuery->where('status', 'published')->take(15);
+        } else {
+            $articlesQuery->take(150);
+        }
+        $articles = $articlesQuery->get();
 
-        $facilities = Facility::where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $facilitiesQuery = Facility::orderBy('name');
+        if (!$includeAll) {
+            $facilitiesQuery->where('status', 'active');
+        }
+        $facilities = $facilitiesQuery->get();
 
-        $centers = CenterOfExcellence::where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $centersQuery = CenterOfExcellence::orderBy('name');
+        if (!$includeAll) {
+            $centersQuery->where('status', 'active');
+        }
+        $centers = $centersQuery->get();
 
-        $roomTypes = RoomType::with(['rooms'])
-            ->where('status', 'active')
-            ->orderBy('price_per_night')
-            ->get();
+        $roomTypesQuery = RoomType::with(['rooms'])->orderBy('price_per_night');
+        if (!$includeAll) {
+            $roomTypesQuery->where('status', 'active');
+        }
+        $roomTypes = $roomTypesQuery->get();
 
-        $mcuPackages = McuPackage::where('status', 'active')
-            ->orderBy('price')
-            ->get();
+        $mcuPackagesQuery = McuPackage::orderBy('price');
+        if (!$includeAll) {
+            $mcuPackagesQuery->where('status', 'active');
+        }
+        $mcuPackages = $mcuPackagesQuery->get();
 
-        $media = Media::with('category')
-            ->where('status', 'active')
-            ->latest()
-            ->take(30)
-            ->get();
+        $mediaQuery = Media::with('category')->latest();
+        if (!$includeAll) {
+            $mediaQuery->where('status', 'active')->take(30);
+        } else {
+            $mediaQuery->take(200);
+        }
+        $media = $mediaQuery->get();
 
-        $insurancePartners = InsurancePartner::where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $insurancePartnersQuery = InsurancePartner::orderBy('name');
+        if (!$includeAll) {
+            $insurancePartnersQuery->where('status', 'active');
+        }
+        $insurancePartners = $insurancePartnersQuery->get();
 
-        $doctorLeaves = DoctorLeave::with('doctor:id,name')
-            ->where('status', 'active')
-            ->orderBy('start_date')
-            ->get();
+        $doctorLeavesQuery = DoctorLeave::with('doctor:id,name')->orderBy('start_date');
+        if (!$includeAll) {
+            $doctorLeavesQuery->where('status', 'active');
+        }
+        $doctorLeaves = $doctorLeavesQuery->get();
 
         $simrsService = app(\App\Services\SimrsService::class);
         $force = $request->boolean('refresh') || $request->boolean('force');

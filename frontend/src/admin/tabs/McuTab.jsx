@@ -6,6 +6,8 @@ import {
   Tag, Award, ChevronRight
 } from 'lucide-react';
 
+import StatusBadge from '../components/StatusBadge';
+
 // Helper format Rupiah
 function formatPriceRupiah(val) {
   if (!val) return 'Hubungi Kami';
@@ -31,6 +33,7 @@ export default function McuTab({
 }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [categoryFilter, setCategoryFilter] = useState('all'); // 'all' | 'popular' | 'general' | 'specific'
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'inactive'
   const [previewPackage, setPreviewPackage] = useState(null); // Modal detail pratinjau
 
   // Ekstrak item pemeriksaan
@@ -55,6 +58,8 @@ export default function McuTab({
   const stats = useMemo(() => {
     const total = mcuPackages.length;
     const popularCount = mcuPackages.filter(m => Boolean(m.badge)).length;
+    const activeCount = mcuPackages.filter(m => (m.status || 'active') === 'active').length;
+    const inactiveCount = mcuPackages.filter(m => (m.status || 'active') === 'inactive').length;
 
     let totalItemsCount = 0;
     mcuPackages.forEach(m => {
@@ -64,6 +69,8 @@ export default function McuTab({
     return {
       total,
       popularCount,
+      activeCount,
+      inactiveCount,
       totalItemsCount,
       avgItems: total > 0 ? Math.round(totalItemsCount / total) : 0
     };
@@ -84,6 +91,11 @@ export default function McuTab({
 
       if (!matchesSearch) return false;
 
+      // Filter status
+      const mStatus = (m.status || 'active').toLowerCase();
+      if (statusFilter === 'active' && mStatus !== 'active') return false;
+      if (statusFilter === 'inactive' && mStatus !== 'inactive') return false;
+
       // Filter category
       const name = (m.name || '').toLowerCase();
       const badge = (m.badge || '').toLowerCase();
@@ -100,7 +112,7 @@ export default function McuTab({
 
       return true;
     });
-  }, [mcuPackages, searchQuery, categoryFilter]);
+  }, [mcuPackages, searchQuery, categoryFilter, statusFilter]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 font-sans">
@@ -264,30 +276,49 @@ export default function McuTab({
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar text-xs font-semibold">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
-              Filter:
-            </span>
-            {[
-              { id: 'all', label: 'Semua Paket' },
-              { id: 'popular', label: 'Unggulan & Populer' },
-              { id: 'general', label: 'Skrining Umum & Rutin' },
-              { id: 'specific', label: 'Spesifik (Jantung / Lansia / Pranikah)' },
-            ].map(cat => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setCategoryFilter(cat.id)}
-                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
-                  categoryFilter === cat.id
-                    ? 'bg-teal-600 text-white shadow-2xs'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80'
-                }`}
+          {/* Filter Bar: Category & Status */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar text-xs font-semibold">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
+                Kategori:
+              </span>
+              {[
+                { id: 'all', label: 'Semua Paket' },
+                { id: 'popular', label: 'Unggulan & Populer' },
+                { id: 'general', label: 'Skrining Umum & Rutin' },
+                { id: 'specific', label: 'Spesifik (Jantung / Lansia / Pranikah)' },
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                    categoryFilter === cat.id
+                      ? 'bg-teal-600 text-white shadow-2xs'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Status Dropdown Filter */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">
+                Status:
+              </span>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-700 rounded-xl border border-slate-200 focus:border-teal-500 outline-none cursor-pointer font-medium"
               >
-                {cat.label}
-              </button>
-            ))}
+                <option value="all">Semua Status ({stats.total})</option>
+                <option value="active">Aktif / Tersedia ({stats.activeCount})</option>
+                <option value="inactive">Non-Aktif / Arsip ({stats.inactiveCount})</option>
+              </select>
+            </div>
           </div>
 
         </div>
@@ -299,7 +330,7 @@ export default function McuTab({
               <div className="py-16 text-center text-slate-500">
                 <Activity size={44} className="mx-auto text-slate-300 mb-3" />
                 <h4 className="font-heading text-base font-bold text-slate-700">Tidak ada paket MCU ditemukan</h4>
-                <p className="text-xs text-slate-400 mt-1">Coba ubah kata kunci pencarian atau reset filter kategori.</p>
+                <p className="text-xs text-slate-400 mt-1">Coba ubah kata kunci pencarian atau reset filter kategori / status.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -316,16 +347,19 @@ export default function McuTab({
                         
                         {/* Badges Bar */}
                         <div className="flex items-center justify-between gap-2">
-                          {m.badge ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
-                              <Sparkles size={12} className="text-amber-600" />
-                              <span>{m.badge}</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                              Paket Skrining Medis
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {m.badge ? (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
+                                <Sparkles size={12} className="text-amber-600" />
+                                <span>{m.badge}</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
+                                Paket Skrining Medis
+                              </span>
+                            )}
+                            <StatusBadge status={(m.status || 'active').toLowerCase()} />
+                          </div>
 
                           <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200 shrink-0">
                             {items.length} Item Skrining
@@ -452,13 +486,14 @@ export default function McuTab({
                   <th className="py-3 px-4">Tarif Biaya</th>
                   <th className="py-3 px-4">Durasi &amp; Sasaran</th>
                   <th className="py-3 px-4">Item Skrining</th>
+                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                 {filteredMcu.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-slate-500">
+                    <td colSpan="7" className="py-12 text-center text-slate-500">
                       <Activity size={36} className="mx-auto text-slate-300 mb-2" />
                       <p className="font-semibold text-slate-700">Tidak ada paket MCU ditemukan</p>
                       <p className="text-xs text-slate-400 mt-0.5">Coba ubah kata kunci pencarian Anda.</p>
@@ -504,6 +539,9 @@ export default function McuTab({
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
                             {items.length} Item Pemeriksaan
                           </span>
+                        </td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <StatusBadge status={(m.status || 'active').toLowerCase()} />
                         </td>
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
                           <div className="inline-flex items-center gap-1.5 justify-end">

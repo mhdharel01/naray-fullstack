@@ -33,7 +33,7 @@ export function HealthArticles({ onSelectArticle }) {
 
         {/* Articles Grid */}
         <div className="articles-grid">
-          {healthArticles.map((art) => (
+          {healthArticles.filter(art => (art.status || 'published').toLowerCase() === 'published').map((art) => (
             <article 
               key={art.id} 
               className="article-card glass-card card-hover"

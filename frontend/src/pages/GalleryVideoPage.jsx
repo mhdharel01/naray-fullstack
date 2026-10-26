@@ -76,31 +76,35 @@ export default function GalleryVideoPage() {
     };
   }, [lightboxVideo, lightboxImg]);
 
-  // Filter gallery photos
+  // Filter gallery photos (Active Only)
   const filteredGallery = useMemo(() => {
-    return galleryActivities.filter((gal) => {
-      const catStr = typeof gal.category === 'object' ? (gal.category?.name || '') : String(gal.category || '');
-      const matchCat =
-        selectedCategory === 'Semua' ||
-        (catStr && catStr.toLowerCase().includes(selectedCategory.toLowerCase())) ||
-        (selectedCategory === 'Fasilitas Medis' && catStr.toLowerCase().includes('fasilitas'));
-      const matchSearch =
-        !searchKeyword ||
-        gal.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-        gal.desc?.toLowerCase().includes(searchKeyword.toLowerCase());
-      return matchCat && matchSearch;
-    });
+    return galleryActivities
+      .filter(gal => (gal.status || 'active').toLowerCase() === 'active')
+      .filter((gal) => {
+        const catStr = typeof gal.category === 'object' ? (gal.category?.name || '') : String(gal.category || '');
+        const matchCat =
+          selectedCategory === 'Semua' ||
+          (catStr && catStr.toLowerCase().includes(selectedCategory.toLowerCase())) ||
+          (selectedCategory === 'Fasilitas Medis' && catStr.toLowerCase().includes('fasilitas'));
+        const matchSearch =
+          !searchKeyword ||
+          gal.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+          gal.desc?.toLowerCase().includes(searchKeyword.toLowerCase());
+        return matchCat && matchSearch;
+      });
   }, [galleryActivities, selectedCategory, searchKeyword]);
 
-  // Filter videos
+  // Filter videos (Active Only)
   const filteredVideos = useMemo(() => {
-    return videoList.filter((vid) => {
-      return (
-        !searchKeyword ||
-        vid.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-        vid.desc?.toLowerCase().includes(searchKeyword.toLowerCase())
-      );
-    });
+    return videoList
+      .filter(vid => (vid.status || 'active').toLowerCase() === 'active')
+      .filter((vid) => {
+        return (
+          !searchKeyword ||
+          vid.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+          vid.desc?.toLowerCase().includes(searchKeyword.toLowerCase())
+        );
+      });
   }, [videoList, searchKeyword]);
 
   return (

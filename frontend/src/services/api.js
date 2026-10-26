@@ -55,7 +55,10 @@ async function fetchApi(endpoint, options = {}) {
 
 export const api = {
   // 0. Single Batch Aggregated Init (Cepat 1x HTTP handshake)
-  getAppInit: () => fetchApi('/app-init'),
+  getAppInit: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return fetchApi(qs ? `/app-init?${qs}` : '/app-init');
+  },
 
   // 1. Health / Connection Check
   checkConnection: async () => {

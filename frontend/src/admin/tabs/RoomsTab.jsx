@@ -32,7 +32,8 @@ export default function RoomsTab({
   formatImageUrl
 }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
-  const [categoryFilter, setCategoryFilter] = useState('all'); // 'all' | 'vip' | 'class1_2' | 'class3' | 'icu' | 'active'
+  const [categoryFilter, setCategoryFilter] = useState('all'); // 'all' | 'vip' | 'class1_2' | 'class3' | 'icu'
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'inactive'
   const [previewRoom, setPreviewRoom] = useState(null); // Modal detail pratinjau
 
   // KPI Metrics
@@ -51,9 +52,10 @@ export default function RoomsTab({
     }).length;
 
     const bpjsCount = inpatientRooms.filter(r => r.bpjsCovered !== false).length;
-    const activeCount = inpatientRooms.filter(r => (r.status || 'active') === 'active').length;
+    const activeCount = inpatientRooms.filter(r => (r.status || 'active').toLowerCase() === 'active').length;
+    const inactiveCount = total - activeCount;
 
-    return { total, vipCount, intensiveCount, bpjsCount, activeCount };
+    return { total, vipCount, intensiveCount, bpjsCount, activeCount, inactiveCount };
   }, [inpatientRooms]);
 
   // Filtered rooms
@@ -71,6 +73,12 @@ export default function RoomsTab({
 
       if (!matchesSearch) return false;
 
+      // Status filter
+      const roomStatus = (r.status || 'active').toLowerCase();
+      if (statusFilter !== 'all' && roomStatus !== statusFilter) {
+        return false;
+      }
+
       // Category filter
       const cat = (r.category || '').toLowerCase();
       const name = (r.name || '').toLowerCase();
@@ -87,13 +95,10 @@ export default function RoomsTab({
       if (categoryFilter === 'icu') {
         return cat === 'intensive' || name.includes('icu') || name.includes('nicu') || name.includes('picu') || name.includes('isolasi');
       }
-      if (categoryFilter === 'active') {
-        return (r.status || 'active') === 'active';
-      }
 
       return true;
     });
-  }, [inpatientRooms, searchQuery, categoryFilter]);
+  }, [inpatientRooms, searchQuery, categoryFilter, statusFilter]);
 
   // Extract facilities array safely
   const getRoomFacilities = (r) => {
@@ -124,7 +129,7 @@ export default function RoomsTab({
               {stats.total}
             </div>
             <span className="text-xs text-slate-500 mt-1.5 inline-block">
-              {stats.activeCount} kamar aktif di web
+              {stats.activeCount} aktif di web {stats.inactiveCount > 0 ? `• ${stats.inactiveCount} nonaktif` : ''}
             </span>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 border border-teal-100">
@@ -270,32 +275,50 @@ export default function RoomsTab({
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar text-xs font-semibold">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
-              Filter:
-            </span>
-            {[
-              { id: 'all', label: 'Semua Tipe' },
-              { id: 'vip', label: 'VVIP & VIP Suite' },
-              { id: 'class1_2', label: 'Kelas 1 & 2' },
-              { id: 'class3', label: 'Kelas 3' },
-              { id: 'icu', label: 'Intensif / ICU' },
-              { id: 'active', label: 'Hanya Aktif' }
-            ].map(cat => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setCategoryFilter(cat.id)}
-                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
-                  categoryFilter === cat.id
-                    ? 'bg-teal-600 text-white shadow-2xs'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80'
-                }`}
+          {/* Category & Status Filter Row */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs font-semibold">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
+                Kategori:
+              </span>
+              {[
+                { id: 'all', label: 'Semua Tipe' },
+                { id: 'vip', label: 'VVIP & VIP Suite' },
+                { id: 'class1_2', label: 'Kelas 1 & 2' },
+                { id: 'class3', label: 'Kelas 3' },
+                { id: 'icu', label: 'Intensif / ICU' }
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                    categoryFilter === cat.id
+                      ? 'bg-teal-600 text-white shadow-2xs'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200/80'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Status Filter Dropdown */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">
+                Status:
+              </span>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 text-xs sm:text-sm font-semibold text-slate-700 rounded-xl border border-slate-200 outline-none cursor-pointer"
               >
-                {cat.label}
-              </button>
-            ))}
+                <option value="all">Semua Status ({stats.total})</option>
+                <option value="active">Aktif ({stats.activeCount})</option>
+                <option value="inactive">Nonaktif ({stats.inactiveCount})</option>
+              </select>
+            </div>
           </div>
 
         </div>

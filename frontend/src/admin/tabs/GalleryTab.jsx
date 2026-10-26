@@ -6,6 +6,8 @@ import {
   ChevronRight, CheckCircle2, ShieldCheck, Info
 } from 'lucide-react';
 
+import StatusBadge from '../components/StatusBadge';
+
 // Ekstrak ID video YouTube
 function getYouTubeVideoId(url) {
   if (!url) return null;
@@ -48,6 +50,7 @@ export default function GalleryTab({
 }) {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'table'
   const [activeCategory, setActiveCategory] = useState('all'); // 'all' | categoryName
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'inactive'
   const [previewMedia, setPreviewMedia] = useState(null); // Lightbox / Video Modal
 
   // Ekstrak semua kategori unik
@@ -65,20 +68,27 @@ export default function GalleryTab({
   // Filter gabungan
   const displayMediaList = useMemo(() => {
     return filteredMediaList.filter(m => {
+      // Filter status
+      const mStatus = (m.status || 'active').toLowerCase();
+      if (statusFilter === 'active' && mStatus !== 'active') return false;
+      if (statusFilter === 'inactive' && mStatus !== 'inactive') return false;
+
       if (activeCategory === 'all') return true;
       const cat = typeof m.category === 'object'
         ? (m.category?.name || m.categoryName)
         : (m.category || m.categoryName);
       return (cat || '').toLowerCase() === activeCategory.toLowerCase();
     });
-  }, [filteredMediaList, activeCategory]);
+  }, [filteredMediaList, activeCategory, statusFilter]);
 
   // KPI Metrics
   const stats = useMemo(() => {
     const total = allMediaList.length;
     const photoCount = galleryActivities.length;
     const videoCount = videoList.length;
-    return { total, photoCount, videoCount, categoryCount: categories.length };
+    const activeCount = allMediaList.filter(m => (m.status || 'active') === 'active').length;
+    const inactiveCount = allMediaList.filter(m => (m.status || 'active') === 'inactive').length;
+    return { total, photoCount, videoCount, activeCount, inactiveCount, categoryCount: categories.length };
   }, [allMediaList, galleryActivities, videoList, categories]);
 
   return (
@@ -283,8 +293,9 @@ export default function GalleryTab({
             </div>
           </div>
 
-          {/* Category Filter Pills (Jika ada kategori) */}
-          {categories.length > 0 && (
+          {/* Filter Bar: Category & Status */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
+            {/* Category Filter Pills (Jika ada kategori) */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar text-xs font-semibold">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 hidden sm:inline">
                 Kategori:
@@ -315,7 +326,23 @@ export default function GalleryTab({
                 </button>
               ))}
             </div>
-          )}
+
+            {/* Status Dropdown Filter */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">
+                Status:
+              </span>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="py-1.5 px-3 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-700 rounded-xl border border-slate-200 focus:border-teal-500 outline-none cursor-pointer font-medium"
+              >
+                <option value="all">Semua Status ({stats.total})</option>
+                <option value="active">Aktif / Tampil ({stats.activeCount})</option>
+                <option value="inactive">Non-Aktif / Arsip ({stats.inactiveCount})</option>
+              </select>
+            </div>
+          </div>
 
         </div>
 
@@ -370,14 +397,17 @@ export default function GalleryTab({
 
                         {/* Top Badges */}
                         <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-                          <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md shadow-xs flex items-center gap-1.5 ${
-                            isVideo
-                              ? 'bg-rose-600/90 text-white'
-                              : 'bg-sky-600/90 text-white'
-                          }`}>
-                            {isVideo ? <Film size={11} /> : <ImageIcon size={11} />}
-                            <span>{isVideo ? 'Video YouTube' : 'Foto'}</span>
-                          </span>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md shadow-xs flex items-center gap-1.5 ${
+                              isVideo
+                                ? 'bg-rose-600/90 text-white'
+                                : 'bg-sky-600/90 text-white'
+                            }`}>
+                              {isVideo ? <Film size={11} /> : <ImageIcon size={11} />}
+                              <span>{isVideo ? 'Video YouTube' : 'Foto'}</span>
+                            </span>
+                            <StatusBadge status={(item.status || 'active').toLowerCase()} />
+                          </div>
 
                           <span className="text-[10px] font-semibold bg-slate-950/70 text-slate-200 px-2 py-0.5 rounded-md backdrop-blur-xs">
                             {catLabel}
@@ -461,13 +491,14 @@ export default function GalleryTab({
                   <th className="py-3 px-4">Tipe Media</th>
                   <th className="py-3 px-4">Kategori</th>
                   <th className="py-3 px-4">Tanggal Publikasi</th>
+                  <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4 text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                 {displayMediaList.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="py-12 text-center text-slate-500">
+                    <td colSpan="7" className="py-12 text-center text-slate-500">
                       <ImageIcon size={36} className="mx-auto text-slate-300 mb-2" />
                       <p className="font-semibold text-slate-700">Tidak ada media dokumentasi ditemukan</p>
                       <p className="text-xs text-slate-400 mt-0.5">Coba ubah kata kunci pencarian atau filter tipe.</p>
@@ -533,6 +564,9 @@ export default function GalleryTab({
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap text-slate-600 text-xs">
                           {item.date || 'Terbaru'}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <StatusBadge status={(item.status || 'active').toLowerCase()} />
                         </td>
                         <td className="py-3 px-4 text-right whitespace-nowrap">
                           <div className="inline-flex items-center gap-1.5 justify-end">

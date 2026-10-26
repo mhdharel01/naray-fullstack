@@ -100,9 +100,14 @@ export default function McuPackagePage() {
     { id: 'pranikah', label: 'Pra-Nikah' }
   ];
 
+  // Active packages only for public view
+  const activePackages = useMemo(() => {
+    return (mcuPackages || []).filter(pkg => (pkg.status || 'active').toLowerCase() === 'active');
+  }, [mcuPackages]);
+
   // Filtering packages
   const filteredPackages = useMemo(() => {
-    return (mcuPackages || []).filter((pkg) => {
+    return activePackages.filter((pkg) => {
       const idLower = (pkg.id || '').toLowerCase();
       const nameLower = (pkg.name || '').toLowerCase();
 
@@ -127,7 +132,7 @@ export default function McuPackagePage() {
 
       return matchesCategory && matchesSearch;
     });
-  }, [mcuPackages, activeCategory, searchQuery]);
+  }, [activePackages, activeCategory, searchQuery]);
 
   return (
     <PageLayout>
@@ -146,7 +151,7 @@ export default function McuPackagePage() {
             </nav>
             <span className="text-xs text-slate-500 font-mono hidden sm:inline-flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Total {mcuPackages.length} Paket Skrining Terakreditasi KARS
+              Total {activePackages.length} Paket Skrining Terakreditasi KARS
             </span>
           </div>
         </div>
@@ -362,7 +367,7 @@ export default function McuPackagePage() {
             </div>
 
             <div className="text-xs font-semibold text-slate-500 shrink-0 font-mono">
-              Menampilkan <span className="text-teal-700 font-bold">{filteredPackages.length}</span> dari {mcuPackages.length} paket
+              Menampilkan <span className="text-teal-700 font-bold">{filteredPackages.length}</span> dari {activePackages.length} paket
             </div>
           </div>
 

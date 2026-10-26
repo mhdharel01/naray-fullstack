@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Sparkles,
   Building2,
@@ -31,6 +31,23 @@ export default function FacilitiesTab({
   promptDelete,
   formatImageUrl
 }) {
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const stats = useMemo(() => {
+    const totalCenters = centersOfExcellence.length;
+    const activeCenters = centersOfExcellence.filter(c => (c.status || 'active').toLowerCase() === 'active').length;
+    const inactiveCenters = totalCenters - activeCenters;
+
+    const totalFacilities = facilities.length;
+    const activeFacilities = facilities.filter(f => (f.status || 'active').toLowerCase() === 'active').length;
+    const inactiveFacilities = totalFacilities - activeFacilities;
+
+    const totalAll = totalCenters + totalFacilities;
+    const activeAll = activeCenters + activeFacilities;
+    const inactiveAll = totalAll - activeAll;
+
+    return { totalCenters, activeCenters, inactiveCenters, totalFacilities, activeFacilities, inactiveFacilities, totalAll, activeAll, inactiveAll };
+  }, [centersOfExcellence, facilities]);
   return (
     <div className="space-y-6 animate-in fade-in duration-200 font-sans">
       {/* ── 1. Hero Header Banner ── */}
@@ -90,9 +107,9 @@ export default function FacilitiesTab({
           <div>
             <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Layanan</span>
             <span className="text-xl sm:text-2xl font-heading font-black text-slate-900 leading-none mt-0.5 block">
-              {(centersOfExcellence?.length || 0) + (facilities?.length || 0)}
+              {stats.totalAll}
             </span>
-            <span className="text-[11px] font-semibold text-teal-600 mt-0.5 block">Katalog Terintegrasi</span>
+            <span className="text-[11px] font-semibold text-teal-600 mt-0.5 block">{stats.activeAll} Aktif di Web</span>
           </div>
         </div>
 
@@ -102,8 +119,8 @@ export default function FacilitiesTab({
           </div>
           <div>
             <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Pusat Unggulan (CoE)</span>
-            <span className="text-xl sm:text-2xl font-heading font-black text-slate-900 leading-none mt-0.5 block">{centersOfExcellence?.length || 0}</span>
-            <span className="text-[11px] font-semibold text-cyan-600 mt-0.5 block">Kluster Multidisiplin</span>
+            <span className="text-xl sm:text-2xl font-heading font-black text-slate-900 leading-none mt-0.5 block">{stats.totalCenters}</span>
+            <span className="text-[11px] font-semibold text-cyan-600 mt-0.5 block">{stats.activeCenters} Aktif {stats.inactiveCenters > 0 ? `• ${stats.inactiveCenters} Nonaktif` : ''}</span>
           </div>
         </div>
 
@@ -113,8 +130,8 @@ export default function FacilitiesTab({
           </div>
           <div>
             <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">Fasilitas Diagnostik</span>
-            <span className="text-xl sm:text-2xl font-heading font-black text-slate-900 leading-none mt-0.5 block">{facilities?.length || 0}</span>
-            <span className="text-[11px] font-semibold text-emerald-600 mt-0.5 block">Siaga &amp; Terkalibrasi</span>
+            <span className="text-xl sm:text-2xl font-heading font-black text-slate-900 leading-none mt-0.5 block">{stats.totalFacilities}</span>
+            <span className="text-[11px] font-semibold text-emerald-600 mt-0.5 block">{stats.activeFacilities} Siaga {stats.inactiveFacilities > 0 ? `• ${stats.inactiveFacilities} Nonaktif` : ''}</span>
           </div>
         </div>
 
@@ -186,6 +203,17 @@ export default function FacilitiesTab({
                 </button>
               )}
             </div>
+
+            {/* Status Filter Dropdown */}
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="px-3 py-1.5 bg-slate-50 text-xs sm:text-sm font-semibold text-slate-700 rounded-xl border border-slate-200 outline-none cursor-pointer"
+            >
+              <option value="all">Semua Status ({serviceSubTab === 'centers' ? stats.totalCenters : stats.totalFacilities})</option>
+              <option value="active">Aktif ({serviceSubTab === 'centers' ? stats.activeCenters : stats.activeFacilities})</option>
+              <option value="inactive">Nonaktif ({serviceSubTab === 'centers' ? stats.inactiveCenters : stats.inactiveFacilities})</option>
+            </select>
 
             {serviceSubTab === 'facilities' && (
               <select
@@ -269,11 +297,15 @@ export default function FacilitiesTab({
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                     {centersOfExcellence
-                      .filter(c =>
-                        (c.name || c.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (c.tagline || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        (c.description || '').toLowerCase().includes(searchQuery.toLowerCase())
-                      )
+                      .filter(c => {
+                        const cStatus = (c.status || 'active').toLowerCase();
+                        if (statusFilter !== 'all' && cStatus !== statusFilter) return false;
+                        return (
+                          (c.name || c.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (c.tagline || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (c.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                      })
                       .map(c => {
                         const bannerSrc = formatImageUrl ? formatImageUrl(c.image || c.image_url, '/images/discovery/diagnostic-center.jpg') : (c.image || c.image_url || '/images/discovery/diagnostic-center.jpg');
                         const techList = Array.isArray(c.technologies) ? c.technologies : ['Teknologi Medis Terkini', 'Sistem Digital Terpadu'];
@@ -348,11 +380,15 @@ export default function FacilitiesTab({
               /* Grid Mode */
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {centersOfExcellence
-                  .filter(c =>
-                    (c.name || c.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (c.tagline || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    (c.description || '').toLowerCase().includes(searchQuery.toLowerCase())
-                  )
+                  .filter(c => {
+                    const cStatus = (c.status || 'active').toLowerCase();
+                    if (statusFilter !== 'all' && cStatus !== statusFilter) return false;
+                    return (
+                      (c.name || c.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (c.tagline || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      (c.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+                  })
                   .map(c => {
                     const bannerSrc = formatImageUrl ? formatImageUrl(c.image || c.image_url, '/images/discovery/diagnostic-center.jpg') : (c.image || c.image_url || '/images/discovery/diagnostic-center.jpg');
                     const techList = Array.isArray(c.technologies) ? c.technologies : ['Teknologi Medis Terkini', 'Sistem Digital Terpadu'];
@@ -439,6 +475,9 @@ export default function FacilitiesTab({
                   <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                     {facilities
                       .filter(f => {
+                        const fStatus = (f.status || 'active').toLowerCase();
+                        if (statusFilter !== 'all' && fStatus !== statusFilter) return false;
+
                         const q = searchQuery.toLowerCase();
                         const matchesSearch = !searchQuery ||
                           f.name?.toLowerCase().includes(q) ||
@@ -532,6 +571,9 @@ export default function FacilitiesTab({
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {facilities
                   .filter(f => {
+                    const fStatus = (f.status || 'active').toLowerCase();
+                    if (statusFilter !== 'all' && fStatus !== statusFilter) return false;
+
                     const q = searchQuery.toLowerCase();
                     const matchesSearch = !searchQuery ||
                       f.name?.toLowerCase().includes(q) ||

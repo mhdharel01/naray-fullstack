@@ -33,7 +33,7 @@ export function McuPackages({ onSelectPackage }) {
 
         {/* Packages Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {mcuPackages.map((pkg) => (
+          {mcuPackages.filter(pkg => (pkg.status || 'active').toLowerCase() === 'active').map((pkg) => (
             <article 
               key={pkg.id} 
               className="group bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 hover:border-teal-400 hover:shadow-xl hover:shadow-teal-900/5 transition-all duration-300 flex flex-col overflow-hidden cursor-pointer transform hover:-translate-y-1.5"

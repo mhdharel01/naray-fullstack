@@ -377,24 +377,30 @@ function AdminDashboard({ onLogout }) {
   const allMediaList = useMemo(() => {
     const photos = (galleryActivities || []).map(g => {
       const cat = typeof g.category === 'object' ? (g.category?.name || 'Kegiatan Naray') : (g.category || 'Kegiatan Naray');
+      const normalizedStatus = (g.status || 'active').toLowerCase();
       return {
         ...g,
         type: 'photo',
         displayType: 'Foto Kegiatan',
         url: g.image || g.url,
         category: cat,
-        categoryName: cat
+        categoryName: cat,
+        status: normalizedStatus,
+        is_active: normalizedStatus === 'active'
       };
     });
     const videos = (videoList || []).map(v => {
       const cat = typeof v.category === 'object' ? (v.category?.name || 'Edukasi Pasien') : (v.category || 'Edukasi Pasien');
+      const normalizedStatus = (v.status || 'active').toLowerCase();
       return {
         ...v,
         type: 'video',
         displayType: 'Video YouTube',
         url: v.youtubeEmbed || v.url,
         category: cat,
-        categoryName: cat
+        categoryName: cat,
+        status: normalizedStatus,
+        is_active: normalizedStatus === 'active'
       };
     });
     return [...photos, ...videos];

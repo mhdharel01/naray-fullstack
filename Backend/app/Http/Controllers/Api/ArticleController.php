@@ -9,37 +9,37 @@ use Illuminate\Http\Request;
 class ArticleController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Article::with('category')
-        ->where('status', 'PUBLISHED');
+    {
+        $query = Article::with('category')
+            ->whereIn('status', ['published', 'PUBLISHED']);
 
-    if ($request->filled('search')) {
-        $search = $request->search;
+        if ($request->filled('search')) {
+            $search = $request->search;
 
-        $query->where(function ($q) use ($search) {
-            $q->where('title', 'like', "%{$search}%")
-                ->orWhere('content', 'like', "%{$search}%");
-        });
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $articles = $query->orderByDesc('published_at')->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artikel berhasil diambil',
+            'data' => $articles
+        ]);
     }
 
-    if ($request->filled('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
-
-    $articles = $query->orderByDesc('published_at')->paginate(10);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Artikel berhasil diambil',
-        'data' => $articles
-    ]);
-}
-
-public function show($id)
-{
-    $article = Article::with('category')
-        ->where('status', 'PUBLISHED')
-        ->find($id);
+    public function show($id)
+    {
+        $article = Article::with('category')
+            ->whereIn('status', ['published', 'PUBLISHED'])
+            ->find($id);
 
     if (!$article) {
         return response()->json([
