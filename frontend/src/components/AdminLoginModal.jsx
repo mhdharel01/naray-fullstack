@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, LogIn, Eye, EyeOff, AlertCircle, X, Lock, Mail } from 'lucide-react';
+import { ShieldCheck, LogIn, Eye, EyeOff, AlertCircle, X, Lock, Mail, User } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 
 export function AdminLoginModal({ isOpen, onClose, onShowToast }) {
@@ -15,7 +15,7 @@ export function AdminLoginModal({ isOpen, onClose, onShowToast }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password) {
-      setError('Mohon masukkan email/ID dan kata sandi.');
+      setError('Mohon masukkan username/email dan kata sandi.');
       return;
     }
     setError('');
@@ -28,7 +28,7 @@ export function AdminLoginModal({ isOpen, onClose, onShowToast }) {
         if (onShowToast) onShowToast('Login Admin Berhasil! Terhubung dengan Backend API.');
         onClose();
       } else {
-        setError(res.message || 'Email/ID petugas atau kata sandi tidak sesuai.');
+        setError(res.message || 'Username/email atau kata sandi tidak sesuai.');
       }
     } catch (err) {
       setLoading(false);
@@ -100,18 +100,18 @@ export function AdminLoginModal({ isOpen, onClose, onShowToast }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Email / ID Petugas
+              Username / Nama Pengguna / Email
             </label>
             <div className="relative rounded-2xl shadow-2xs">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <Mail size={16} />
+                <User size={16} />
               </div>
               <input
                 type="text"
                 className="w-full pl-9 pr-4 py-2.5 bg-slate-50 focus:bg-white text-slate-900 text-sm rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all outline-none placeholder:text-slate-400 disabled:opacity-60"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder="nama@narayhospital.com atau ID Admin"
+                placeholder="Masukkan username atau email admin"
                 required
                 autoComplete="username"
                 disabled={loading}

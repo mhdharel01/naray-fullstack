@@ -11,19 +11,45 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        $admin = Admin::where('email', $request->email)->first();
+        $identifier = trim(
+            $request->input('username') 
+            ?? $request->input('login') 
+            ?? $request->input('email') 
+            ?? ''
+        );
+
+        if (empty($identifier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Username atau email wajib diisi.',
+                'errors' => [
+                    'username' => ['Username atau email wajib diisi.']
+                ]
+            ], 422);
+        }
+
+        // Cari akun admin berdasarkan username (kolom name) ATAU email (case-insensitive)
+        $admin = Admin::where('email', $identifier)
+            ->orWhere('name', $identifier)
+            ->orWhereRaw('LOWER(name) = ?', [strtolower($identifier)])
+            ->orWhereRaw('LOWER(email) = ?', [strtolower($identifier)])
+            ->first();
+
+        // Fallback shortcut jika pengguna mengetik 'admin' atau 'superadmin'
+        if (!$admin && in_array(strtolower($identifier), ['admin', 'superadmin'])) {
+            $admin = Admin::where('role', Admin::ROLE_SUPER_ADMIN)->first();
+        }
 
         if (!$admin || !Hash::check($request->password, $admin->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials',
+                'message' => 'Username/email atau kata sandi tidak sesuai.',
                 'errors' => [
-                    'email' => [
-                        'These credentials do not match our records.'
+                    'username' => [
+                        'Kredensial yang dimasukkan tidak cocok dengan data admin kami.'
                     ]
                 ]
             ], 401);

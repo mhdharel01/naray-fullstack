@@ -1090,16 +1090,18 @@ export function HospitalDataProvider({ children }) {
   // Auth Methods with Backend Sanctum Integration
   const loginAdmin = async (identifier, password) => {
     if (!identifier || !password) {
-      return { success: false, message: 'Mohon isi email dan kata sandi Anda.' };
+      return { success: false, message: 'Mohon isi username/email dan kata sandi Anda.' };
     }
 
-    // Normalise identifier: allow typing 'admin' as shortcut for admin@narayhospital.com
-    const email = identifier.includes('@')
-      ? identifier.trim()
-      : (identifier.trim().toLowerCase() === 'admin' ? 'admin@narayhospital.com' : identifier.trim());
+    const cleanInput = identifier.trim();
 
     try {
-      const res = await api.adminLogin({ email, password });
+      const res = await api.adminLogin({ 
+        username: cleanInput, 
+        login: cleanInput, 
+        email: cleanInput, 
+        password 
+      });
       if (res.success && res.data?.token) {
         const token = res.data.token;
         const user = res.data.admin;
@@ -1114,10 +1116,10 @@ export function HospitalDataProvider({ children }) {
         fetchAdminInit();
         return { success: true, user };
       }
-      return { success: false, message: res?.message || 'Kredensial tidak valid. Silakan periksa kembali email dan kata sandi Anda.' };
+      return { success: false, message: res?.message || 'Kredensial tidak valid. Silakan periksa kembali username/email dan kata sandi Anda.' };
     } catch (err) {
       console.warn('[HospitalDataContext] Autentikasi admin gagal:', err.message);
-      return { success: false, message: err.message || 'Kredensial tidak valid. Pastikan email dan kata sandi Anda sudah benar.' };
+      return { success: false, message: err.message || 'Kredensial tidak valid. Pastikan username/email dan kata sandi Anda sudah benar.' };
     }
   };
 
