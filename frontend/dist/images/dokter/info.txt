@@ -1,0 +1,3 @@
+# Folder Aset Foto Dokter
+Taruh foto profil dokter spesialis dan subspesialis di sini.
+Ukuran rekomendasi: 600x750px (portrait) atau 600x600px (format .webp / .png).

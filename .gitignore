@@ -22,8 +22,8 @@ Backend/public/storage
 Backend/storage/app/public/*
 !Backend/storage/app/public/.gitignore
 
-# Frontend build (optional, if you want build tracked remove dist)
-frontend/dist/
+# Frontend build tracked for zero-build server deployment
+!frontend/dist/
 
 # Archives & Temporary files
 *.zip
