@@ -17,7 +17,8 @@ import {
   X,
   RefreshCw,
   Info,
-  ShieldCheck
+  ShieldCheck,
+  MessageCircle
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 import { PageLayout } from '../layouts/PageLayout';
