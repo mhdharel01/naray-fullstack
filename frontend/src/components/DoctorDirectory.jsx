@@ -17,19 +17,24 @@ import {
 import { useHospitalData } from '../context/HospitalDataContext';
 
 const matchDayDoctor = (doc, dayTerm) => {
+  if (doc.status === 'inactive') return false;
+  const activeSchedules = (doc.schedules || []).filter(s => (s.status || 'active') === 'active');
+  if (activeSchedules.length === 0) return false;
+
   if (!dayTerm) return true;
   const day = dayTerm.toLowerCase().trim();
-
-  if (doc.availableDays?.some(d => d.toLowerCase().includes(day) || day.includes(d.toLowerCase()))) {
-    return true;
-  }
-
   const dayOrder = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
   const dayIdx = dayOrder.indexOf(day);
+  const targetDayNum = dayIdx !== -1 ? dayIdx + 1 : null;
 
-  for (const s of (doc.schedules || [])) {
+  return activeSchedules.some(s => {
+    const sDow = Number(s.day_of_week);
+    if (targetDayNum !== null && (sDow === targetDayNum || (targetDayNum === 7 && sDow === 0))) return true;
     const sDay = (s.day || '').toLowerCase();
-    if (sDay.includes(day) || day.includes(sDay)) return true;
+    if (sDay.includes(day)) return true;
+    if (sDay.includes('senin - sabtu') && dayIdx <= 5) return true;
+    if (sDay.includes('senin - jumat') && dayIdx <= 4) return true;
+    if (sDay.includes('senin - minggu') || sDay.includes('setiap hari')) return true;
 
     if (sDay.includes('-')) {
       const parts = sDay.split('-').map(p => p.trim());
@@ -41,8 +46,8 @@ const matchDayDoctor = (doc, dayTerm) => {
         }
       }
     }
-  }
-  return false;
+    return false;
+  });
 };
 
 export function DoctorDirectory({ 
@@ -66,6 +71,10 @@ export function DoctorDirectory({
 
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doc) => {
+      if (doc.status === 'inactive') return false;
+      const hasActive = (doc.schedules || []).some(s => (s.status || 'active') === 'active');
+      if (!hasActive) return false;
+
       const matchKeyword = !keyword || 
         (doc.name && doc.name.toLowerCase().includes(keyword.toLowerCase())) ||
         (doc.specialty && doc.specialty.toLowerCase().includes(keyword.toLowerCase())) ||

@@ -49,20 +49,33 @@ const matchSpecialtyDoctor = (doc, specialtyTerm) => {
 };
 
 const matchDayDoctor = (doc, dayTerm) => {
+  // Hanya dokter berstatus aktif yang ditampilkan pada jadwal publik
+  if (doc.status === 'inactive') return false;
+
+  const activeSchedules = (doc.schedules || []).filter(s => (s.status || 'active') === 'active');
+  // Dokter tanpa jadwal praktik aktif tidak dimunculkan di halaman jadwal
+  if (activeSchedules.length === 0) return false;
+
+  // Jika "Semua", tampilkan dokter yang memiliki jadwal aktif
   if (!dayTerm || dayTerm === 'Semua') return true;
+
   const day = dayTerm.toLowerCase().trim();
-  
-  if (doc.availableDays?.some(d => d.toLowerCase().includes(day) || day.includes(d.toLowerCase()))) {
-    return true;
-  }
-  
   const dayOrder = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
   const dayIdx = dayOrder.indexOf(day);
+  const targetDayNum = dayIdx !== -1 ? dayIdx + 1 : null; // 1 = Senin, ..., 7 = Minggu
 
-  for (const s of (doc.schedules || [])) {
-    const sDay = (s.day || '').toLowerCase();
+  return activeSchedules.some(s => {
+    // 1. Cocokkan berdasarkan angka day_of_week
+    const sDow = Number(s.day_of_week);
+    if (targetDayNum !== null && (sDow === targetDayNum || (targetDayNum === 7 && sDow === 0))) {
+      return true;
+    }
+
+    // 2. Cocokkan nama hari teks
+    const sDay = (s.day || '').toLowerCase().trim();
     if (sDay.includes(day)) return true;
-    
+
+    // 3. Cocokkan pola rentang (misal Senin - Sabtu)
     if (sDay.includes('senin - sabtu') && dayIdx <= 5) return true;
     if (sDay.includes('senin - jumat') && dayIdx <= 4) return true;
     if (sDay.includes('senin - minggu') || sDay.includes('setiap hari')) return true;
@@ -77,43 +90,114 @@ const matchDayDoctor = (doc, dayTerm) => {
         }
       }
     }
-  }
-  return false;
+    return false;
+  });
 };
 
-// Helper to determine doctor's schedule time for a specific day
+// Helper untuk menampilkan jam praktik dan hari pelayanan dokter secara tepat
 const getDoctorDaySchedule = (doc, targetDay) => {
-  if (!doc.schedules || doc.schedules.length === 0) {
-    return { time: '09:00 - 14:00 WIB', room: doc.specialty ? `Poliklinik ${doc.specialty}` : 'Poliklinik Terpadu' };
+  const activeSchedules = (doc.schedules || []).filter(s => (s.status || 'active') === 'active');
+
+  if (activeSchedules.length === 0) {
+    return {
+      time: 'Belum ada jadwal praktik',
+      room: doc.specialty ? `Poliklinik ${doc.specialty}` : 'Poliklinik Rawat Jalan',
+      practiceDaysText: '',
+      hasSchedule: false
+    };
   }
 
-  if (targetDay && targetDay !== 'Semua') {
-    const tDay = targetDay.toLowerCase();
-    const dayOrder = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
-    const dayIdx = dayOrder.indexOf(tDay);
+  const dayOrder = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+  const dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-    const specific = doc.schedules.find(s => {
+  // Ringkasan hari praktik aktif (misal "Senin, Rabu, Jumat" atau "Senin s/d Sabtu")
+  const getPracticeDaysSummary = () => {
+    const daysSet = new Set();
+    activeSchedules.forEach(s => {
+      const dNum = Number(s.day_of_week);
+      if (dNum >= 1 && dNum <= 7) {
+        daysSet.add(dayNames[dNum - 1]);
+      } else if (dNum === 0) {
+        daysSet.add('Minggu');
+      } else if (s.day) {
+        const lower = s.day.toLowerCase();
+        if (lower.includes('senin - sabtu')) {
+          ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'].forEach(d => daysSet.add(d));
+        } else if (lower.includes('senin - jumat')) {
+          ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].forEach(d => daysSet.add(d));
+        } else if (lower.includes('senin - minggu') || lower.includes('setiap hari')) {
+          dayNames.forEach(d => daysSet.add(d));
+        } else {
+          dayNames.forEach(d => {
+            if (lower.includes(d.toLowerCase())) daysSet.add(d);
+          });
+        }
+      }
+    });
+
+    const uniqueDays = Array.from(daysSet).sort(
+      (a, b) => dayOrder.indexOf(a.toLowerCase()) - dayOrder.indexOf(b.toLowerCase())
+    );
+
+    if (uniqueDays.length === 7) return 'Setiap Hari (Senin - Minggu)';
+    if (uniqueDays.length === 6 && !uniqueDays.includes('Minggu')) return 'Senin s/d Sabtu';
+    if (uniqueDays.length === 5 && !uniqueDays.includes('Sabtu') && !uniqueDays.includes('Minggu')) return 'Senin s/d Jumat';
+    if (uniqueDays.length === 1) return `Hari ${uniqueDays[0]}`;
+    if (uniqueDays.length > 0) return uniqueDays.join(', ');
+    return 'Sesuai Jadwal';
+  };
+
+  const practiceDaysText = getPracticeDaysSummary();
+
+  // Jika memilih hari spesifik (misal Senin)
+  if (targetDay && targetDay !== 'Semua') {
+    const tDay = targetDay.toLowerCase().trim();
+    const dayIdx = dayOrder.indexOf(tDay);
+    const targetDayNum = dayIdx !== -1 ? dayIdx + 1 : null;
+
+    const matching = activeSchedules.filter(s => {
+      const sDow = Number(s.day_of_week);
+      if (targetDayNum !== null && (sDow === targetDayNum || (targetDayNum === 7 && sDow === 0))) return true;
       const sDay = (s.day || '').toLowerCase();
       if (sDay.includes(tDay)) return true;
       if (sDay.includes('senin - sabtu') && dayIdx <= 5) return true;
       if (sDay.includes('senin - jumat') && dayIdx <= 4) return true;
-      if (sDay.includes('senin - minggu')) return true;
+      if (sDay.includes('senin - minggu') || sDay.includes('setiap hari')) return true;
       return false;
     });
 
-    if (specific) {
+    if (matching.length > 0) {
+      const sessionTimes = matching
+        .map(m => (m.time || '').replace(/\s*WIB/i, '').trim())
+        .filter(Boolean);
+      const uniqueSessionTimes = Array.from(new Set(sessionTimes));
+      const timeFormatted = uniqueSessionTimes.length > 0
+        ? `${uniqueSessionTimes.join(' & ')} WIB`
+        : (matching[0].time || 'Sesuai Jadwal');
+
       return {
-        time: specific.time || '09:00 - 14:00 WIB',
-        room: specific.room || `Poliklinik ${doc.specialty}`
+        time: timeFormatted,
+        room: matching[0].room || (doc.specialty ? `Poliklinik ${doc.specialty}` : 'Poliklinik Rawat Jalan'),
+        practiceDaysText,
+        dayLabel: targetDay,
+        hasSchedule: true
       };
     }
   }
 
-  // Fallback to first active schedule
-  const activeFirst = doc.schedules.find(s => (s.status || 'active') === 'active') || doc.schedules[0];
+  // Jika memilih "Semua Hari"
+  const firstActive = activeSchedules[0];
+  const allTimes = Array.from(new Set(activeSchedules.map(s => s.time))).filter(Boolean);
+  const timeFormatted = allTimes.length === 1
+    ? allTimes[0]
+    : `${allTimes[0]}${allTimes.length > 1 ? ` (${allTimes.length} sesi waktu)` : ''}`;
+
   return {
-    time: activeFirst?.time || '09:00 - 14:00 WIB',
-    room: activeFirst?.room || `Poliklinik ${doc.specialty}`
+    time: timeFormatted || firstActive.time || 'Sesuai Jadwal Poliklinik',
+    room: firstActive.room || (doc.specialty ? `Poliklinik ${doc.specialty}` : 'Poliklinik Rawat Jalan'),
+    practiceDaysText,
+    dayLabel: practiceDaysText,
+    hasSchedule: true
   };
 };
 
@@ -181,6 +265,13 @@ export default function DoctorSchedulePage() {
     }
   };
 
+  // Total dokter berstatus aktif yang memiliki jadwal praktik
+  const totalActiveDoctorsCount = useMemo(() => {
+    return doctors.filter(
+      doc => (doc.status || 'active') === 'active' && (doc.schedules || []).some(s => (s.status || 'active') === 'active')
+    ).length;
+  }, [doctors]);
+
   // Helper to count doctors available on each day
   const dayDoctorCounts = useMemo(() => {
     const counts = {};
@@ -193,6 +284,11 @@ export default function DoctorSchedulePage() {
   // Filtered doctors list
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doc) => {
+      // Hanya tampilkan dokter aktif yang memiliki jadwal praktik aktif
+      if (doc.status === 'inactive') return false;
+      const hasActive = (doc.schedules || []).some(s => (s.status || 'active') === 'active');
+      if (!hasActive) return false;
+
       const matchKeyword =
         !keyword ||
         doc.name?.toLowerCase().includes(keyword.toLowerCase()) ||
@@ -256,7 +352,7 @@ export default function DoctorSchedulePage() {
               <span className="text-slate-900 font-semibold">Jadwal Dokter &amp; Poliklinik</span>
             </nav>
             <span className="text-xs text-slate-400 font-mono hidden sm:inline-block">
-              19+ Dokter Spesialis Bersertifikasi
+              {totalActiveDoctorsCount} Dokter Spesialis Aktif
             </span>
           </div>
         </div>
@@ -351,7 +447,7 @@ export default function DoctorSchedulePage() {
               <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
                 selectedDay === 'Semua' ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-500'
               }`}>
-                {doctors.length}
+                {totalActiveDoctorsCount}
               </span>
             </button>
 
@@ -493,13 +589,23 @@ export default function DoctorSchedulePage() {
                           </div>
                         </div>
 
-                        {/* Middle Row: Clock & Service Hours */}
-                        <div className="py-3 px-3.5 rounded-xl bg-slate-50 border border-slate-100/90 flex items-center justify-between text-xs mb-4">
-                          <div className="flex items-center gap-2 font-bold text-slate-800">
-                            <Clock size={15} className="text-teal-600 shrink-0" />
-                            <span>{schedule.time}</span>
+                        {/* Middle Row: Clock & Service Hours & Practice Days */}
+                        <div className="py-3 px-3.5 rounded-xl bg-slate-50 border border-slate-100/90 flex flex-col gap-1.5 text-xs mb-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 font-bold text-slate-800">
+                              <Clock size={15} className="text-teal-600 shrink-0" />
+                              <span>{schedule.time}</span>
+                            </div>
+                            <span className="text-slate-400 font-medium">Jadwal pelayanan</span>
                           </div>
-                          <span className="text-slate-400 font-medium">Jadwal pelayanan</span>
+
+                          {/* Tampilkan Hari Praktik Khusus jika sedang melihat 'Semua Hari' */}
+                          {selectedDay === 'Semua' && schedule.practiceDaysText && (
+                            <div className="flex items-center gap-1.5 text-[11px] font-semibold text-teal-800 pt-1.5 border-t border-slate-200/60">
+                              <Calendar size={13} className="text-teal-600 shrink-0" />
+                              <span className="truncate">Hari Praktik: <strong>{schedule.practiceDaysText}</strong></span>
+                            </div>
+                          )}
                         </div>
                       </div>
 

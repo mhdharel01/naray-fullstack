@@ -264,7 +264,7 @@ export function HospitalDataProvider({ children }) {
   const mapDoctor = (d, currentSpecs = specializationsList, currentLeaves = doctorLeaves, simrsSchedules = simrsDoctorSchedules) => {
     const rawSchedules = Array.isArray(d.schedules) ? d.schedules : [];
     const activeSchedules = rawSchedules.filter(s => s.status !== 'inactive');
-    const practiceDays = activeSchedules.map(s => Number(s.day_of_week)).filter(Boolean);
+    let practiceDays = activeSchedules.map(s => Number(s.day_of_week)).filter(Boolean);
 
     const specId = Number(d.specialization_id || d.specialization?.id || 1);
     const lookupList = Array.isArray(currentSpecs) && currentSpecs.length > 0 ? currentSpecs : DEFAULT_SPECIALIZATIONS;
@@ -301,6 +301,7 @@ export function HospitalDataProvider({ children }) {
       const dayNums = Array.from(new Set(simrsDoctorItems.map(s => s.day_of_week)))
         .sort((a, b) => a - b);
       availableDays = dayNums.map(num => DAY_NUM_TO_NAME[num]).filter(Boolean);
+      practiceDays = dayNums;
 
       formattedSchedules = simrsDoctorItems.map((s, idx) => {
         const dayName = DAY_NUM_TO_NAME[s.day_of_week] || 'Senin';
@@ -449,7 +450,7 @@ export function HospitalDataProvider({ children }) {
         photo_url: effectivePhoto,
       availableDays,
       schedules: formattedSchedules,
-      practiceDays: practiceDays.length > 0 ? practiceDays : [1, 2, 3, 4, 5],
+      practiceDays: practiceDays.length > 0 ? practiceDays : [],
       practiceStartTime,
       practiceEndTime,
       poliklinik_id: assignedPoliId,

@@ -407,19 +407,31 @@ export default function DoctorDetailPage() {
 
                 {/* Day-by-Day Schedule Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {daysOfWeek.map((dayName) => {
+                  {daysOfWeek.map((dayName, dayIdx) => {
                     const activeSchedules = (doctor.schedules || []).filter(s => (s.status || 'active') === 'active');
-                    const matchSchedule = activeSchedules.find(s => {
+                    const targetDayNum = dayIdx + 1; // 1 = Senin ... 7 = Minggu
+                    const targetDayLower = dayName.toLowerCase();
+
+                    const matchingDaySchedules = activeSchedules.filter(s => {
+                      const sDow = Number(s.day_of_week);
+                      if (sDow === targetDayNum || (targetDayNum === 7 && sDow === 0)) return true;
                       const sDay = (s.day || '').toLowerCase();
-                      const targetDay = dayName.toLowerCase();
-                      if (sDay.includes(targetDay)) return true;
-                      if (sDay.includes('senin - sabtu') && ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'].includes(targetDay)) return true;
-                      if (sDay.includes('senin - jumat') && ['senin', 'selasa', 'rabu', 'kamis', 'jumat'].includes(targetDay)) return true;
-                      if (sDay.includes('senin - minggu')) return true;
+                      if (sDay.includes(targetDayLower)) return true;
+                      if (sDay.includes('senin - sabtu') && dayIdx <= 5) return true;
+                      if (sDay.includes('senin - jumat') && dayIdx <= 4) return true;
+                      if (sDay.includes('senin - minggu') || sDay.includes('setiap hari')) return true;
                       return false;
                     });
 
-                    const isAvailable = Boolean(matchSchedule);
+                    const isAvailable = matchingDaySchedules.length > 0;
+                    const primarySchedule = matchingDaySchedules[0];
+                    const sessionTimes = matchingDaySchedules
+                      .map(m => (m.time || '').replace(/\s*WIB/i, '').trim())
+                      .filter(Boolean);
+                    const uniqueTimes = Array.from(new Set(sessionTimes));
+                    const timeFormatted = uniqueTimes.length > 0
+                      ? `${uniqueTimes.join(' & ')} WIB`
+                      : (primarySchedule?.time || 'Sesuai Jadwal');
 
                     return (
                       <div
@@ -445,11 +457,11 @@ export default function DoctorDetailPage() {
                           <div className="flex flex-col gap-1 text-xs text-slate-600 mt-1">
                             <div className="flex items-center gap-1.5 font-bold text-teal-700">
                               <Clock size={13} className="shrink-0" />
-                              <span>{matchSchedule.time || '09:00 - 13:00 WIB'}</span>
+                              <span>{timeFormatted}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-slate-500">
                               <MapPin size={13} className="shrink-0 text-slate-400" />
-                              <span className="truncate">{matchSchedule.room || `Poliklinik ${doctor.specialty}`}</span>
+                              <span className="truncate">{primarySchedule?.room || `Poliklinik ${doctor.specialty}`}</span>
                             </div>
                           </div>
                         ) : (
