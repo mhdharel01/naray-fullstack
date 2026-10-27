@@ -24,7 +24,7 @@ export function FloatingSpeedDial({ onOpenEmergency }) {
   };
 
   const handleCallCenter = () => {
-    const text = encodeURIComponent("Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan rumah sakit.");
+    const text = encodeURIComponent("Halo Customer Care Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan rumah sakit.");
     const callCenterWa = (hospitalInfo.callCenter || '628137258376').replace(/[^0-9]/g, '');
     window.open(`https://wa.me/${callCenterWa}?text=${text}`, '_blank');
   };
@@ -64,15 +64,15 @@ export function FloatingSpeedDial({ onOpenEmergency }) {
             </div>
           </button>
 
-          {/* WhatsApp Call Center */}
+          {/* WhatsApp Customer Care */}
           <button 
             type="button"
             onClick={handleCallCenter}
             className="flex items-center gap-3 group cursor-pointer"
-            title="Chat WhatsApp Call Center Naray"
+            title="Chat WhatsApp Customer Care Naray"
           >
             <span className="px-3 py-1.5 rounded-xl bg-slate-900/90 text-white text-xs font-bold shadow-lg backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
-              Call Center {hospitalInfo.callCenter || '+62 813-7258-376'}
+              No Customer Care {hospitalInfo.callCenter || '+62 813-7258-376'}
             </span>
             <div className="w-12 h-12 rounded-2xl bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white flex items-center justify-center shadow-lg shadow-teal-600/30 group-hover:scale-105 transition-all">
               <Headphones size={22} />
