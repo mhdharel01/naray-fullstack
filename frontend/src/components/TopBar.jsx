@@ -5,7 +5,7 @@ import { useHospitalData } from '../context/HospitalDataContext';
 export function TopBar({ onOpenEmergency }) {
   const { hospitalInfo = {} } = useHospitalData();
   const emergencyNum = hospitalInfo.emergencyHotline || '+62 853-6339-5383';
-  const callCenterNum = hospitalInfo.callCenter || hospitalInfo.phone || '+62 811-7529-798';
+  const callCenterNum = hospitalInfo.callCenter || '+62 813-7258-376';
   const hours = hospitalInfo.operatingHours || 'Poliklinik: 08.00 - 21.00 WIB';
 
   return (

@@ -569,13 +569,13 @@ export default function ArticlePage() {
                 <span>Lihat Jadwal Dokter</span>
               </Link>
               <a
-                href={`https://wa.me/${(hospitalInfo?.callCenter || hospitalInfo?.whatsappHotline || '628117529798').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan.')}`}
+                href={`https://wa.me/${(hospitalInfo?.callCenter || '628137258376').replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Call Center Naray Hospital Dumai, saya ingin menanyakan informasi pelayanan.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all cursor-pointer"
               >
                 <MessageCircle size={16} />
-                <span>WhatsApp Call Center: {hospitalInfo?.callCenter || '+62 811-7529-798'}</span>
+                <span>WhatsApp Call Center: {hospitalInfo?.callCenter || '+62 813-7258-376'}</span>
               </a>
             </div>
           </section>

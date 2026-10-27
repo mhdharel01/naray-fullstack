@@ -11,7 +11,7 @@ import { useHospitalData } from '../context/HospitalDataContext';
 export function EmergencyModal({ onClose }) {
   const { hospitalInfo = {} } = useHospitalData();
   const emNumber = hospitalInfo.emergencyHotline || '+62 853-6339-5383';
-  const callCenterNum = hospitalInfo.callCenter || hospitalInfo.phone || '+62 811-7529-798';
+  const callCenterNum = hospitalInfo.callCenter || '+62 813-7258-376';
 
   return (
     <div 

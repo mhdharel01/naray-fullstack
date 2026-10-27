@@ -9,7 +9,7 @@ export const hospitalInfo = {
   accreditation: "Akreditasi Paripurna Kemenkes RI & Pelayanan Standar Nasional",
   emergencyHotline: "+62 853-6339-5383",
   ambulanceHotline: "+62 853-6339-5383",
-  callCenter: "+62 811-7529-798",
+  callCenter: "+62 813-7258-376",
   whatsappHotline: "+62 811-7529-798",
   whatsapp: "628117529798",
   phone: "+62 811-7529-798",

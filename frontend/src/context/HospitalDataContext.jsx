@@ -991,7 +991,7 @@ export function HospitalDataProvider({ children }) {
             name: d.hospital_info.name || prev.name,
             address: d.hospital_info.address || prev.address,
             phone: d.hospital_info.phone || prev.phone,
-            callCenter: d.hospital_info.phone || prev.callCenter,
+            callCenter: d.hospital_info.call_center || prev.callCenter || '+62 813-7258-376',
             emergencyHotline: d.hospital_info.emergency_hotline || prev.emergencyHotline,
             whatsappHotline: d.hospital_info.phone || prev.whatsappHotline,
             operatingHours: d.hospital_info.operating_hours || prev.operatingHours,
