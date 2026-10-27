@@ -170,7 +170,48 @@ export default function DoctorDetailPage() {
   }, [doctors, doctor]);
 
   // Days list for weekly schedule view
-  const daysOfWeek = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+  const daysOfWeek = useMemo(() => ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'], []);
+
+  // Filter hanya hari-hari di mana dokter benar-benar berpraktik aktif (hari tanpa jadwal/libur tidak ditampilkan)
+  const activePracticeDays = useMemo(() => {
+    if (!doctor) return [];
+    const activeSchedules = (doctor.schedules || []).filter(s => (s.status || 'active') === 'active');
+
+    return daysOfWeek.map((dayName, dayIdx) => {
+      const targetDayNum = dayIdx + 1; // 1 = Senin ... 7 = Minggu
+      const targetDayLower = dayName.toLowerCase();
+
+      const matchingDaySchedules = activeSchedules.filter(s => {
+        const sDow = Number(s.day_of_week);
+        if (targetDayNum !== null && (sDow === targetDayNum || (targetDayNum === 7 && sDow === 0))) return true;
+        const sDay = (s.day || '').toLowerCase();
+        if (sDay.includes(targetDayLower)) return true;
+        if (sDay.includes('senin - sabtu') && dayIdx <= 5) return true;
+        if (sDay.includes('senin - jumat') && dayIdx <= 4) return true;
+        if (sDay.includes('senin - minggu') || sDay.includes('setiap hari')) return true;
+        return false;
+      });
+
+      if (matchingDaySchedules.length === 0) return null;
+
+      const primarySchedule = matchingDaySchedules[0];
+      const sessionTimes = matchingDaySchedules
+        .map(m => (m.time || '').replace(/\s*WIB/i, '').trim())
+        .filter(Boolean);
+      const uniqueTimes = Array.from(new Set(sessionTimes));
+      const timeFormatted = uniqueTimes.length > 0
+        ? `${uniqueTimes.join(' & ')} WIB`
+        : (primarySchedule?.time || 'Sesuai Jadwal');
+
+      return {
+        dayName,
+        dayIdx,
+        timeFormatted,
+        room: primarySchedule?.room || (doctor.specialty ? `Poliklinik ${doctor.specialty}` : 'Poliklinik Rawat Jalan'),
+        schedules: matchingDaySchedules
+      };
+    }).filter(Boolean);
+  }, [doctor, daysOfWeek]);
 
   if (!doctor) {
     return (
@@ -405,72 +446,47 @@ export default function DoctorDetailPage() {
                   </span>
                 </div>
 
-                {/* Day-by-Day Schedule Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {daysOfWeek.map((dayName, dayIdx) => {
-                    const activeSchedules = (doctor.schedules || []).filter(s => (s.status || 'active') === 'active');
-                    const targetDayNum = dayIdx + 1; // 1 = Senin ... 7 = Minggu
-                    const targetDayLower = dayName.toLowerCase();
-
-                    const matchingDaySchedules = activeSchedules.filter(s => {
-                      const sDow = Number(s.day_of_week);
-                      if (sDow === targetDayNum || (targetDayNum === 7 && sDow === 0)) return true;
-                      const sDay = (s.day || '').toLowerCase();
-                      if (sDay.includes(targetDayLower)) return true;
-                      if (sDay.includes('senin - sabtu') && dayIdx <= 5) return true;
-                      if (sDay.includes('senin - jumat') && dayIdx <= 4) return true;
-                      if (sDay.includes('senin - minggu') || sDay.includes('setiap hari')) return true;
-                      return false;
-                    });
-
-                    const isAvailable = matchingDaySchedules.length > 0;
-                    const primarySchedule = matchingDaySchedules[0];
-                    const sessionTimes = matchingDaySchedules
-                      .map(m => (m.time || '').replace(/\s*WIB/i, '').trim())
-                      .filter(Boolean);
-                    const uniqueTimes = Array.from(new Set(sessionTimes));
-                    const timeFormatted = uniqueTimes.length > 0
-                      ? `${uniqueTimes.join(' & ')} WIB`
-                      : (primarySchedule?.time || 'Sesuai Jadwal');
-
-                    return (
+                {/* Day-by-Day Schedule Grid - Hanya Menampilkan Hari Praktik Resmi */}
+                {activePracticeDays.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {activePracticeDays.map((item) => (
                       <div
-                        key={dayName}
-                        className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
-                          isAvailable
-                            ? 'bg-slate-50/70 border-slate-200/80 hover:border-teal-400 hover:bg-white'
-                            : 'bg-slate-50/30 border-slate-100 opacity-60'
-                        }`}
+                        key={item.dayName}
+                        className="p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-teal-400 hover:shadow-md transition-all flex flex-col justify-between"
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <strong className="text-sm font-bold text-slate-900">{dayName}</strong>
-                          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
-                            isAvailable
-                              ? (doctor.isOnLeave ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800')
-                              : 'bg-slate-200/70 text-slate-500'
+                        <div className="flex items-center justify-between mb-3">
+                          <strong className="text-base font-bold text-slate-900">{item.dayName}</strong>
+                          <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ${
+                            doctor.isOnLeave ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                           }`}>
-                            {isAvailable ? (doctor.isOnLeave ? 'Cuti' : 'Praktik') : 'Libur'}
+                            {doctor.isOnLeave ? 'Cuti' : 'Praktik'}
                           </span>
                         </div>
 
-                        {isAvailable ? (
-                          <div className="flex flex-col gap-1 text-xs text-slate-600 mt-1">
-                            <div className="flex items-center gap-1.5 font-bold text-teal-700">
-                              <Clock size={13} className="shrink-0" />
-                              <span>{timeFormatted}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-slate-500">
-                              <MapPin size={13} className="shrink-0 text-slate-400" />
-                              <span className="truncate">{primarySchedule?.room || `Poliklinik ${doctor.specialty}`}</span>
-                            </div>
+                        <div className="flex flex-col gap-2 text-xs text-slate-600">
+                          <div className="flex items-center gap-2 font-bold text-teal-700 text-sm">
+                            <Clock size={15} className="shrink-0 text-teal-600" />
+                            <span>{item.timeFormatted}</span>
                           </div>
-                        ) : (
-                          <span className="text-xs text-slate-400 italic mt-1">Tidak ada jadwal praktik</span>
-                        )}
+                          <div className="flex items-center gap-2 text-slate-500">
+                            <MapPin size={14} className="shrink-0 text-slate-400" />
+                            <span className="truncate font-medium">{item.room}</span>
+                          </div>
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200/80">
+                    <Calendar size={32} className="mx-auto text-slate-400 mb-2" />
+                    <p className="text-sm font-semibold text-slate-700 m-0">
+                      Saat ini dokter belum memiliki jadwal praktik mingguan aktif.
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1 mb-0">
+                      Silakan hubungi layanan informasi atau call center rumah sakit untuk konfirmasi jadwal konsultasi.
+                    </p>
+                  </div>
+                )}
 
                 <p className="text-xs text-slate-500 mt-5 leading-relaxed font-normal">
                   * Jadwal dokter dapat mengalami perubahan sewaktu-waktu sesuai penugasan tindakan operasi darurat. Pasien disarankan melakukan pendaftaran atau konfirmasi terlebih dahulu melalui WhatsApp Nurse Station.
