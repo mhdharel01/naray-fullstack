@@ -25,7 +25,8 @@ import {
   Clock,
   Shield,
   Briefcase,
-  Megaphone
+  Megaphone,
+  AtSign
 } from 'lucide-react';
 import { useHospitalData } from '../../context/HospitalDataContext';
 
@@ -57,6 +58,7 @@ export default function UsersTab({ onShowToast }) {
 
   const [formState, setFormState] = useState({
     name: '',
+    username: '',
     email: '',
     password: '',
     password_confirmation: '',
@@ -97,8 +99,9 @@ export default function UsersTab({ onShowToast }) {
       if (search.trim()) {
         const q = search.toLowerCase();
         const matchesName = (u.name || '').toLowerCase().includes(q);
+        const matchesUsername = (u.username || '').toLowerCase().includes(q);
         const matchesEmail = (u.email || '').toLowerCase().includes(q);
-        if (!matchesName && !matchesEmail) return false;
+        if (!matchesName && !matchesUsername && !matchesEmail) return false;
       }
       if (roleFilter !== 'all' && u.role !== roleFilter) {
         return false;
@@ -115,6 +118,7 @@ export default function UsersTab({ onShowToast }) {
   const handleOpenCreate = () => {
     setFormState({
       name: '',
+      username: '',
       email: '',
       password: '',
       password_confirmation: '',
@@ -130,6 +134,7 @@ export default function UsersTab({ onShowToast }) {
   const handleOpenEdit = (user) => {
     setFormState({
       name: user.name || '',
+      username: user.username || '',
       email: user.email || '',
       password: '',
       password_confirmation: '',
@@ -145,6 +150,15 @@ export default function UsersTab({ onShowToast }) {
   const validateForm = () => {
     const errors = {};
     if (!formState.name.trim()) errors.name = 'Nama lengkap wajib diisi.';
+
+    if (!formState.username.trim()) {
+      errors.username = 'Username / Nama Pengguna wajib diisi.';
+    } else if (formState.username.trim().length < 3) {
+      errors.username = 'Username minimal 3 karakter.';
+    } else if (!/^[a-zA-Z0-9._-]+$/.test(formState.username.trim())) {
+      errors.username = 'Username hanya boleh huruf, angka, titik (.), strip (-), atau underscore (_).';
+    }
+
     if (!formState.email.trim()) {
       errors.email = 'Alamat email wajib diisi.';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email.trim())) {
@@ -183,6 +197,7 @@ export default function UsersTab({ onShowToast }) {
     setIsSubmitting(true);
     const payload = {
       name: formState.name.trim(),
+      username: formState.username.trim().toLowerCase(),
       email: formState.email.trim().toLowerCase(),
       role: formState.role,
       is_active: formState.is_active
@@ -579,17 +594,22 @@ export default function UsersTab({ onShowToast }) {
                             {(u.name || 'A').charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-bold text-slate-800 truncate block">
                                 {u.name}
                               </span>
+                              {u.username && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-100 text-teal-700 border border-slate-200">
+                                  @{u.username}
+                                </span>
+                              )}
                               {isCurrentLoggedUser && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-teal-600 text-white tracking-wide shrink-0">
                                   Akun Anda
                                 </span>
                               )}
                             </div>
-                            <span className="text-slate-500 text-xs flex items-center gap-1.5 truncate">
+                            <span className="text-slate-500 text-xs flex items-center gap-1.5 truncate mt-0.5">
                               <Mail size={12} className="shrink-0 text-slate-400" />
                               {u.email}
                             </span>
@@ -810,7 +830,18 @@ export default function UsersTab({ onShowToast }) {
                     type="text"
                     required
                     value={formState.name}
-                    onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => {
+                      const newName = e.target.value;
+                      setFormState(prev => {
+                        const next = { ...prev, name: newName };
+                        // Suggest username for new user if username hasn't been set manually
+                        if (!modalState.isEdit && (!prev.username || prev.username === prev.name.toLowerCase().replace(/[^a-z0-9._-]/g, ''))) {
+                          next.username = newName.toLowerCase().replace(/[^a-z0-9._-]/g, '');
+                        }
+                        return next;
+                      });
+                      if (formErrors.name) setFormErrors(prev => ({ ...prev, name: null }));
+                    }}
                     placeholder="Contoh: drg. Ahmad Fauzi / Staf Operasional"
                     className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm bg-slate-50/50 transition-all ${
                       formErrors.name ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:border-teal-500 focus:ring-teal-500/20'
@@ -818,6 +849,41 @@ export default function UsersTab({ onShowToast }) {
                   />
                 </div>
                 {formErrors.name && <p className="text-xs text-rose-600 m-0">{formErrors.name}</p>}
+              </div>
+
+              {/* Username Input */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  Username / ID Pengguna (Untuk Login) <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <AtSign className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input
+                    type="text"
+                    required
+                    autoComplete="off"
+                    value={formState.username}
+                    onChange={(e) => {
+                      const val = e.target.value.toLowerCase().replace(/\s+/g, '');
+                      setFormState(prev => ({ ...prev, username: val }));
+                      if (formErrors.username) setFormErrors(prev => ({ ...prev, username: null }));
+                    }}
+                    placeholder="Contoh: admin, harel, operasional1"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs sm:text-sm font-mono bg-slate-50/50 transition-all ${
+                      formErrors.username ? 'border-rose-400 bg-rose-50/30 focus:ring-rose-200' : 'border-slate-200 focus:border-teal-500 focus:ring-teal-500/20'
+                    } focus:ring-2`}
+                  />
+                </div>
+                {formErrors.username ? (
+                  <p className="text-xs text-rose-600 font-semibold flex items-center gap-1.5 m-0 animate-in fade-in">
+                    <AlertTriangle size={13} className="shrink-0 text-rose-500" />
+                    <span>{formErrors.username}</span>
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-500 m-0">
+                    ID unik untuk login admin (huruf kecil, angka, titik, strip, underscore tanpa spasi).
+                  </p>
+                )}
               </div>
 
               {/* Email Input */}

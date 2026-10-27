@@ -31,11 +31,14 @@ class AdminAuthController extends Controller
             ], 422);
         }
 
-        // Cari akun admin berdasarkan username (kolom name) ATAU email (case-insensitive)
-        $admin = Admin::where('email', $identifier)
+        // Cari akun admin berdasarkan username, email, atau nama lengkap (case-insensitive)
+        $cleanIdentifier = strtolower($identifier);
+        $admin = Admin::where('username', $identifier)
+            ->orWhereRaw('LOWER(username) = ?', [$cleanIdentifier])
+            ->orWhere('email', $identifier)
+            ->orWhereRaw('LOWER(email) = ?', [$cleanIdentifier])
             ->orWhere('name', $identifier)
-            ->orWhereRaw('LOWER(name) = ?', [strtolower($identifier)])
-            ->orWhereRaw('LOWER(email) = ?', [strtolower($identifier)])
+            ->orWhereRaw('LOWER(name) = ?', [$cleanIdentifier])
             ->first();
 
         // Fallback shortcut jika pengguna mengetik 'admin' atau 'superadmin'

@@ -17,11 +17,12 @@ class AdminUserController extends Controller
     {
         $query = Admin::query();
 
-        // Pencarian nama atau email
+        // Pencarian nama, username, atau email
         if ($request->filled('search')) {
             $s = trim($request->search);
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
+                  ->orWhere('username', 'like', "%{$s}%")
                   ->orWhere('email', 'like', "%{$s}%");
             });
         }
@@ -66,12 +67,25 @@ class AdminUserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => [
+                'required',
+                'string',
+                'min:3',
+                'max:50',
+                'regex:/^[a-zA-Z0-9._-]+$/',
+                Rule::unique('admins', 'username')->whereNull('deleted_at'),
+            ],
             'email' => ['required', 'email', 'max:255', Rule::unique('admins', 'email')->whereNull('deleted_at')],
             'password' => ['required', 'string', 'min:6'],
             'role' => ['required', Rule::in([Admin::ROLE_SUPER_ADMIN, Admin::ROLE_ADMIN, Admin::ROLE_MARKETING])],
             'is_active' => ['nullable', 'boolean'],
         ], [
             'name.required' => 'Nama lengkap pengguna wajib diisi.',
+            'username.required' => 'Username / Nama Pengguna wajib diisi.',
+            'username.min' => 'Username minimal terdiri dari 3 karakter.',
+            'username.max' => 'Username maksimal 50 karakter.',
+            'username.regex' => 'Username hanya boleh huruf, angka, titik (.), strip (-), atau underscore (_).',
+            'username.unique' => 'Username ini sudah terdaftar untuk admin lain.',
             'email.required' => 'Alamat email pengguna wajib diisi.',
             'email.email' => 'Format alamat email tidak valid.',
             'email.unique' => 'Alamat email ini sudah terdaftar untuk admin lain.',
@@ -83,6 +97,7 @@ class AdminUserController extends Controller
 
         $admin = Admin::create([
             'name' => trim($validated['name']),
+            'username' => strtolower(trim($validated['username'])),
             'email' => strtolower(trim($validated['email'])),
             'password' => $validated['password'], // Model otomatis menggunakan cast 'hashed'
             'role' => $validated['role'],
@@ -119,12 +134,25 @@ class AdminUserController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'username' => [
+                'required',
+                'string',
+                'min:3',
+                'max:50',
+                'regex:/^[a-zA-Z0-9._-]+$/',
+                Rule::unique('admins', 'username')->ignore($admin->id)->whereNull('deleted_at'),
+            ],
             'email' => ['required', 'email', 'max:255', Rule::unique('admins', 'email')->ignore($admin->id)->whereNull('deleted_at')],
             'password' => ['nullable', 'string', 'min:6'],
             'role' => ['required', Rule::in([Admin::ROLE_SUPER_ADMIN, Admin::ROLE_ADMIN, Admin::ROLE_MARKETING])],
             'is_active' => ['nullable', 'boolean'],
         ], [
             'name.required' => 'Nama lengkap pengguna wajib diisi.',
+            'username.required' => 'Username / Nama Pengguna wajib diisi.',
+            'username.min' => 'Username minimal terdiri dari 3 karakter.',
+            'username.max' => 'Username maksimal 50 karakter.',
+            'username.regex' => 'Username hanya boleh huruf, angka, titik (.), strip (-), atau underscore (_).',
+            'username.unique' => 'Username ini sudah dipakai admin lain.',
             'email.required' => 'Alamat email pengguna wajib diisi.',
             'email.unique' => 'Alamat email ini sudah dipakai admin lain.',
             'password.min' => 'Kata sandi baru minimal terdiri dari 6 karakter.',
@@ -161,6 +189,7 @@ class AdminUserController extends Controller
         }
 
         $admin->name = trim($validated['name']);
+        $admin->username = strtolower(trim($validated['username']));
         $admin->email = strtolower(trim($validated['email']));
         $admin->role = $validated['role'];
         $admin->is_active = $newActiveStatus;
