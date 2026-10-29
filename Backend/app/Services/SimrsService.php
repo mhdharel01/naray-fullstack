@@ -17,15 +17,19 @@ class SimrsService
     public function __construct()
     {
         $this->baseUrl = rtrim(env('SIMRS_API_BASE_URL', 'http://dekago-v2.test/api/v1/pasien'), '/');
-        $this->cacheMinutes = (int) env('SIMRS_SYNC_CACHE_MINUTES', 15);
+        $this->cacheMinutes = (int) env('SIMRS_SYNC_CACHE_MINUTES', 3);
     }
 
     /**
      * Mengambil ketersediaan tempat tidur real-time dari SIMRS Dekago
      * Sesuai Postman: GET /kamar/persediaan
      */
-    public function getBedAvailability(): array
+    public function getBedAvailability(bool $forceRefresh = false): array
     {
+        if ($forceRefresh) {
+            Cache::forget('simrs_persediaan_kamar');
+        }
+
         return Cache::remember('simrs_persediaan_kamar', now()->addMinutes($this->cacheMinutes), function () {
             try {
                 if (!empty($this->baseUrl) && filter_var($this->baseUrl, FILTER_VALIDATE_URL)) {

@@ -22,30 +22,93 @@ import { PageLayout } from '../layouts/PageLayout';
 // Day mapping helpers
 const DAY_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
-const matchSpecialtyDoctor = (doc, specialtyTerm) => {
-  if (!specialtyTerm) return true;
-  
-  const term = specialtyTerm.toLowerCase().trim();
-  const docSpec = (doc.specialty || '').toLowerCase();
-  const docGroup = (doc.specialtyGroup || '').toLowerCase();
-  const docSub = (doc.subSpecialty || '').toLowerCase();
-  const docPoli = (doc.schedules || []).map(s => (s.room || '').toLowerCase()).join(' ');
+const normalizePoliKey = (str) => {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .replace(/^(poliklinik\s+poli|poliklinik|poli)\s+/i, '')
+    .replace(/[.\s]+$/g, '')
+    .trim();
+};
 
-  if (docSpec.includes(term) || term.includes(docSpec)) return true;
-  if (docGroup.includes(term) || term.includes(docGroup)) return true;
-  if (docSub.includes(term)) return true;
-  if (docPoli.includes(term)) return true;
+const POLI_SYNONYMS = {
+  'paru': ['pulmonologi', 'kedokteran respirasi', 'pulmonologi dan kedokteran respirasi'],
+  'pulmonologi': ['paru'],
+  'pulmonologi dan kedokteran respirasi': ['paru'],
+  'kulit dan kelamin': ['dermatologi dan venereologi', 'dermatologi'],
+  'dermatologi dan venereologi': ['kulit dan kelamin', 'kulit & kelamin'],
+  'kandungan': ['kebidanan', 'kebidanan & kandungan', 'kebidanan dan kandungan', 'obgyn'],
+  'kebidanan & kandungan': ['kandungan', 'obgyn'],
+  'kebidanan dan kandungan': ['kandungan', 'obgyn'],
+  'kedokteran jiwa': ['psikiatri', 'jiwa'],
+  'psikiatri & jiwa': ['kedokteran jiwa', 'jiwa'],
+  'saraf': ['neurologi', 'neuro'],
+  'neurologi': ['saraf'],
+  'anak': ['pediatrik'],
+  'jantung dan pembuluh darah': ['jantung'],
+  'jantung': ['jantung dan pembuluh darah']
+};
 
-  const stopWords = new Set(['dan', 'atau', 'pada', 'yang', 'poli', 'poliklinik', 'spesialis', 'dokter']);
-  const tokens = term
-    .replace(/[()&/,-]/g, ' ')
-    .split(/\s+/)
-    .filter(t => t.length >= 3 && !stopWords.has(t));
+const matchDoctorPoliklinik = (doc, targetPoli) => {
+  if (!targetPoli || targetPoli === 'Semua' || targetPoli === 'all') return true;
+  const targetKey = normalizePoliKey(targetPoli);
+  if (!targetKey) return true;
 
-  if (tokens.length === 0) return true;
+  // Kumpulkan poliklinik dokter dari ruangan jadwal dan polikliniks terdaftar
+  const docPoliKeys = [];
+  (doc.schedules || []).forEach(s => {
+    if (s.room) docPoliKeys.push(normalizePoliKey(s.room));
+  });
+  if (Array.isArray(doc.polikliniks)) {
+    doc.polikliniks.forEach(p => {
+      const name = p.name || p;
+      if (name) docPoliKeys.push(normalizePoliKey(name));
+    });
+  }
 
-  const allDocText = `${docSpec} ${docGroup} ${docSub} ${docPoli}`;
-  return tokens.some(tok => allDocText.includes(tok));
+  // 1. ISOLASI KETAT: Bedah Umum vs Bedah Mulut vs Gigi
+  // (Pemisahan eksplisit agar tidak tercampur)
+  if (targetKey === 'bedah') {
+    return docPoliKeys.includes('bedah') || 
+      (!docPoliKeys.some(k => k.includes('bedah mulut')) && normalizePoliKey(doc.specialty) === 'bedah');
+  }
+
+  if (targetKey === 'gigi') {
+    return docPoliKeys.includes('gigi') || 
+      (docPoliKeys.includes('gigi & mulut') && !docPoliKeys.some(k => k.includes('bedah mulut')));
+  }
+
+  if (targetKey.includes('bedah mulut')) {
+    return docPoliKeys.some(k => k.includes('bedah mulut')) || 
+      normalizePoliKey(doc.subSpecialty).includes('bedah mulut') || 
+      normalizePoliKey(doc.specialty).includes('bedah mulut');
+  }
+
+  // 2. Pencocokan langsung dengan nama poli jadwal / poliklinik terdaftar
+  if (docPoliKeys.includes(targetKey)) {
+    return true;
+  }
+
+  // 3. Pencocokan sinonim resmi
+  if (POLI_SYNONYMS[targetKey]) {
+    for (const syn of POLI_SYNONYMS[targetKey]) {
+      if (docPoliKeys.includes(syn)) return true;
+    }
+  }
+
+  // 4. Pencocokan ke spesialisasi dokter jika targetKey cocok
+  const docSpecKey = normalizePoliKey(doc.specialty);
+  const docGroupKey = normalizePoliKey(doc.specialtyGroup);
+  if (docSpecKey === targetKey || docGroupKey === targetKey) {
+    return true;
+  }
+  if (POLI_SYNONYMS[targetKey]) {
+    for (const syn of POLI_SYNONYMS[targetKey]) {
+      if (docSpecKey === syn || docGroupKey === syn) return true;
+    }
+  }
+
+  return false;
 };
 
 const matchDayDoctor = (doc, dayTerm) => {
@@ -256,7 +319,7 @@ export default function DoctorSchedulePage() {
     setIsRefreshing(true);
     try {
       if (refreshBackendData) {
-        await refreshBackendData();
+        await refreshBackendData(true);
       }
     } catch (e) {
       console.warn('Gagal memuat ulang data:', e);
@@ -281,6 +344,36 @@ export default function DoctorSchedulePage() {
     return counts;
   }, [doctors]);
 
+  const poliklinikOptions = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    const addPoli = (rawName, id) => {
+      if (!rawName) return;
+      let clean = String(rawName).trim().replace(/[.\s]+$/g, '');
+      if (!clean.toLowerCase().startsWith('poli')) {
+        clean = `Poli ${clean}`;
+      }
+      const key = clean.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        list.push({ id: id || key, name: clean });
+      }
+    };
+
+    (poliklinikList || []).forEach(p => {
+      addPoli(p.name, p.id || p.dbId);
+    });
+
+    (doctors || []).forEach(d => {
+      (d.schedules || []).forEach(s => {
+        if (s.room) addPoli(s.room);
+      });
+    });
+
+    return list.sort((a, b) => a.name.localeCompare(b.name, 'id'));
+  }, [poliklinikList, doctors]);
+
   // Filtered doctors list
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doc) => {
@@ -295,7 +388,7 @@ export default function DoctorSchedulePage() {
         doc.specialty?.toLowerCase().includes(keyword.toLowerCase()) ||
         doc.subSpecialty?.toLowerCase().includes(keyword.toLowerCase());
 
-      const matchSpecialty = matchSpecialtyDoctor(doc, selectedSpecialty);
+      const matchSpecialty = matchDoctorPoliklinik(doc, selectedSpecialty);
       const matchDay = matchDayDoctor(doc, selectedDay);
 
       return matchKeyword && matchSpecialty && matchDay;
@@ -401,8 +494,8 @@ export default function DoctorSchedulePage() {
                 className="w-full h-12 px-4 rounded-xl text-xs sm:text-sm text-slate-700 bg-transparent focus:bg-slate-50/50 outline-none cursor-pointer font-medium appearance-none"
               >
                 <option value="">Semua Poliklinik</option>
-                {poliklinikList.map((p) => (
-                  <option key={p.id || p.dbId} value={p.name.replace(/.*Poliklinik\s+/, '')}>
+                {poliklinikOptions.map((p) => (
+                  <option key={p.id || p.name} value={p.name}>
                     {p.name}
                   </option>
                 ))}

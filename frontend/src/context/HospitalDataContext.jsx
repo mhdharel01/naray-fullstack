@@ -273,7 +273,13 @@ export function HospitalDataProvider({ children }) {
 
     // 1. Cek apakah ada jadwal live dari SIMRS Dekago (Read-Only Live Sync)
     let simrsDoctorItems = [];
-    if (simrsSchedules && Array.isArray(simrsSchedules.jadwal_dokter)) {
+    const isSimrsConnected = Boolean(
+      simrsSchedules && 
+      Array.isArray(simrsSchedules.jadwal_dokter) && 
+      simrsSchedules.jadwal_dokter.length > 0
+    );
+
+    if (isSimrsConnected) {
       for (const dayItem of simrsSchedules.jadwal_dokter) {
         const dow = Number(dayItem.day_of_week); // 0 = Minggu, 1 = Senin, ..., 6 = Sabtu
         const dayNum = dow === 0 ? 7 : dow; // Standarisasi 1=Senin, ..., 7=Minggu
@@ -322,8 +328,8 @@ export function HospitalDataProvider({ children }) {
           source: 'simrs'
         };
       });
-    } else if (rawSchedules.length > 0) {
-      // Fallback ke jadwal database lokal
+    } else if (rawSchedules.length > 0 && !isSimrsConnected) {
+      // Fallback ke jadwal database lokal HANYA jika server API SIMRS sedang offline/tidak tersedia
       const activeDayNames = Array.from(new Set(practiceDays.map(num => DAY_NUM_TO_NAME[num]).filter(Boolean)))
         .sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
       availableDays = activeDayNames;
@@ -350,8 +356,10 @@ export function HospitalDataProvider({ children }) {
         };
       });
     } else {
+      // Jika API SIMRS aktif tetapi jadwal dokter ini sudah dihapus di API
       availableDays = [];
       formattedSchedules = [];
+      practiceDays = [];
     }
 
     const firstSchedule = formattedSchedules[0] || {};
@@ -926,13 +934,19 @@ export function HospitalDataProvider({ children }) {
     return { dbPhotos, dbVideos };
   };
 
-  const loadBackendData = async () => {
+  const loadBackendData = async (forceRefresh = false) => {
     setIsLoadingBackend(true);
     try {
       // 1. Single Batch Init Endpoint (Hanya 1x request HTTP: pangkas load time dari 3s jadi ~300ms)
       // Jika admin login / adminToken ada, minta seluruh data (termasuk draf & non-aktif)
       const token = adminToken || (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) : null);
-      const initRes = await api.getAppInit(token ? { all: 1 } : {});
+      const params = {};
+      if (token) params.all = 1;
+      if (forceRefresh) {
+        params.refresh = 1;
+        params.force = 1;
+      }
+      const initRes = await api.getAppInit(params);
       if (initRes?.success && initRes?.data) {
         const d = initRes.data;
         const leaves = Array.isArray(d.doctor_leaves) ? d.doctor_leaves : [];

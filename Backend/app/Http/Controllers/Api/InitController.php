@@ -119,7 +119,7 @@ class InitController extends Controller
 
         $simrsService = app(\App\Services\SimrsService::class);
         $force = $request->boolean('refresh') || $request->boolean('force');
-        $simrsBeds = $simrsService->getBedAvailability();
+        $simrsBeds = $simrsService->getBedAvailability($force);
         $simrsDoctorSchedules = $simrsService->getDoctorSchedules($force);
         $simrsSurgeries = $simrsService->getSurgerySchedule(null, null, $force);
 

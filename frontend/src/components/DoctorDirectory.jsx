@@ -1,3 +1,5 @@
+
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
@@ -15,6 +17,90 @@ import {
   Trash2
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
+
+const normalizePoliKey = (str) => {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .replace(/^(poliklinik\s+poli|poliklinik|poli)\s+/i, '')
+    .replace(/[.\s]+$/g, '')
+    .trim();
+};
+
+const POLI_SYNONYMS = {
+  'paru': ['pulmonologi', 'kedokteran respirasi', 'pulmonologi dan kedokteran respirasi'],
+  'pulmonologi': ['paru'],
+  'pulmonologi dan kedokteran respirasi': ['paru'],
+  'kulit dan kelamin': ['dermatologi dan venereologi', 'dermatologi'],
+  'dermatologi dan venereologi': ['kulit dan kelamin', 'kulit & kelamin'],
+  'kandungan': ['kebidanan', 'kebidanan & kandungan', 'kebidanan dan kandungan', 'obgyn'],
+  'kebidanan & kandungan': ['kandungan', 'obgyn'],
+  'kebidanan dan kandungan': ['kandungan', 'obgyn'],
+  'kedokteran jiwa': ['psikiatri', 'jiwa'],
+  'psikiatri & jiwa': ['kedokteran jiwa', 'jiwa'],
+  'saraf': ['neurologi', 'neuro'],
+  'neurologi': ['saraf'],
+  'anak': ['pediatrik'],
+  'jantung dan pembuluh darah': ['jantung'],
+  'jantung': ['jantung dan pembuluh darah']
+};
+
+const matchDoctorPoliklinik = (doc, targetPoli) => {
+  if (!targetPoli || targetPoli === 'Semua' || targetPoli === 'all') return true;
+  const targetKey = normalizePoliKey(targetPoli);
+  if (!targetKey) return true;
+
+  const docPoliKeys = [];
+  (doc.schedules || []).forEach(s => {
+    if (s.room) docPoliKeys.push(normalizePoliKey(s.room));
+  });
+  if (Array.isArray(doc.polikliniks)) {
+    doc.polikliniks.forEach(p => {
+      const name = p.name || p;
+      if (name) docPoliKeys.push(normalizePoliKey(name));
+    });
+  }
+
+  // 1. ISOLASI KETAT: Bedah Umum vs Bedah Mulut vs Gigi
+  if (targetKey === 'bedah') {
+    return docPoliKeys.includes('bedah') || 
+      (!docPoliKeys.some(k => k.includes('bedah mulut')) && normalizePoliKey(doc.specialty) === 'bedah');
+  }
+
+  if (targetKey === 'gigi') {
+    return docPoliKeys.includes('gigi') || 
+      (docPoliKeys.includes('gigi & mulut') && !docPoliKeys.some(k => k.includes('bedah mulut')));
+  }
+
+  if (targetKey.includes('bedah mulut')) {
+    return docPoliKeys.some(k => k.includes('bedah mulut')) || 
+      normalizePoliKey(doc.subSpecialty).includes('bedah mulut') || 
+      normalizePoliKey(doc.specialty).includes('bedah mulut');
+  }
+
+  if (docPoliKeys.includes(targetKey)) {
+    return true;
+  }
+
+  if (POLI_SYNONYMS[targetKey]) {
+    for (const syn of POLI_SYNONYMS[targetKey]) {
+      if (docPoliKeys.includes(syn)) return true;
+    }
+  }
+
+  const docSpecKey = normalizePoliKey(doc.specialty);
+  const docGroupKey = normalizePoliKey(doc.specialtyGroup);
+  if (docSpecKey === targetKey || docGroupKey === targetKey) {
+    return true;
+  }
+  if (POLI_SYNONYMS[targetKey]) {
+    for (const syn of POLI_SYNONYMS[targetKey]) {
+      if (docSpecKey === syn || docGroupKey === syn) return true;
+    }
+  }
+
+  return false;
+};
 
 const matchDayDoctor = (doc, dayTerm) => {
   if (doc.status === 'inactive') return false;
@@ -69,6 +155,36 @@ export function DoctorDirectory({
 
   const daysList = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
+  const poliklinikOptions = useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    const addPoli = (rawName, id) => {
+      if (!rawName) return;
+      let clean = String(rawName).trim().replace(/[.\s]+$/g, '');
+      if (!clean.toLowerCase().startsWith('poli')) {
+        clean = `Poli ${clean}`;
+      }
+      const key = clean.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        list.push({ id: id || key, name: clean });
+      }
+    };
+
+    (poliklinikList || []).forEach(p => {
+      addPoli(p.name, p.id || p.dbId);
+    });
+
+    (doctors || []).forEach(d => {
+      (d.schedules || []).forEach(s => {
+        if (s.room) addPoli(s.room);
+      });
+    });
+
+    return list.sort((a, b) => a.name.localeCompare(b.name, 'id'));
+  }, [poliklinikList, doctors]);
+
   const filteredDoctors = useMemo(() => {
     return doctors.filter((doc) => {
       if (doc.status === 'inactive') return false;
@@ -80,10 +196,7 @@ export function DoctorDirectory({
         (doc.specialty && doc.specialty.toLowerCase().includes(keyword.toLowerCase())) ||
         (doc.subSpecialty && doc.subSpecialty.toLowerCase().includes(keyword.toLowerCase()));
 
-      const matchSpecialty = !selectedSpecialty || 
-        (doc.specialtyGroup && doc.specialtyGroup.toLowerCase().includes(selectedSpecialty.toLowerCase())) ||
-        (doc.specialty && doc.specialty.toLowerCase().includes(selectedSpecialty.toLowerCase()));
-
+      const matchSpecialty = matchDoctorPoliklinik(doc, selectedSpecialty);
       const matchDay = matchDayDoctor(doc, selectedDay);
 
       return matchKeyword && matchSpecialty && matchDay;
@@ -151,8 +264,8 @@ export function DoctorDirectory({
                 className="filter-select"
               >
                 <option value="">Semua Poliklinik</option>
-                {poliklinikList.map((p) => (
-                  <option key={p.id} value={p.name.replace(/.*Poliklinik\s+/, '')}>
+                {poliklinikOptions.map((p) => (
+                  <option key={p.id || p.name} value={p.name}>
                     {p.name}
                   </option>
                 ))}

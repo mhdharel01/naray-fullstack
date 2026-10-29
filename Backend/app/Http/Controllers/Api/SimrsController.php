@@ -55,7 +55,8 @@ class SimrsController extends Controller
      */
     public function doctorSchedules(Request $request)
     {
-        $data = $this->simrsService->getDoctorSchedules();
+        $force = $request->boolean('refresh') || $request->boolean('force');
+        $data = $this->simrsService->getDoctorSchedules($force);
 
         return response()->json([
             'status' => 'success',
