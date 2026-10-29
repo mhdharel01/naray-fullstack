@@ -46,6 +46,12 @@ class InitController extends Controller
             || $request->boolean('include_inactive')
             || $request->header('X-Admin-Request') === 'true';
 
+        $simrsService = app(\App\Services\SimrsService::class);
+        $force = $request->boolean('refresh') || $request->boolean('force');
+        $simrsBeds = $simrsService->getBedAvailability($force);
+        $simrsDoctorSchedules = $simrsService->getDoctorSchedules($force);
+        $simrsSurgeries = $simrsService->getSurgerySchedule(null, null, $force);
+
         $doctors = Doctor::with([
             'specialization',
             'branch',
@@ -116,12 +122,6 @@ class InitController extends Controller
             $doctorLeavesQuery->where('status', 'active');
         }
         $doctorLeaves = $doctorLeavesQuery->get();
-
-        $simrsService = app(\App\Services\SimrsService::class);
-        $force = $request->boolean('refresh') || $request->boolean('force');
-        $simrsBeds = $simrsService->getBedAvailability($force);
-        $simrsDoctorSchedules = $simrsService->getDoctorSchedules($force);
-        $simrsSurgeries = $simrsService->getSurgerySchedule(null, null, $force);
 
         // Auto-sync avatar SIMRS ke dokter di DB jika foto di DB masih kosong atau default
         if (!empty($simrsDoctorSchedules['jadwal_dokter'])) {

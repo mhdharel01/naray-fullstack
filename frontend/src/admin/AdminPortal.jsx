@@ -132,7 +132,7 @@ function AdminDashboard({ onLogout }) {
     setIsSyncing(true);
     try {
       if (typeof refreshBackendData === 'function') {
-        await refreshBackendData();
+        await refreshBackendData(true);
       }
       showToast('Sinkronisasi database & SIMRS Dekago berhasil diperbarui.');
     } catch {
