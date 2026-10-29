@@ -202,6 +202,8 @@ class SimrsService
         }
 
         $allPolikliniks = Poliklinik::all();
+        $allSpecializations = Specialization::all();
+        $branchId = \App\Models\Branch::first()?->id ?? 1;
         $deletedCount = 0;
         $createdCount = 0;
         $restoredCount = 0;
@@ -219,12 +221,16 @@ class SimrsService
             }
 
             if (!$isFoundInSimrs) {
-                // Hapus jadwal lokal dokter ini
-                DoctorSchedule::where('doctor_id', $doc->id)->delete();
-                // Soft-delete dokter
-                $doc->delete();
-                $deletedCount++;
-                Log::info("SIMRS Auto-Delete: Dokter '{$doc->name}' (ID: {$doc->id}) di-soft-delete karena sudah tidak memiliki jadwal di SIMRS.");
+                try {
+                    // Hapus jadwal lokal dokter ini
+                    DoctorSchedule::where('doctor_id', $doc->id)->delete();
+                    // Soft-delete dokter
+                    $doc->delete();
+                    $deletedCount++;
+                    Log::info("SIMRS Auto-Delete: Dokter '{$doc->name}' (ID: {$doc->id}) di-soft-delete karena sudah tidak memiliki jadwal di SIMRS.");
+                } catch (\Throwable $delErr) {
+                    Log::warning("Gagal soft-delete dokter ID {$doc->id}: " . $delErr->getMessage());
+                }
             }
         }
 
@@ -243,50 +249,67 @@ class SimrsService
 
             if ($matchedDoc) {
                 if ($matchedDoc->trashed()) {
-                    $matchedDoc->restore();
-                    $matchedDoc->update(['status' => 'active']);
-                    $restoredCount++;
-                    Log::info("SIMRS Auto-Restore: Dokter '{$matchedDoc->name}' (ID: {$matchedDoc->id}) dipulihkan karena kembali ada di SIMRS.");
+                    try {
+                        $matchedDoc->restore();
+                        $matchedDoc->update(['status' => 'active']);
+                        $restoredCount++;
+                        Log::info("SIMRS Auto-Restore: Dokter '{$matchedDoc->name}' (ID: {$matchedDoc->id}) dipulihkan karena kembali ada di SIMRS.");
+                    } catch (\Throwable $resErr) {
+                        Log::warning("Gagal restore dokter ID {$matchedDoc->id}: " . $resErr->getMessage());
+                    }
                 }
                 $targetDoctor = $matchedDoc;
             } else {
                 // Dokter baru di SIMRS -> Auto-create
-                $specId = $this->resolveSpecializationId($info['nama'], $info['ruangan']);
-                $targetDoctor = Doctor::create([
-                    'name' => $info['nama'],
-                    'specialization_id' => $specId,
-                    'branch_id' => 1,
-                    'photo_url' => $info['avatar'],
-                    'status' => 'active',
-                ]);
-                $createdCount++;
-                Log::info("SIMRS Auto-Create: Dokter baru '{$targetDoctor->name}' (ID: {$targetDoctor->id}) otomatis dibuat dari SIMRS.");
+                $specId = $this->resolveSpecializationId($info['nama'], $info['ruangan'], $allSpecializations);
+                try {
+                    $targetDoctor = Doctor::create([
+                        'name' => $info['nama'],
+                        'specialization_id' => $specId,
+                        'branch_id' => $branchId,
+                        'photo_url' => $info['avatar'],
+                        'status' => 'active',
+                    ]);
+                    $createdCount++;
+                    Log::info("SIMRS Auto-Create: Dokter baru '{$targetDoctor->name}' (ID: {$targetDoctor->id}) otomatis dibuat dari SIMRS.");
+                } catch (\Throwable $createErr) {
+                    Log::error("Gagal auto-create dokter '{$info['nama']}': " . $createErr->getMessage());
+                    continue;
+                }
             }
 
             // Sync Poliklinik dokter
-            if ($primaryPoliId) {
-                $targetDoctor->polikliniks()->syncWithoutDetaching([$primaryPoliId]);
+            if ($primaryPoliId && $targetDoctor) {
+                try {
+                    $targetDoctor->polikliniks()->syncWithoutDetaching([$primaryPoliId]);
+                } catch (\Throwable $syncPoliErr) {}
             }
 
             // 4. Sync jadwal dokter ke database lokal (agar selaras 100%)
-            DoctorSchedule::where('doctor_id', $targetDoctor->id)->delete();
-            $seenScheduleKeys = [];
-            foreach ($info['schedules'] as $sch) {
-                $poliId = $this->resolvePoliklinikId([$sch['ruangan_nama']], $allPolikliniks) ?? $primaryPoliId ?? 1;
-                $schKey = "{$sch['day_of_week']}-{$sch['start_time']}-{$sch['end_time']}-{$poliId}";
-                if (isset($seenScheduleKeys[$schKey])) continue;
-                $seenScheduleKeys[$schKey] = true;
+            if ($targetDoctor) {
+                DoctorSchedule::where('doctor_id', $targetDoctor->id)->delete();
+                $seenScheduleKeys = [];
+                foreach ($info['schedules'] as $sch) {
+                    $poliId = $this->resolvePoliklinikId([$sch['ruangan_nama']], $allPolikliniks) ?? $primaryPoliId ?? 1;
+                    $schKey = "{$sch['day_of_week']}-{$sch['start_time']}-{$sch['end_time']}-{$poliId}";
+                    if (isset($seenScheduleKeys[$schKey])) continue;
+                    $seenScheduleKeys[$schKey] = true;
 
-                DoctorSchedule::create([
-                    'doctor_id' => $targetDoctor->id,
-                    'branch_id' => $targetDoctor->branch_id ?? 1,
-                    'poliklinik_id' => $poliId,
-                    'day_of_week' => $sch['day_of_week'],
-                    'start_time' => $sch['start_time'],
-                    'end_time' => $sch['end_time'],
-                    'status' => 'active',
-                ]);
-                $syncedSchedulesCount++;
+                    try {
+                        DoctorSchedule::create([
+                            'doctor_id' => $targetDoctor->id,
+                            'branch_id' => $targetDoctor->branch_id ?? $branchId,
+                            'poliklinik_id' => $poliId,
+                            'day_of_week' => $sch['day_of_week'],
+                            'start_time' => $sch['start_time'],
+                            'end_time' => $sch['end_time'],
+                            'status' => 'active',
+                        ]);
+                        $syncedSchedulesCount++;
+                    } catch (\Throwable $schErr) {
+                        Log::warning("Gagal buat jadwal dokter {$targetDoctor->id}: " . $schErr->getMessage());
+                    }
+                }
             }
         }
 
@@ -305,43 +328,106 @@ class SimrsService
      */
     private function matchDoctorName(string $name1, string $name2): bool
     {
-        $n1 = strtolower(trim(preg_replace('/^(drg\.|dr\.)\s+/i', '', $name1)));
-        $n2 = strtolower(trim(preg_replace('/^(drg\.|dr\.)\s+/i', '', $name2)));
-        if ($n1 === $n2) return true;
-        if (str_contains($n1, $n2) || str_contains($n2, $n1)) return true;
-        $base1 = trim(explode(',', $n1)[0]);
-        $base2 = trim(explode(',', $n2)[0]);
-        if (!empty($base1) && !empty($base2) && ($base1 === $base2 || str_contains($base1, $base2) || str_contains($base2, $base1))) {
-            return true;
+        $clean = function(string $s) {
+            $s = strtolower($s);
+            $s = preg_replace('/^(drg\.|dr\.)\s+/i', '', $s);
+            $s = preg_replace('/,.*$/', '', $s); // Hapus gelar setelah koma
+            $s = preg_replace('/[^a-z0-9\s]/', ' ', $s);
+            return trim(preg_replace('/\s+/', ' ', $s));
+        };
+
+        $c1 = $clean($name1);
+        $c2 = $clean($name2);
+
+        if ($c1 === $c2) return true;
+        if (!empty($c1) && !empty($c2) && (str_contains($c1, $c2) || str_contains($c2, $c1))) return true;
+
+        // Token matching (minimal 2 token kata nama cocok jika lebih dari 1 kata)
+        $tokens1 = array_filter(explode(' ', $c1), fn($t) => strlen($t) > 2);
+        $tokens2 = array_filter(explode(' ', $c2), fn($t) => strlen($t) > 2);
+        if (!empty($tokens1) && !empty($tokens2)) {
+            $intersect = array_intersect($tokens1, $tokens2);
+            if (count($intersect) >= 2 || (count($tokens1) === 1 && count($intersect) === 1)) {
+                return true;
+            }
         }
+
         return false;
     }
 
     /**
-     * Helper menentukan specialization_id berdasarkan gelar dokter / ruangan
+     * Helper menentukan specialization_id berdasarkan gelar dokter / ruangan yang DIJAMIN ada di DB
      */
-    private function resolveSpecializationId(string $doctorName, array $ruanganList): int
+    private function resolveSpecializationId(string $doctorName, array $ruanganList, $allSpecializations): int
     {
         $dLower = strtolower($doctorName);
         $rString = strtolower(implode(' ', $ruanganList));
 
-        if (str_contains($dLower, 'sp.pd') || str_contains($rString, 'penyakit dalam')) return 2;
-        if (str_contains($dLower, 'sp.b.m.m') || str_contains($rString, 'bedah mulut')) return 3;
-        if (str_contains($dLower, 'drg.') || str_contains($rString, 'gigi')) return 3;
-        if (str_contains($dLower, 'sp.p') || str_contains($rString, 'paru') || str_contains($rString, 'pulmonologi')) return 4;
-        if (str_contains($dLower, 'sp. d.v.e') || str_contains($dLower, 'sp.dve') || str_contains($rString, 'dermatologi') || str_contains($rString, 'kulit')) return 5;
-        if (str_contains($dLower, 'sp.tht') || str_contains($rString, 'tht')) return 6;
-        if (str_contains($dLower, 'sp. a') || str_contains($dLower, 'sp.a') || str_contains($rString, 'anak')) return 7;
-        if (str_contains($dLower, 'sp.b') || str_contains($rString, 'bedah')) return 8;
-        if (str_contains($dLower, 'sp.m') || str_contains($rString, 'mata')) return 9;
-        if (str_contains($dLower, 'sp.og') || str_contains($rString, 'kandungan') || str_contains($rString, 'kebidanan')) return 10;
-        if (str_contains($dLower, 'sp.j.p') || str_contains($dLower, 'sp.jp') || str_contains($rString, 'jantung')) return 11;
-        if (str_contains($dLower, 'sp. neuro') || str_contains($dLower, 'sp.s') || str_contains($rString, 'saraf')) return 12;
-        if (str_contains($dLower, 'sp.kj') || str_contains($rString, 'jiwa') || str_contains($rString, 'psikiatri')) return 13;
-        if (str_contains($dLower, 'sp.rad') || str_contains($rString, 'radiologi')) return 15;
-        if (str_contains($dLower, 'sp.ort') || str_contains($rString, 'orthopedi')) return 16;
+        // Keywords mapping: keyword => search term in DB specializations
+        $map = [
+            'penyakit dalam' => 'penyakit dalam',
+            'sp.pd' => 'penyakit dalam',
+            'bedah mulut' => 'bedah mulut',
+            'gigi' => 'gigi',
+            'drg.' => 'gigi',
+            'paru' => 'paru',
+            'pulmonologi' => 'paru',
+            'sp.p' => 'paru',
+            'kulit' => 'kulit',
+            'dermatologi' => 'kulit',
+            'sp. d.v.e' => 'kulit',
+            'sp.dve' => 'kulit',
+            'tht' => 'tht',
+            'sp.tht' => 'tht',
+            'anak' => 'anak',
+            'sp. a' => 'anak',
+            'sp.a' => 'anak',
+            'bedah' => 'bedah',
+            'sp.b' => 'bedah',
+            'mata' => 'mata',
+            'sp.m' => 'mata',
+            'kandungan' => 'kandungan',
+            'kebidanan' => 'kandungan',
+            'sp.og' => 'kandungan',
+            'jantung' => 'jantung',
+            'sp.j.p' => 'jantung',
+            'sp.jp' => 'jantung',
+            'saraf' => 'saraf',
+            'neuro' => 'saraf',
+            'sp. neuro' => 'saraf',
+            'sp.s' => 'saraf',
+            'jiwa' => 'jiwa',
+            'psikiatri' => 'jiwa',
+            'sp.kj' => 'jiwa',
+            'radiologi' => 'radiologi',
+            'sp.rad' => 'radiologi',
+            'orthopedi' => 'ortopedi',
+            'ortopedi' => 'ortopedi',
+            'sp.ort' => 'ortopedi',
+        ];
 
-        return 1; // Default UGD & Dokter Umum
+        foreach ($map as $key => $targetTerm) {
+            if (str_contains($dLower, $key) || str_contains($rString, $key)) {
+                $matchedSpec = $allSpecializations->first(function ($s) use ($targetTerm) {
+                    return str_contains(strtolower($s->name), $targetTerm);
+                });
+                if ($matchedSpec) {
+                    return $matchedSpec->id;
+                }
+            }
+        }
+
+        // Fallback: bedah if contains sp.ort and orthopedi is not in DB
+        if (str_contains($dLower, 'sp.ort') || str_contains($rString, 'orthopedi')) {
+            $bedah = $allSpecializations->first(fn($s) => str_contains(strtolower($s->name), 'bedah'));
+            if ($bedah) return $bedah->id;
+        }
+
+        // Safe fallback: First existing specialization ID in the DB (usually UGD / Dokter Umum)
+        $fallback = $allSpecializations->first(fn($s) => str_contains(strtolower($s->name), 'umum') || str_contains(strtolower($s->name), 'ugd'))
+            ?? $allSpecializations->first();
+
+        return $fallback ? $fallback->id : 1;
     }
 
     /**
