@@ -693,12 +693,36 @@ class SimrsService
 
                         if ($response->successful()) {
                             $json = $response->json();
+                            $jadwalOperasi = $json['data']['jadwal_operasi'] ?? [];
+
+                            // Auto-enrich avatar dokter dari database jika ada
+                            try {
+                                $allDoctors = Doctor::withoutTrashed()->get();
+                                foreach ($jadwalOperasi as &$op) {
+                                    $opDocName = $op['nama_dokter'] ?? ($op['dokter']['nama'] ?? '');
+                                    $op['avatar_url'] = null;
+                                    $op['doctor_id'] = null;
+                                    if (!empty($opDocName)) {
+                                        foreach ($allDoctors as $doc) {
+                                            if ($this->matchDoctorName($doc->name, $opDocName)) {
+                                                $op['avatar_url'] = $doc->photo_url;
+                                                $op['doctor_id'] = $doc->id;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                unset($op);
+                            } catch (\Throwable $enrichErr) {
+                                Log::warning('Enrich surgery doctor avatar error: ' . $enrichErr->getMessage());
+                            }
+
                             return [
                                 'source' => 'simrs_live',
                                 'success' => true,
                                 'from' => $from,
                                 'to' => $to,
-                                'jadwal_operasi' => $json['data']['jadwal_operasi'] ?? [],
+                                'jadwal_operasi' => $jadwalOperasi,
                                 'last_fetched' => $json['data']['last_fetched'] ?? now()->format('d/m/Y H:i:s'),
                             ];
                         }

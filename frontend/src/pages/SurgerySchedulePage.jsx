@@ -17,7 +17,7 @@ import { PageLayout } from '../layouts/PageLayout';
 const DAY_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
 export default function SurgerySchedulePage() {
-  const { simrsSurgeryData, refreshSurgeryData, doctors = [], isLoadingBackend } = useHospitalData();
+  const { simrsSurgeryData, refreshSurgeryData, doctors = [], isLoadingBackend, formatImageUrl } = useHospitalData();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Helper untuk menentukan nama hari hari ini dalam bahasa Indonesia
@@ -132,21 +132,58 @@ export default function SurgerySchedulePage() {
     }, 600);
   };
 
-  // Helper untuk mencocokkan foto dokter
-  const getDoctorPhoto = (docName) => {
-    if (!docName) return '/images/doctors/doctor-male-default.jpg';
-    const cleanName = docName.toLowerCase().replace(/dr\.?\s*/i, '').trim();
-    
-    const matched = doctors.find(d => {
-      const dClean = (d.name || '').toLowerCase().replace(/dr\.?\s*/i, '').trim();
-      return dClean.includes(cleanName) || cleanName.includes(dClean);
-    });
-
-    if (matched?.photo && !matched.photo.includes('.svg') && !matched.photo.includes('default-doctor')) {
-      return matched.photo;
+  // Helper cerdas mencocokkan foto asli dokter dari database / SIMRS
+  const getDoctorPhoto = (docName, itemAvatar = null) => {
+    // 1. Jika SIMRS / backend sudah menyertakan avatar URL
+    if (itemAvatar && typeof itemAvatar === 'string' && itemAvatar.trim() !== '') {
+      const isDefault = itemAvatar.includes('.svg') || itemAvatar.includes('default') || itemAvatar.includes('SL99Oz3WyX0Wj5ZKUhthIhEg5VlDMqnLDPe685B4');
+      if (!isDefault) {
+        return formatImageUrl ? formatImageUrl(itemAvatar, '/images/doctors/doctor-male-default.jpg') : itemAvatar;
+      }
     }
 
-    const isFemale = /siti|rizka|yolanda|levina|dwi|depsi|mutia/i.test(docName);
+    if (!docName) return '/images/doctors/doctor-male-default.jpg';
+
+    // 2. Normalisasi cerdas nama dokter (hapus gelar depan dr./drg. dan gelar belakang Sp.B, FICS, dll.)
+    const cleanDoctorName = (s) => {
+      if (!s || typeof s !== 'string') return '';
+      let clean = s.toLowerCase();
+      clean = clean.replace(/^(drg\.|dr\.|prof\.|drs\.)\s+/i, '');
+      clean = clean.replace(/,.*$/, ''); // Hapus semua gelar setelah koma
+      clean = clean.replace(/[^a-z0-9\s]/g, ' ');
+      return clean.trim().replace(/\s+/g, ' ');
+    };
+
+    const targetClean = cleanDoctorName(docName);
+
+    // 3. Cari dokter yang cocok di database
+    const matched = doctors.find(d => {
+      const dbClean = cleanDoctorName(d.name);
+      if (!dbClean || !targetClean) return false;
+      if (dbClean === targetClean) return true;
+      if (dbClean.includes(targetClean) || targetClean.includes(dbClean)) return true;
+
+      // Token matching
+      const t1 = dbClean.split(' ').filter(x => x.length > 2);
+      const t2 = targetClean.split(' ').filter(x => x.length > 2);
+      if (t1.length > 0 && t2.length > 0) {
+        const intersect = t1.filter(x => t2.includes(x));
+        if (intersect.length >= 2 || (t1.length === 1 && intersect.length === 1)) {
+          return true;
+        }
+      }
+      return false;
+    });
+
+    const candidatePhoto = matched?.photo_url || matched?.photo;
+    if (candidatePhoto && typeof candidatePhoto === 'string') {
+      const isDefault = candidatePhoto.includes('.svg') || candidatePhoto.includes('default') || candidatePhoto.includes('SL99Oz3WyX0Wj5ZKUhthIhEg5VlDMqnLDPe685B4');
+      if (!isDefault) {
+        return formatImageUrl ? formatImageUrl(candidatePhoto, '/images/doctors/doctor-male-default.jpg') : candidatePhoto;
+      }
+    }
+
+    const isFemale = /siti|indah|atikanur|asri|levina|nurul|dwi|ayu|putri|rahma|desi|rizka|yolanda|depsi|mutia/i.test(docName);
     return isFemale ? '/images/doctors/doctor-female-default.jpg' : '/images/doctors/doctor-male-default.jpg';
   };
 
@@ -331,7 +368,7 @@ export default function SurgerySchedulePage() {
                   const doctorName = item.nama_dokter || item.dokter?.nama || 'Dokter Spesialis';
                   const smfName = item.nama_smf || item.smf?.nama || 'Spesialis Bedah';
                   const dateStr = item.tanggal || '-';
-                  const photoSrc = getDoctorPhoto(doctorName);
+                  const photoSrc = getDoctorPhoto(doctorName, item.avatar_url || item.dokter?.avatar_url);
 
                   return (
                     <div
