@@ -2185,6 +2185,28 @@ export function HospitalDataProvider({ children }) {
     }
   };
 
+  const adminSyncPolikliniksFromSimrs = async () => {
+    try {
+      const res = await api.adminSyncPolikliniksFromSimrs();
+      await loadBackendData(true);
+      return res;
+    } catch (err) {
+      console.error('[HospitalDataContext] adminSyncPolikliniksFromSimrs error:', err);
+      throw err;
+    }
+  };
+
+  const adminCleanStalePolikliniks = async () => {
+    try {
+      const res = await api.adminCleanStalePolikliniks();
+      await loadBackendData(true);
+      return res;
+    } catch (err) {
+      console.error('[HospitalDataContext] adminCleanStalePolikliniks error:', err);
+      throw err;
+    }
+  };
+
   // Helper pencocokan item fleksibel (mendukung ID numerik murni, string id ber-prefix, dbId, dan slug)
   const isMatchItem = (a, b) => {
     if (!a || !b) return false;
@@ -2399,7 +2421,7 @@ export function HospitalDataProvider({ children }) {
   const deleteItem = (entityType, id) => {
     switch (entityType) {
       case 'poliklinik':
-        setPoliklinikList(prev => prev.filter(x => x.id !== id));
+        setPoliklinikList(prev => prev.filter(x => String(x.id) !== String(id) && String(x.dbId) !== String(id) && `poli-${x.dbId}` !== String(id) && `poli-${x.id}` !== String(id)));
         break;
       case 'doctor':
         setDoctors(prev => prev.filter(x => x.id !== id));
@@ -2533,6 +2555,8 @@ export function HospitalDataProvider({ children }) {
         adminCreateDoctorLeave,
         adminUpdateDoctorLeave,
         adminDeleteDoctorLeave,
+        adminSyncPolikliniksFromSimrs,
+        adminCleanStalePolikliniks,
         saveItem,
         deleteItem,
         resetToDefaultData,

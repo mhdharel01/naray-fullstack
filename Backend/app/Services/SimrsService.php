@@ -201,6 +201,13 @@ class SimrsService
             return ['status' => 'skipped', 'message' => 'Tidak ada dokter yang ditemukan di SIMRS'];
         }
 
+        // 0. SINKRONKAN NAMA & DATA POLIKLINIK DULU AGAR 100% SELARAS DENGAN SIMRS
+        try {
+            $this->syncPolikliniksWithSimrs($simrsData, false);
+        } catch (\Throwable $pe) {
+            Log::warning('SIMRS auto-sync polikliniks error: ' . $pe->getMessage());
+        }
+
         $allPolikliniks = Poliklinik::all();
         $allSpecializations = Specialization::all();
         $branchId = \App\Models\Branch::first()?->id ?? 1;
@@ -435,19 +442,225 @@ class SimrsService
      */
     private function resolvePoliklinikId(array $ruanganList, $allPolikliniks): ?int
     {
+        $synonyms = [
+            'paru' => ['pulmonologi', 'kedokteran respirasi', 'paru'],
+            'kulit dan kelamin' => ['dermatologi', 'venereologi', 'kulit dan kelamin', 'kulit & kelamin'],
+            'kandungan' => ['kebidanan', 'obgyn', 'kandungan'],
+            'kedokteran jiwa' => ['psikiatri', 'jiwa'],
+            'saraf' => ['neurologi', 'neuro', 'saraf'],
+            'orthopedi' => ['orthopedi', 'ortopedi'],
+        ];
+
         foreach ($ruanganList as $ruangan) {
             if (empty($ruangan)) continue;
-            $cleanRuangan = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', $ruangan)));
+            $cleanRuangan = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', rtrim($ruangan, '. '))));
 
+            // 1. Direct / exact match
             foreach ($allPolikliniks as $p) {
-                $cleanPoli = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', $p->name)));
-                if ($cleanPoli === $cleanRuangan || str_contains($cleanPoli, $cleanRuangan) || str_contains($cleanRuangan, $cleanPoli)) {
+                $cleanPoli = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', rtrim($p->name, '. '))));
+                if ($cleanPoli === $cleanRuangan) {
+                    return $p->id;
+                }
+            }
+
+            // 2. Strict Bedah / Bedah Mulut isolation
+            if ($cleanRuangan === 'bedah') {
+                $bedah = $allPolikliniks->first(function ($p) {
+                    $cp = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', $p->name)));
+                    return $cp === 'bedah' && !str_contains($cp, 'mulut');
+                });
+                if ($bedah) return $bedah->id;
+            }
+
+            if ($cleanRuangan === 'gigi') {
+                $gigi = $allPolikliniks->first(function ($p) {
+                    $cp = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', $p->name)));
+                    return ($cp === 'gigi' || str_contains($cp, 'gigi')) && !str_contains($cp, 'bedah');
+                });
+                if ($gigi) return $gigi->id;
+            }
+
+            if (str_contains($cleanRuangan, 'bedah mulut')) {
+                $bm = $allPolikliniks->first(function ($p) {
+                    return str_contains(strtolower($p->name), 'bedah mulut');
+                });
+                if ($bm) return $bm->id;
+            }
+
+            // 3. Synonym match
+            if (isset($synonyms[$cleanRuangan])) {
+                foreach ($synonyms[$cleanRuangan] as $syn) {
+                    foreach ($allPolikliniks as $p) {
+                        if (str_contains(strtolower($p->name), $syn)) {
+                            return $p->id;
+                        }
+                    }
+                }
+            }
+
+            // 4. Substring fallback
+            foreach ($allPolikliniks as $p) {
+                $cleanPoli = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', rtrim($p->name, '. '))));
+                if (str_contains($cleanPoli, $cleanRuangan) || str_contains($cleanRuangan, $cleanPoli)) {
                     return $p->id;
                 }
             }
         }
 
         return $allPolikliniks->first()?->id ?? 1;
+    }
+
+    /**
+     * Sinkronisasi daftar Poliklinik agar 100% selaras dengan ruangan/poli di SIMRS Dekago
+     * - Memperbarui nama poli lama ke nama resmi SIMRS (misal Poli Pulmonologi -> Poli Paru)
+     * - Memperbaiki penulisan/tanda baca (misal Poli Dermatologi... -> Poli Kulit dan Kelamin)
+     * - Membuat poli baru dari SIMRS jika belum ada di database lokal
+     * - Opsi pembersihan ($deleteStale = true): menghapus/soft-delete poli lokal yang tidak ada di SIMRS
+     */
+    public function syncPolikliniksWithSimrs(array $simrsData, bool $deleteStale = false): array
+    {
+        if (empty($simrsData) || empty($simrsData['jadwal_dokter']) || count($simrsData['jadwal_dokter']) < 3) {
+            return ['status' => 'skipped', 'message' => 'Data SIMRS tidak valid atau kosong'];
+        }
+
+        // 1. Kumpulkan semua nama ruangan unik dari SIMRS
+        $simrsRooms = [];
+        foreach ($simrsData['jadwal_dokter'] as $dayGroup) {
+            foreach ($dayGroup['jadwal'] ?? [] as $item) {
+                $r = $item['ruangan'] ?? null;
+                if (!empty($r['nama'])) {
+                    $rawName = trim($r['nama']);
+                    $cleanKey = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', $rawName)));
+                    $cleanKey = rtrim($cleanKey, '. ');
+                    $officialName = str_starts_with(strtolower($rawName), 'poli') ? $rawName : "Poli {$rawName}";
+                    $officialName = rtrim($officialName, '. ');
+                    $simrsRooms[$cleanKey] = [
+                        'official_name' => $officialName,
+                        'simrs_id' => $r['id'] ?? null,
+                    ];
+                }
+            }
+        }
+
+        if (empty($simrsRooms)) {
+            return ['status' => 'skipped', 'message' => 'Tidak ada ruangan poliklinik dari SIMRS'];
+        }
+
+        $synonyms = [
+            'paru' => ['pulmonologi', 'kedokteran respirasi', 'paru'],
+            'kulit dan kelamin' => ['dermatologi', 'venereologi', 'kulit dan kelamin', 'kulit & kelamin'],
+            'kandungan' => ['kebidanan', 'obgyn', 'kandungan'],
+            'kedokteran jiwa' => ['psikiatri', 'jiwa'],
+            'saraf' => ['neurologi', 'neuro', 'saraf'],
+            'orthopedi' => ['orthopedi', 'ortopedi'],
+        ];
+
+        $allPolis = Poliklinik::withTrashed()->get();
+        $branchId = \App\Models\Branch::first()?->id ?? 1;
+        $updatedCount = 0;
+        $createdCount = 0;
+        $restoredCount = 0;
+        $deletedCount = 0;
+        $matchedPoliIds = [];
+
+        // 2. Selaraskan nama setiap poli SIMRS ke database lokal
+        foreach ($simrsRooms as $cleanKey => $info) {
+            $officialName = $info['official_name'];
+            $matched = null;
+
+            // Cari yang namanya sama persis (case insensitive)
+            foreach ($allPolis as $p) {
+                $pClean = strtolower(trim(preg_replace('/^(poli|poliklinik)\s+/i', '', rtrim($p->name, '. '))));
+                if ($pClean === $cleanKey || strtolower(trim($p->name)) === strtolower($officialName)) {
+                    $matched = $p;
+                    break;
+                }
+            }
+
+            // Jika belum cocok, cari berdasarkan sinonim resmi (misal Pulmonologi -> Paru)
+            if (!$matched && isset($synonyms[$cleanKey])) {
+                foreach ($synonyms[$cleanKey] as $syn) {
+                    foreach ($allPolis as $p) {
+                        if (str_contains(strtolower($p->name), $syn)) {
+                            if ($cleanKey === 'bedah' && str_contains(strtolower($p->name), 'mulut')) continue;
+                            if ($cleanKey === 'gigi' && str_contains(strtolower($p->name), 'bedah')) continue;
+
+                            $matched = $p;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if ($matched) {
+                $matchedPoliIds[] = $matched->id;
+
+                // Jika nama di DB belum sesuai nama resmi SIMRS, update!
+                if ($matched->name !== $officialName) {
+                    $oldName = $matched->name;
+                    $matched->update([
+                        'name' => $officialName,
+                        'status' => 'active',
+                    ]);
+                    $updatedCount++;
+                    Log::info("SIMRS Poliklinik Sync: ID {$matched->id} diperbarui dari '{$oldName}' menjadi '{$officialName}'.");
+                }
+
+                if ($matched->trashed()) {
+                    $matched->restore();
+                    $matched->update(['status' => 'active']);
+                    $restoredCount++;
+                }
+            } else {
+                // Poliklinik belum ada sama sekali di DB -> Auto-create
+                $newPoli = Poliklinik::create([
+                    'name' => $officialName,
+                    'branch_id' => $branchId,
+                    'status' => 'active',
+                    'description' => "Pelayanan Rawat Jalan {$officialName}",
+                ]);
+                $matchedPoliIds[] = $newPoli->id;
+                $createdCount++;
+                Log::info("SIMRS Poliklinik Sync: Poli baru '{$officialName}' (ID: {$newPoli->id}) otomatis dibuat dari SIMRS.");
+            }
+        }
+
+        // 3. Hapus (Soft-Delete) poliklinik lama yang SUDAH TIDAK ADA di SIMRS (jika deleteStale diaktifkan)
+        if ($deleteStale) {
+            $activePolis = Poliklinik::withoutTrashed()->get();
+            foreach ($activePolis as $p) {
+                if (!in_array($p->id, $matchedPoliIds)) {
+                    // Lepaskan relasi dokter & jadwal
+                    $p->doctors()->detach();
+                    $p->schedules()->delete();
+                    $p->delete();
+                    $deletedCount++;
+                    Log::info("SIMRS Poliklinik Clean: Poli lama '{$p->name}' (ID: {$p->id}) di-soft-delete karena tidak ada di SIMRS.");
+                }
+            }
+        }
+
+        return [
+            'simrs_rooms' => count($simrsRooms),
+            'updated' => $updatedCount,
+            'created' => $createdCount,
+            'restored' => $restoredCount,
+            'deleted' => $deletedCount,
+            'matched_ids' => $matchedPoliIds,
+        ];
+    }
+
+    /**
+     * Membersihkan semua poliklinik lokal yang sudah tidak aktif / tidak ada di SIMRS
+     */
+    public function cleanStalePolikliniks(): array
+    {
+        $data = $this->getDoctorSchedules(true);
+        if (empty($data) || empty($data['jadwal_dokter'])) {
+            return ['status' => 'error', 'message' => 'SIMRS tidak dapat diakses'];
+        }
+
+        return $this->syncPolikliniksWithSimrs($data, true);
     }
 
     /**

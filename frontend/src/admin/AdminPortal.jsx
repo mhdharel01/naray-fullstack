@@ -63,6 +63,9 @@ function AdminDashboard({ onLogout }) {
     adminUpdate,
     adminDelete,
     adminDeleteAppointment,
+    adminSyncPolikliniksFromSimrs,
+    adminCleanStalePolikliniks,
+    simrsDoctorSchedules,
     bannerSlides = [],
     setBannerSlides,
     leadershipMessage,
@@ -964,6 +967,10 @@ function AdminDashboard({ onLogout }) {
                   handleOpenCreate={handleOpenCreate}
                   handleOpenEdit={handleOpenEdit}
                   promptDelete={promptDelete}
+                  adminSyncPolikliniksFromSimrs={adminSyncPolikliniksFromSimrs}
+                  adminCleanStalePolikliniks={adminCleanStalePolikliniks}
+                  simrsDoctorSchedules={simrsDoctorSchedules}
+                  showToast={showToast}
                 />
               )}
 

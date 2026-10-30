@@ -103,11 +103,68 @@ class PoliklinikController extends Controller
     {
         $poliklinik = Poliklinik::findOrFail($id);
 
+        // Lepaskan relasi dokter agar tidak menggantung
+        $poliklinik->doctors()->detach();
+
+        // Bersihkan jadwal yang menggunakan poliklinik ini
+        $poliklinik->schedules()->delete();
+
+        // Soft-delete poliklinik
         $poliklinik->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Poliklinik berhasil dihapus',
+        ]);
+    }
+
+    /**
+     * Sinkronkan daftar Poliklinik dari API SIMRS Dekago
+     * POST /api/admin/poliklinik/sync-simrs
+     */
+    public function syncFromSimrs()
+    {
+        $simrsService = app(\App\Services\SimrsService::class);
+        $schedules = $simrsService->getDoctorSchedules(true);
+
+        if (empty($schedules) || empty($schedules['jadwal_dokter'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghubungkan ke server SIMRS untuk sinkronisasi poliklinik.',
+            ], 500);
+        }
+
+        $result = $simrsService->syncPolikliniksWithSimrs($schedules, false);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Sinkronisasi poliklinik dari SIMRS berhasil.',
+            'data' => $result,
+        ]);
+    }
+
+    /**
+     * Bersihkan poliklinik lama / usang yang sudah tidak ada di SIMRS
+     * POST /api/admin/poliklinik/clean-stale
+     */
+    public function cleanStale()
+    {
+        $simrsService = app(\App\Services\SimrsService::class);
+        $schedules = $simrsService->getDoctorSchedules(true);
+
+        if (empty($schedules) || empty($schedules['jadwal_dokter'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memuat jadwal SIMRS. Pembersihan dibatalkan demi keamanan data.',
+            ], 500);
+        }
+
+        $result = $simrsService->syncPolikliniksWithSimrs($schedules, true);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pembersihan poliklinik lama/usang berhasil dilakukan.',
+            'data' => $result,
         ]);
     }
 }

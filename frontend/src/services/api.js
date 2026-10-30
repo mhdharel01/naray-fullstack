@@ -199,6 +199,8 @@ export const api = {
   adminCreatePoliklinik: (data) => fetchApi('/admin/poliklinik', { method: 'POST', body: JSON.stringify(data) }),
   adminUpdatePoliklinik: (id, data) => fetchApi(`/admin/poliklinik/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   adminDeletePoliklinik: (id) => fetchApi(`/admin/poliklinik/${id}`, { method: 'DELETE' }),
+  adminSyncPolikliniksFromSimrs: () => fetchApi('/admin/poliklinik/sync-simrs', { method: 'POST' }),
+  adminCleanStalePolikliniks: () => fetchApi('/admin/poliklinik/clean-stale', { method: 'POST' }),
 
   // 16. Admin MCU Packages CRUD
   adminGetMcuPackages: (params = {}) => {

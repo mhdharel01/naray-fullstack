@@ -221,6 +221,16 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy'
     ]);
 
+    Route::post('/admin/poliklinik/sync-simrs', [
+        AdminPoliklinikController::class,
+        'syncFromSimrs'
+    ]);
+
+    Route::post('/admin/poliklinik/clean-stale', [
+        AdminPoliklinikController::class,
+        'cleanStale'
+    ]);
+
 
     // --------------------------------------------------------
     // BRANCHES
