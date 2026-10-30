@@ -73,6 +73,43 @@ export const formatImageUrl = (url, fallback = '/images/default-image.svg') => {
   return clean;
 };
 
+// Helper format tarif yang mendukung angka tunggal maupun rentang harga (string)
+export const formatRoomTarif = (val) => {
+  const raw = String(val !== undefined && val !== null ? val : '').trim();
+  if (!raw || raw === '0' || raw.toLowerCase() === 'null' || raw.toLowerCase() === 'undefined' || raw === 'Hubungi Admisi') {
+    return 'Hubungi Admisi';
+  }
+  // Jika rentang harga dengan tanda strip (- atau –)
+  if (raw.includes('-') || raw.includes('–')) {
+    let formatted = raw;
+    if (!raw.toLowerCase().includes('rp')) {
+      formatted = `Rp ${raw}`;
+    }
+    return formatted.endsWith('/ malam') ? formatted : `${formatted} / malam`;
+  }
+
+  // Bersihkan sufiks / malam jika ada
+  let cleanVal = raw.replace(/\s*\/\s*malam$/i, '').trim();
+
+  // PENTING: Bersihkan akhiran .00 bawaan MySQL DECIMAL (misal 600000.00 -> 600000)
+  // agar tidak terlipatgandakan 100x menjadi 60 Juta saat direplace regex digit!
+  if (/^\d+\.00$/.test(cleanVal)) {
+    cleanVal = cleanVal.replace(/\.00$/, '');
+  }
+
+  // Jika sudah memiliki format mata uang Rp
+  if (cleanVal.toLowerCase().includes('rp')) {
+    cleanVal = cleanVal.replace(/\.00$/, '');
+    return cleanVal.endsWith('/ malam') ? cleanVal : `${cleanVal} / malam`;
+  }
+
+  const num = Number(cleanVal.replace(/[^0-9]/g, ''));
+  if (!isNaN(num) && num > 0) {
+    return `Rp ${num.toLocaleString('id-ID')} / malam`;
+  }
+  return cleanVal.endsWith('/ malam') ? cleanVal : `${cleanVal} / malam`;
+};
+
 export const DEFAULT_SPECIALIZATIONS = [
   { id: 1, name: 'UGD & Dokter Umum', slug: 'ugd-dokter-umum' },
   { id: 2, name: 'Penyakit Dalam', slug: 'penyakit-dalam' },
@@ -685,43 +722,6 @@ export function HospitalDataProvider({ children }) {
     } else if (nameLower.includes('isolasi')) {
       defaultPrice = 850000;
     }
-
-    // Helper format tarif yang mendukung angka tunggal maupun rentang harga (string)
-    const formatRoomTarif = (val) => {
-      const raw = String(val !== undefined && val !== null ? val : '').trim();
-      if (!raw || raw === '0' || raw.toLowerCase() === 'null' || raw.toLowerCase() === 'undefined' || raw === 'Hubungi Admisi') {
-        return 'Hubungi Admisi';
-      }
-      // Jika rentang harga dengan tanda strip (- atau –)
-      if (raw.includes('-') || raw.includes('–')) {
-        let formatted = raw;
-        if (!raw.toLowerCase().includes('rp')) {
-          formatted = `Rp ${raw}`;
-        }
-        return formatted.endsWith('/ malam') ? formatted : `${formatted} / malam`;
-      }
-
-      // Bersihkan sufiks / malam jika ada
-      let cleanVal = raw.replace(/\s*\/\s*malam$/i, '').trim();
-
-      // PENTING: Bersihkan akhiran .00 bawaan MySQL DECIMAL (misal 600000.00 -> 600000)
-      // agar tidak terlipatgandakan 100x menjadi 60 Juta saat direplace regex digit!
-      if (/^\d+\.00$/.test(cleanVal)) {
-        cleanVal = cleanVal.replace(/\.00$/, '');
-      }
-
-      // Jika sudah memiliki format mata uang Rp
-      if (cleanVal.toLowerCase().includes('rp')) {
-        cleanVal = cleanVal.replace(/\.00$/, '');
-        return cleanVal.endsWith('/ malam') ? cleanVal : `${cleanVal} / malam`;
-      }
-
-      const num = Number(cleanVal.replace(/[^0-9]/g, ''));
-      if (!isNaN(num) && num > 0) {
-        return `Rp ${num.toLocaleString('id-ID')} / malam`;
-      }
-      return cleanVal.endsWith('/ malam') ? cleanVal : `${cleanVal} / malam`;
-    };
 
     const priceDisplay = formatRoomTarif(r.price_per_night || r.price);
 
