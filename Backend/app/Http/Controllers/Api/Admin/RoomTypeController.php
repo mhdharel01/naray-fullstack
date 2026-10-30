@@ -15,8 +15,11 @@ class RoomTypeController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-
             $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
         }
 
         if ($request->filled('status')) {
@@ -48,6 +51,7 @@ class RoomTypeController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:50'],
             'capacity' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price_per_night' => ['nullable', 'string', 'max:255'],
@@ -55,6 +59,10 @@ class RoomTypeController extends Controller
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ]);
+
+        if (empty($validated['category'])) {
+            $validated['category'] = 'rawat_inap';
+        }
 
         $roomType = RoomType::create($validated);
 
@@ -77,6 +85,7 @@ class RoomTypeController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:50'],
             'capacity' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price_per_night' => ['nullable', 'string', 'max:255'],
@@ -84,6 +93,10 @@ class RoomTypeController extends Controller
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ]);
+
+        if (empty($validated['category'])) {
+            $validated['category'] = $roomType->category ?: 'rawat_inap';
+        }
 
         $roomType->update($validated);
 

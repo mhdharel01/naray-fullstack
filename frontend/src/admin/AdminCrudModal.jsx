@@ -117,7 +117,7 @@ export function AdminCrudModal({
         },
         poliklinik: { name: '', description: '', image_url: '', status: 'active' },
         mcu: { name: '', badge: '', price: '', duration: '2 - 3 Jam', target: '', highlight: '', itemsText: '', status: 'active' },
-        room: { name: '', capacity: '1 - 2 Pasien per Kamar', price: '', description: '', image_url: '', facilitiesText: '', status: 'active' },
+        room: { name: '', category: 'rawat_inap', capacity: '1 - 2 Pasien per Kamar', price: '', description: '', image_url: '', facilitiesText: '', status: 'active' },
         facility: { name: '', type: 'advanced', description: '', image_url: '', status: 'active' },
         center: { name: '', tagline: '', description: '', image_url: '', status: 'active' },
         media: { title: '', type: 'image', url: '', description: '', category: 'Kegiatan Naray', status: 'active' },
@@ -719,6 +719,21 @@ export function AdminCrudModal({
                 </div>
 
                 <div className="admin-form-half">
+                  <label>Kategori Kamar <span className="req">*</span></label>
+                  <select
+                    name="category"
+                    value={formData.category || 'rawat_inap'}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="rawat_inap">Rawat Inap</option>
+                    <option value="intensif">Intensif (ICU / HCU / NICU / PICU)</option>
+                    <option value="isolasi">Isolasi (Tekanan Negatif / Khusus)</option>
+                    <option value="emargensi">Emergensi (IGD / Gawat Darurat)</option>
+                  </select>
+                </div>
+
+                <div className="admin-form-half">
                   <label>Kapasitas Bed / Pasien <span className="req">*</span></label>
                   <input
                     type="text"
@@ -731,16 +746,15 @@ export function AdminCrudModal({
                 </div>
 
                 <div className="admin-form-half">
-                  <label>Tarif per Malam (Bisa Rentang Harga) <span className="req">*</span></label>
+                  <label>Tarif per Malam (Opsional / Rentang Harga)</label>
                   <input
                     type="text"
                     name="price"
                     value={formData.price || formData.price_per_night || ''}
                     onChange={handleChange}
-                    placeholder="Contoh: Rp 350.000 - Rp 500.000 atau 750000"
-                    required
+                    placeholder="Contoh: Rp 350.000 - Rp 500.000 (Kosongkan bila Hubungi Admisi)"
                   />
-                  <span className="text-[11px] text-slate-400 mt-1 block">Bisa diisi nominal satuan atau rentang harga (misal: Rp 350.000 - Rp 500.000).</span>
+                  <span className="text-[11px] text-slate-400 mt-1 block">Bisa rentang harga, nominal tetap, atau kosongkan bila tarif disesuaikan / Hubungi Admisi.</span>
                 </div>
 
                 <div className="admin-form-half">

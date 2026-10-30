@@ -30,12 +30,11 @@ import { PageLayout } from '../layouts/PageLayout';
 import { inpatientRooms as fallbackRooms, hospitalInfo } from '../data/hospitalData';
 
 const ROOM_CATEGORIES = [
-  { id: 'all', label: 'Semua Kamar' },
-  { id: 'vip', label: 'Suite & VIP' },
-  { id: 'kelas-1', label: 'Kelas 1 (Green Petals)' },
-  { id: 'kelas-2', label: 'Kelas 2 (Red Petals)' },
-  { id: 'reguler', label: 'Kelas 3 Reguler (Seroja)' },
-  { id: 'intensive', label: 'ICU & Isolasi' }
+  { id: 'all', label: 'Semua Kategori' },
+  { id: 'rawat_inap', label: 'Rawat Inap' },
+  { id: 'intensif', label: 'Intensif' },
+  { id: 'isolasi', label: 'Isolasi' },
+  { id: 'emargensi', label: 'Emergensi' }
 ];
 
 export default function InpatientRoomsPage() {
@@ -404,14 +403,17 @@ export default function InpatientRoomsPage() {
   };
 
   const getRoomCategory = (room) => {
-    if (!room) return 'standard';
+    if (!room) return 'rawat_inap';
+    const rawCat = (room.category || '').toLowerCase().trim();
+    if (rawCat === 'rawat_inap' || rawCat === 'intensif' || rawCat === 'isolasi' || rawCat === 'emargensi') {
+      return rawCat;
+    }
+    // Fallback normalisasi
     const str = `${room.id || ''} ${room.name || ''} ${room.category || ''} ${room.tag || ''}`.toLowerCase();
-    if (str.includes('vip') || str.includes('suite') || str.includes('pistillum')) return 'vip';
-    if (str.includes('kelas 1') || str.includes('green')) return 'kelas-1';
-    if (str.includes('kelas 2') || str.includes('red')) return 'kelas-2';
-    if (str.includes('kelas 3') || str.includes('seroja') || str.includes('reguler')) return 'reguler';
-    if (str.includes('icu') || str.includes('isolasi') || str.includes('intensive') || str.includes('staments')) return 'intensive';
-    return 'standard';
+    if (str.includes('icu') || str.includes('intensif') || str.includes('nicu') || str.includes('picu') || str.includes('hcu')) return 'intensif';
+    if (str.includes('isolasi')) return 'isolasi';
+    if (str.includes('igd') || str.includes('emergensi') || str.includes('emargensi') || str.includes('darurat') || str.includes('resusitasi')) return 'emargensi';
+    return 'rawat_inap';
   };
 
   const filteredRooms = useMemo(() => {
@@ -419,8 +421,7 @@ export default function InpatientRoomsPage() {
       const cat = getRoomCategory(room);
       const matchesCategory = 
         activeCategory === 'all' || 
-        cat === activeCategory || 
-        (activeCategory === 'standard' && (cat === 'kelas-1' || cat === 'kelas-2'));
+        cat === activeCategory;
 
       const matchesSearch = 
         !searchKeyword ||
@@ -1054,12 +1055,11 @@ export default function InpatientRoomsPage() {
 
                         {/* Top-Left: Category Tag */}
                         <span className="absolute top-4 left-4 inline-flex items-center px-3 py-1 rounded-full bg-slate-900/85 backdrop-blur-md text-white text-[11px] font-bold uppercase tracking-wider shadow-md border border-white/15">
-                          {room.name.includes('VIP') ? 'SUITE & VIP' : 
-                           room.name.includes('ICU') ? 'INTENSIF ICU' : 
-                           room.name.includes('Isolasi') ? 'ISOLASI HEPA' : 
-                           room.name.includes('Kelas 1') ? 'RAWAT KELAS 1' : 
-                           room.name.includes('Kelas 2') ? 'RAWAT KELAS 2' : 
-                           room.name.includes('Seroja') || room.name.includes('Kelas 3') ? 'KELAS 3 KRIS' : 'RAWAT INAP'}
+                          {room.categoryLabel || (
+                            getRoomCategory(room) === 'intensif' ? 'INTENSIF' :
+                            getRoomCategory(room) === 'isolasi' ? 'ISOLASI' :
+                            getRoomCategory(room) === 'emargensi' ? 'EMERGENSI' : 'RAWAT INAP'
+                          )}
                         </span>
 
                         {/* Top-Right: Bed Availability Status Badge */}
@@ -1075,11 +1075,11 @@ export default function InpatientRoomsPage() {
                         </div>
 
                         {/* Bottom Floating Price */}
-                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white bg-slate-950/50 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15">
+                        <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white bg-slate-950/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15">
                           <span className="text-xs font-semibold text-teal-200">
-                            Estimasi Tarif
+                            {room.price === 'Hubungi Admisi' ? 'Informasi Tarif' : 'Estimasi Tarif'}
                           </span>
-                          <span className="font-heading font-black text-sm sm:text-base text-white tracking-tight">
+                          <span className="font-heading font-black text-xs sm:text-sm text-white tracking-tight">
                             {room.price}
                           </span>
                         </div>

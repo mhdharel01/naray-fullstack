@@ -40,23 +40,14 @@ export default function RoomsTab({
   // KPI Metrics
   const stats = useMemo(() => {
     const total = inpatientRooms.length;
-    const vipCount = inpatientRooms.filter(r => {
-      const cat = (r.category || '').toLowerCase();
-      const n = (r.name || '').toLowerCase();
-      return cat === 'vip' || n.includes('vip') || n.includes('suite');
-    }).length;
-
-    const intensiveCount = inpatientRooms.filter(r => {
-      const cat = (r.category || '').toLowerCase();
-      const n = (r.name || '').toLowerCase();
-      return cat === 'intensive' || n.includes('icu') || n.includes('picu') || n.includes('nicu');
-    }).length;
-
-    const bpjsCount = inpatientRooms.filter(r => r.bpjsCovered !== false).length;
+    const rawatInapCount = inpatientRooms.filter(r => (r.category || '').toLowerCase() === 'rawat_inap').length;
+    const intensifCount = inpatientRooms.filter(r => (r.category || '').toLowerCase() === 'intensif').length;
+    const isolasiCount = inpatientRooms.filter(r => (r.category || '').toLowerCase() === 'isolasi').length;
+    const emargensiCount = inpatientRooms.filter(r => (r.category || '').toLowerCase() === 'emargensi').length;
     const activeCount = inpatientRooms.filter(r => (r.status || 'active').toLowerCase() === 'active').length;
     const inactiveCount = total - activeCount;
 
-    return { total, vipCount, intensiveCount, bpjsCount, activeCount, inactiveCount };
+    return { total, rawatInapCount, intensifCount, isolasiCount, emargensiCount, activeCount, inactiveCount };
   }, [inpatientRooms]);
 
   // Filtered rooms
@@ -80,21 +71,10 @@ export default function RoomsTab({
         return false;
       }
 
-      // Category filter
+      // Category filter (rawat_inap | intensif | isolasi | emargensi)
       const cat = (r.category || '').toLowerCase();
-      const name = (r.name || '').toLowerCase();
-
-      if (categoryFilter === 'vip') {
-        return cat === 'vip' || name.includes('vip') || name.includes('suite');
-      }
-      if (categoryFilter === 'class1_2') {
-        return name.includes('kelas 1') || name.includes('kelas 2') || name.includes('petals');
-      }
-      if (categoryFilter === 'class3') {
-        return name.includes('kelas 3') || name.includes('corolla');
-      }
-      if (categoryFilter === 'icu') {
-        return cat === 'intensive' || name.includes('icu') || name.includes('nicu') || name.includes('picu') || name.includes('isolasi');
+      if (categoryFilter !== 'all' && cat !== categoryFilter) {
+        return false;
       }
 
       return true;
@@ -138,50 +118,32 @@ export default function RoomsTab({
           </div>
         </div>
 
-        {/* Kelas VIP & Suite */}
+        {/* Rawat Inap */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-              Kamar VVIP &amp; VIP
+              Kamar Rawat Inap
             </span>
-            <div className="font-heading text-2xl sm:text-3xl font-black text-amber-700 leading-none">
-              {stats.vipCount}
+            <div className="font-heading text-2xl sm:text-3xl font-black text-teal-700 leading-none">
+              {stats.rawatInapCount}
             </div>
             <span className="text-xs text-slate-500 mt-1.5 inline-block">
-              Fasilitas privat &amp; suite
+              Suite, VIP, Kelas 1, 2 &amp; 3
             </span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
-            <Crown size={24} />
+          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 border border-teal-100">
+            <Bed size={24} />
           </div>
         </div>
 
-        {/* Pasien Jaminan BPJS */}
+        {/* Unit Intensif */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-              Cover JKN / BPJS
-            </span>
-            <div className="font-heading text-2xl sm:text-3xl font-black text-emerald-700 leading-none">
-              {stats.bpjsCount}
-            </div>
-            <span className="text-xs text-slate-500 mt-1.5 inline-block">
-              Kelas 1, 2, 3 &amp; ICU
-            </span>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-100">
-            <ShieldCheck size={24} />
-          </div>
-        </div>
-
-        {/* Unit Khusus & Intensif */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-              Unit Intensif &amp; Isolasi
+              Unit Intensif
             </span>
             <div className="font-heading text-2xl sm:text-3xl font-black text-rose-700 leading-none">
-              {stats.intensiveCount}
+              {stats.intensifCount}
             </div>
             <span className="text-xs text-slate-500 mt-1.5 inline-block">
               ICU, PICU &amp; NICU
@@ -189,6 +151,24 @@ export default function RoomsTab({
           </div>
           <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
             <HeartPulse size={24} />
+          </div>
+        </div>
+
+        {/* Isolasi & Emergensi */}
+        <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-2xs flex items-center justify-between gap-4">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+              Isolasi &amp; Emergensi
+            </span>
+            <div className="font-heading text-2xl sm:text-3xl font-black text-amber-700 leading-none">
+              {stats.isolasiCount + stats.emargensiCount}
+            </div>
+            <span className="text-xs text-slate-500 mt-1.5 inline-block">
+              {stats.isolasiCount} Isolasi • {stats.emargensiCount} Emergensi
+            </span>
+          </div>
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100">
+            <ShieldCheck size={24} />
           </div>
         </div>
 
@@ -284,11 +264,11 @@ export default function RoomsTab({
                 Kategori:
               </span>
               {[
-                { id: 'all', label: 'Semua Tipe' },
-                { id: 'vip', label: 'VVIP & VIP Suite' },
-                { id: 'class1_2', label: 'Kelas 1 & 2' },
-                { id: 'class3', label: 'Kelas 3' },
-                { id: 'icu', label: 'Intensif / ICU' }
+                { id: 'all', label: 'Semua Kategori' },
+                { id: 'rawat_inap', label: 'Rawat Inap' },
+                { id: 'intensif', label: 'Intensif' },
+                { id: 'isolasi', label: 'Isolasi' },
+                { id: 'emargensi', label: 'Emergensi' }
               ].map(cat => (
                 <button
                   key={cat.id}
@@ -358,13 +338,15 @@ export default function RoomsTab({
                         {/* Top Badges */}
                         <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
                           <span className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md shadow-xs ${
-                            isVip
-                              ? 'bg-amber-500/90 text-white'
-                              : isIntensive
+                            r.category === 'intensif'
                               ? 'bg-rose-600/90 text-white'
+                              : r.category === 'isolasi'
+                              ? 'bg-purple-600/90 text-white'
+                              : r.category === 'emargensi'
+                              ? 'bg-amber-600/90 text-white'
                               : 'bg-teal-700/90 text-white'
                           }`}>
-                            {isVip ? '★ VVIP / VIP' : isIntensive ? 'Unit Intensif' : 'Kelas Perawatan'}
+                            {r.categoryLabel || (r.category === 'intensif' ? 'Intensif' : r.category === 'isolasi' ? 'Isolasi' : r.category === 'emargensi' ? 'Emergensi' : 'Rawat Inap')}
                           </span>
 
                           <StatusBadge status={r.status || 'active'} />
@@ -477,6 +459,7 @@ export default function RoomsTab({
                 <tr className="bg-slate-50/80 border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                   <th className="py-3 px-4 w-20">Foto</th>
                   <th className="py-3 px-4">Nama Tipe Kamar</th>
+                  <th className="py-3 px-4">Kategori</th>
                   <th className="py-3 px-4">Kapasitas Bed</th>
                   <th className="py-3 px-4">Tarif per Malam</th>
                   <th className="py-3 px-4">Fasilitas Utama</th>
@@ -487,7 +470,7 @@ export default function RoomsTab({
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                 {filteredRooms.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="py-12 text-center text-slate-500">
+                    <td colSpan="8" className="py-12 text-center text-slate-500">
                       <BedDouble size={36} className="mx-auto text-slate-300 mb-2" />
                       <p className="font-semibold text-slate-700">Tidak ada tipe kamar ditemukan</p>
                       <p className="text-xs text-slate-400 mt-0.5">Coba ubah kata kunci pencarian Anda.</p>
@@ -516,6 +499,19 @@ export default function RoomsTab({
                           ) : r.desc ? (
                             <span className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 block">{r.desc}</span>
                           ) : null}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold ${
+                            r.category === 'intensif'
+                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                              : r.category === 'isolasi'
+                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                              : r.category === 'emargensi'
+                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                              : 'bg-teal-50 text-teal-700 border border-teal-200'
+                          }`}>
+                            {r.categoryLabel || (r.category === 'intensif' ? 'Intensif' : r.category === 'isolasi' ? 'Isolasi' : r.category === 'emargensi' ? 'Emergensi' : 'Rawat Inap')}
+                          </span>
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">

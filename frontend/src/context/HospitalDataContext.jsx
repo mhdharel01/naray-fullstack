@@ -687,9 +687,11 @@ export function HospitalDataProvider({ children }) {
     }
 
     // Helper format tarif yang mendukung angka tunggal maupun rentang harga (string)
-    const formatRoomTarif = (val, defaultVal) => {
-      const raw = String(val !== undefined && val !== null ? val : (defaultVal || '')).trim();
-      if (!raw) return 'Hubungi Admisi';
+    const formatRoomTarif = (val) => {
+      const raw = String(val !== undefined && val !== null ? val : '').trim();
+      if (!raw || raw === '0' || raw.toLowerCase() === 'null' || raw.toLowerCase() === 'undefined' || raw === 'Hubungi Admisi') {
+        return 'Hubungi Admisi';
+      }
       // Jika sudah memiliki format mata uang atau tanda rentang harga (- atau –)
       if (raw.toLowerCase().includes('rp') || raw.includes('-') || raw.includes('–')) {
         return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
@@ -701,7 +703,7 @@ export function HospitalDataProvider({ children }) {
       return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
     };
 
-    const priceDisplay = formatRoomTarif(r.price_per_night || r.price, defaultPrice);
+    const priceDisplay = formatRoomTarif(r.price_per_night || r.price);
 
     // Sanitize and deduplicate facilities/features
     let rawDesc = (r.description || '')
@@ -787,41 +789,66 @@ export function HospitalDataProvider({ children }) {
     const feats = cleanFeatures.length >= 3 ? cleanFeatures : defaultFeats;
     const cleanDesc = cleanFeatures.join(' • ');
 
-    let cat = 'standard';
+    let cat = (r.category || '').toLowerCase().trim();
+    if (!cat) {
+      if (nameLower.includes('icu') || nameLower.includes('intensif') || nameLower.includes('nicu') || nameLower.includes('picu') || nameLower.includes('hcu')) {
+        cat = 'intensif';
+      } else if (nameLower.includes('isolasi')) {
+        cat = 'isolasi';
+      } else if (nameLower.includes('igd') || nameLower.includes('emergensi') || nameLower.includes('emargensi') || nameLower.includes('darurat') || nameLower.includes('resusitasi')) {
+        cat = 'emargensi';
+      } else {
+        cat = 'rawat_inap';
+      }
+    }
+    // Normalisasi alias kategori lama
+    if (cat === 'intensive') cat = 'intensif';
+    if (cat === 'emergency') cat = 'emargensi';
+    if (cat === 'standard' || cat === 'vip' || cat === 'reguler' || cat === 'kelas-1' || cat === 'kelas-2') cat = 'rawat_inap';
+
+    const categoryLabels = {
+      rawat_inap: 'Rawat Inap',
+      intensif: 'Intensif',
+      isolasi: 'Isolasi',
+      emargensi: 'Emergensi',
+    };
+    const categoryLabel = categoryLabels[cat] || 'Rawat Inap';
+
     let totalBeds = 14;
     let availableBeds = 5;
     let fallbackImg = '/images/rooms/room-class1.jpg';
 
-    if (nameLower.includes('vip') || nameLower.includes('suite') || nameLower.includes('pistillum')) {
-      cat = 'vip';
-      totalBeds = 4;
-      availableBeds = 2;
-      fallbackImg = '/images/rooms/room-vip.jpg';
-    } else if (nameLower.includes('icu') || nameLower.includes('staments') || nameLower.includes('intensif')) {
-      cat = 'intensive';
+    if (cat === 'intensif') {
       totalBeds = 26;
       availableBeds = 25;
       fallbackImg = '/images/rooms/room-icu.jpg';
-    } else if (nameLower.includes('isolasi')) {
-      cat = 'intensive';
+    } else if (cat === 'isolasi') {
       totalBeds = 16;
       availableBeds = 15;
       fallbackImg = '/images/rooms/room-isolation.jpg';
-    } else if (nameLower.includes('kelas 3') || nameLower.includes('seroja')) {
-      cat = 'reguler';
-      totalBeds = 36;
-      availableBeds = 12;
-      fallbackImg = '/images/rooms/room-class3.jpg';
-    } else if (nameLower.includes('kelas 2') || nameLower.includes('red')) {
-      cat = 'standard';
+    } else if (cat === 'emargensi') {
       totalBeds = 20;
-      availableBeds = 7;
-      fallbackImg = '/images/rooms/room-class2.jpg';
-    } else if (nameLower.includes('kelas 1') || nameLower.includes('green')) {
-      cat = 'standard';
-      totalBeds = 15;
-      availableBeds = 5;
-      fallbackImg = '/images/rooms/room-class1.jpg';
+      availableBeds = 10;
+      fallbackImg = '/images/facilities/fac-igd.jpg';
+    } else {
+      // rawat_inap
+      if (nameLower.includes('vip') || nameLower.includes('suite') || nameLower.includes('pistillum')) {
+        totalBeds = 4;
+        availableBeds = 2;
+        fallbackImg = '/images/rooms/room-vip.jpg';
+      } else if (nameLower.includes('kelas 3') || nameLower.includes('seroja')) {
+        totalBeds = 36;
+        availableBeds = 12;
+        fallbackImg = '/images/rooms/room-class3.jpg';
+      } else if (nameLower.includes('kelas 2') || nameLower.includes('red')) {
+        totalBeds = 20;
+        availableBeds = 7;
+        fallbackImg = '/images/rooms/room-class2.jpg';
+      } else {
+        totalBeds = 15;
+        availableBeds = 5;
+        fallbackImg = '/images/rooms/room-class1.jpg';
+      }
     }
 
     const roomSlug = r.slug || (r.name ? r.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : `kamar-${r.id}`);
@@ -838,7 +865,8 @@ export function HospitalDataProvider({ children }) {
       dbId: r.id,
       name: r.name,
       category: cat,
-      tag: r.tag || (cat === 'vip' ? 'Kenyamanan Tertinggi & Privasi Penuh' : cat === 'intensive' ? 'Perawatan Kritis & Terpadu 24 Jam' : 'Kenyamanan & Perawatan Terbaik'),
+      categoryLabel,
+      tag: r.tag || (cat === 'intensif' ? 'Perawatan Kritis & Terpadu 24 Jam' : cat === 'isolasi' ? 'Ruang Tekanan Negatif & Steril PPI' : cat === 'emargensi' ? 'Respon Cepat Gawat Darurat 24 Jam' : nameLower.includes('vip') ? 'Kenyamanan Tertinggi & Privasi Penuh' : 'Kenyamanan & Perawatan Terbaik'),
       tagline: r.tag || 'Kenyamanan & Perawatan Terbaik',
       capacity: r.capacity || `${actualTotalBeds} Tempat Tidur Pasien`,
       totalBeds: actualTotalBeds,
@@ -1574,9 +1602,10 @@ export function HospitalDataProvider({ children }) {
           }
           const body = {
             name: payload.name,
+            category: payload.category || 'rawat_inap',
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
             description: descText,
-            price_per_night: priceString,
+            price_per_night: priceString || null,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
@@ -1763,9 +1792,10 @@ export function HospitalDataProvider({ children }) {
           }
           const body = {
             name: payload.name,
+            category: payload.category || 'rawat_inap',
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
             description: descText,
-            price_per_night: priceString,
+            price_per_night: priceString || null,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
