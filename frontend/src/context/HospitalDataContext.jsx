@@ -190,8 +190,8 @@ export function HospitalDataProvider({ children }) {
   const [simrsBedData, setSimrsBedData] = useState(null);
   const [simrsDoctorSchedules, setSimrsDoctorSchedules] = useState(null);
   const [simrsSurgeryData, setSimrsSurgeryData] = useState(null);
-  const [bannerSlides, setBannerSlides] = useState(DEFAULT_BANNER_SLIDES);
-  const [leadershipMessage, setLeadershipMessage] = useState(DEFAULT_LEADERSHIP_MESSAGE);
+  const [bannerSlides, setBannerSlides] = useState(() => getStoredData('naray_banner_slides', DEFAULT_BANNER_SLIDES));
+  const [leadershipMessage, setLeadershipMessage] = useState(() => getStoredData('naray_leadership_message', DEFAULT_LEADERSHIP_MESSAGE));
   const [hospitalInfo, setHospitalInfo] = useState(() => fallbackHospitalInfo);
 
   // Backend Connection States
@@ -1018,11 +1018,37 @@ export function HospitalDataProvider({ children }) {
               ...d.hospital_info.leadership_data
             }));
             try { localStorage.removeItem('naray_leadership_message'); } catch (e) {}
+          } else {
+            // Auto-migrasi halus: jika di database server belum tersimpan tapi browser lokal punya data upload sebelumnya
+            try {
+              const legacyLeadership = localStorage.getItem('naray_leadership_message');
+              if (legacyLeadership) {
+                const parsedLeader = JSON.parse(legacyLeadership);
+                if (parsedLeader && typeof parsedLeader === 'object') {
+                  setLeadershipMessage(prev => ({ ...prev, ...parsedLeader }));
+                  // Otomatis simpan permanen ke database server
+                  api.adminUpdateLeadership(parsedLeader).catch(() => {});
+                }
+              }
+            } catch (e) {}
           }
 
           if (d.hospital_info.banner_slides && Array.isArray(d.hospital_info.banner_slides) && d.hospital_info.banner_slides.length > 0) {
             setBannerSlides(d.hospital_info.banner_slides);
             try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
+          } else {
+            // Auto-migrasi halus untuk banner slides
+            try {
+              const legacyBanners = localStorage.getItem('naray_banner_slides');
+              if (legacyBanners) {
+                const parsedBanners = JSON.parse(legacyBanners);
+                if (Array.isArray(parsedBanners) && parsedBanners.length > 0) {
+                  setBannerSlides(parsedBanners);
+                  // Otomatis simpan permanen ke database server
+                  api.adminUpdateBanners(parsedBanners).catch(() => {});
+                }
+              }
+            } catch (e) {}
           }
         }
         setIsBackendConnected(true);
@@ -1106,10 +1132,32 @@ export function HospitalDataProvider({ children }) {
               ...info.leadership_data
             }));
             try { localStorage.removeItem('naray_leadership_message'); } catch (e) {}
+          } else {
+            try {
+              const legacyLeadership = localStorage.getItem('naray_leadership_message');
+              if (legacyLeadership) {
+                const parsedLeader = JSON.parse(legacyLeadership);
+                if (parsedLeader && typeof parsedLeader === 'object') {
+                  setLeadershipMessage(prev => ({ ...prev, ...parsedLeader }));
+                  api.adminUpdateLeadership(parsedLeader).catch(() => {});
+                }
+              }
+            } catch (e) {}
           }
           if (info.banner_slides && Array.isArray(info.banner_slides) && info.banner_slides.length > 0) {
             setBannerSlides(info.banner_slides);
             try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
+          } else {
+            try {
+              const legacyBanners = localStorage.getItem('naray_banner_slides');
+              if (legacyBanners) {
+                const parsedBanners = JSON.parse(legacyBanners);
+                if (Array.isArray(parsedBanners) && parsedBanners.length > 0) {
+                  setBannerSlides(parsedBanners);
+                  api.adminUpdateBanners(parsedBanners).catch(() => {});
+                }
+              }
+            } catch (e) {}
           }
         }
         setIsBackendConnected(connected);
