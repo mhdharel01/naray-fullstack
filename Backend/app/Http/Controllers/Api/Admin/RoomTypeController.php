@@ -45,7 +45,7 @@ class RoomTypeController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->has('price') && !$request->has('price_per_night')) {
+        if ($request->has('price') && !$request->filled('price_per_night')) {
             $request->merge(['price_per_night' => $request->input('price')]);
         }
 
@@ -79,7 +79,7 @@ class RoomTypeController extends Controller
     {
         $roomType = RoomType::findOrFail($id);
 
-        if ($request->has('price') && !$request->has('price_per_night')) {
+        if ($request->has('price') && !$request->filled('price_per_night')) {
             $request->merge(['price_per_night' => $request->input('price')]);
         }
 

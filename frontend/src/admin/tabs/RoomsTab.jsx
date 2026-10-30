@@ -9,13 +9,23 @@ import StatusBadge from '../components/StatusBadge';
 
 // Helper format Rupiah & Rentang Tarif
 function formatPriceRupiah(val) {
-  if (!val) return 'Hubungi Kami';
+  if (!val) return 'Hubungi Admisi';
   const str = String(val).trim();
-  if (str.toLowerCase().includes('rp') || str.includes('-') || str.includes('–')) {
+  if (!str || str === '0' || str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined' || str === 'Hubungi Admisi') {
+    return 'Hubungi Admisi';
+  }
+  if (str.includes('-') || str.includes('–')) {
+    let out = str;
+    if (!str.toLowerCase().includes('rp')) {
+      out = `Rp ${str}`;
+    }
+    return out.endsWith('/ malam') ? out : `${out} / malam`;
+  }
+  if (str.toLowerCase().includes('rp')) {
     return str.endsWith('/ malam') ? str : `${str} / malam`;
   }
   const num = typeof val === 'number' ? val : parseInt(str.replace(/\D/g, ''), 10);
-  if (isNaN(num) || num <= 0) return str;
+  if (isNaN(num) || num <= 0) return 'Hubungi Admisi';
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',

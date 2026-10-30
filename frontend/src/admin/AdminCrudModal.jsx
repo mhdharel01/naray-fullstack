@@ -85,8 +85,16 @@ export function AdminCrudModal({
         initialPracticeDays = [1, 2, 3, 4, 5];
       }
 
+      // Bersihkan string tarif kamar untuk input form
+      const rawRoomPrice = (item.price_per_night !== undefined && item.price_per_night !== null && String(item.price_per_night).trim() !== 'Hubungi Admisi')
+        ? String(item.price_per_night)
+        : (item.price !== undefined && item.price !== null && String(item.price).trim() !== 'Hubungi Admisi' ? String(item.price) : '');
+      const cleanRoomPrice = rawRoomPrice.replace(/\s*\/\s*malam$/i, '').trim();
+
       setFormData({
         ...item,
+        price: entity === 'room' ? cleanRoomPrice : (item.price || ''),
+        price_per_night: entity === 'room' ? cleanRoomPrice : (item.price_per_night || ''),
         category: typeof item.category === 'object' ? (item.category?.name || '') : (item.category || ''),
         category_id: Number(item.category_id || (typeof item.category === 'object' ? item.category?.id : 1) || 1),
         specialization_id: Number(item.specialization_id || item.specialization?.id || 1),
@@ -148,6 +156,16 @@ export function AdminCrudModal({
     // Jika admin memilih opsi 'Tambah Baru' dari select dropdown
     if (name === 'specialization_id' && value === '__NEW__') {
       setShowAddSpecModal(true);
+      return;
+    }
+
+    // Sinkronkan price dan price_per_night secara simultan
+    if (name === 'price') {
+      setFormData(prev => ({
+        ...prev,
+        price: value,
+        price_per_night: value,
+      }));
       return;
     }
 
@@ -254,9 +272,16 @@ export function AdminCrudModal({
         payload.items = payload.itemsText.split('\n').map(s => s.trim()).filter(Boolean);
         delete payload.itemsText;
       }
-      if (entity === 'room' && payload.facilitiesText !== undefined) {
-        payload.facilities = payload.facilitiesText.split('\n').map(s => s.trim()).filter(Boolean);
-        delete payload.facilitiesText;
+      if (entity === 'room') {
+        if (payload.facilitiesText !== undefined) {
+          payload.facilities = payload.facilitiesText.split('\n').map(s => s.trim()).filter(Boolean);
+          delete payload.facilitiesText;
+        }
+        // Pastikan nilai price dan price_per_night selalu sinkron dan bersih
+        const rawP = payload.price !== undefined ? payload.price : payload.price_per_night;
+        const cleanP = rawP !== undefined && rawP !== null ? String(rawP).replace(/\s*\/\s*malam$/i, '').trim() : '';
+        payload.price = cleanP;
+        payload.price_per_night = cleanP;
       }
       if (entity === 'banner') {
         payload.image = payload.image || payload.image_url || '/images/default-image.svg';
@@ -750,7 +775,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="price"
-                    value={formData.price || formData.price_per_night || ''}
+                    value={formData.price !== undefined ? formData.price : (formData.price_per_night || '')}
                     onChange={handleChange}
                     placeholder="Contoh: Rp 350.000 - Rp 500.000 (Kosongkan bila Hubungi Admisi)"
                   />

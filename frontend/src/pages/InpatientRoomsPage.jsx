@@ -285,16 +285,8 @@ export default function InpatientRoomsPage() {
 
         const finalFeatures = cleanFeatures.length >= 3 ? cleanFeatures : defaultFeats;
 
-        // Penyesuaian tarif berjenjang (hanya fallback jika tarif belum disetel)
-        let formattedPrice = r.price || r.price_per_night;
-        if (!formattedPrice || formattedPrice === 'Hubungi Admisi') {
-          if (nameLower.includes('vip') || nameLower.includes('suite')) formattedPrice = 'Rp 1.500.000 / malam';
-          else if (nameLower.includes('icu') || nameLower.includes('intensif')) formattedPrice = 'Rp 1.250.000 / malam';
-          else if (nameLower.includes('kelas 1') || nameLower.includes('green')) formattedPrice = 'Rp 750.000 / malam';
-          else if (nameLower.includes('kelas 2') || nameLower.includes('red')) formattedPrice = 'Rp 500.000 / malam';
-          else if (nameLower.includes('kelas 3') || nameLower.includes('seroja')) formattedPrice = 'Rp 250.000 / malam';
-          else if (nameLower.includes('isolasi')) formattedPrice = 'Rp 850.000 / malam';
-        }
+        // Tampilkan tarif kamar atau fallback elegan ke 'Hubungi Admisi' bila belum disetel
+        const formattedPrice = r.price || r.price_per_night || 'Hubungi Admisi';
 
         return {
           ...r,

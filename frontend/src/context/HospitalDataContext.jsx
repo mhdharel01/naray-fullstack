@@ -692,8 +692,16 @@ export function HospitalDataProvider({ children }) {
       if (!raw || raw === '0' || raw.toLowerCase() === 'null' || raw.toLowerCase() === 'undefined' || raw === 'Hubungi Admisi') {
         return 'Hubungi Admisi';
       }
-      // Jika sudah memiliki format mata uang atau tanda rentang harga (- atau –)
-      if (raw.toLowerCase().includes('rp') || raw.includes('-') || raw.includes('–')) {
+      // Jika rentang harga dengan tanda strip (- atau –)
+      if (raw.includes('-') || raw.includes('–')) {
+        let formatted = raw;
+        if (!raw.toLowerCase().includes('rp')) {
+          formatted = `Rp ${raw}`;
+        }
+        return formatted.endsWith('/ malam') ? formatted : `${formatted} / malam`;
+      }
+      // Jika sudah memiliki format mata uang Rp
+      if (raw.toLowerCase().includes('rp')) {
         return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
       }
       const num = Number(raw.replace(/[^0-9]/g, ''));
@@ -1594,8 +1602,10 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'room': {
-          const rawPrice = payload.price_per_night || payload.price || '';
-          const priceString = String(rawPrice).trim();
+          const rawPrice = payload.price !== undefined && payload.price !== null && payload.price !== ''
+            ? payload.price
+            : (payload.price_per_night !== undefined && payload.price_per_night !== null ? payload.price_per_night : '');
+          const priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
           let descText = payload.description || '';
           if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
             descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
@@ -1605,6 +1615,7 @@ export function HospitalDataProvider({ children }) {
             category: payload.category || 'rawat_inap',
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
             description: descText,
+            price: priceString || null,
             price_per_night: priceString || null,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
@@ -1784,8 +1795,10 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'room': {
-          const rawPrice = payload.price_per_night || payload.price || '';
-          const priceString = String(rawPrice).trim();
+          const rawPrice = payload.price !== undefined && payload.price !== null && payload.price !== ''
+            ? payload.price
+            : (payload.price_per_night !== undefined && payload.price_per_night !== null ? payload.price_per_night : '');
+          const priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
           let descText = payload.description || '';
           if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
             descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
@@ -1795,6 +1808,7 @@ export function HospitalDataProvider({ children }) {
             category: payload.category || 'rawat_inap',
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
             description: descText,
+            price: priceString || null,
             price_per_night: priceString || null,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
@@ -1807,6 +1821,9 @@ export function HospitalDataProvider({ children }) {
               mapped.image = formatImageUrl(body.image_url, '/images/default-image.svg');
               mapped.image_url = body.image_url;
             }
+            // Pastikan format display tarif selaras dengan yang baru disimpan
+            mapped.price = formatRoomTarif(body.price_per_night);
+            mapped.price_per_night = body.price_per_night || mapped.price;
             saveItem('room', { ...mapped, id: rawTargetId, dbId: targetId }, true);
             loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
             return { success: true, data: mapped };
