@@ -686,8 +686,22 @@ export function HospitalDataProvider({ children }) {
       defaultPrice = 850000;
     }
 
-    const priceNum = Number(r.price_per_night) || defaultPrice;
-    const priceStr = `Rp ${priceNum.toLocaleString('id-ID')} / malam`;
+    // Helper format tarif yang mendukung angka tunggal maupun rentang harga (string)
+    const formatRoomTarif = (val, defaultVal) => {
+      const raw = String(val !== undefined && val !== null ? val : (defaultVal || '')).trim();
+      if (!raw) return 'Hubungi Admisi';
+      // Jika sudah memiliki format mata uang atau tanda rentang harga (- atau –)
+      if (raw.toLowerCase().includes('rp') || raw.includes('-') || raw.includes('–')) {
+        return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
+      }
+      const num = Number(raw.replace(/[^0-9]/g, ''));
+      if (!isNaN(num) && num > 0) {
+        return `Rp ${num.toLocaleString('id-ID')} / malam`;
+      }
+      return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
+    };
+
+    const priceDisplay = formatRoomTarif(r.price_per_night || r.price, defaultPrice);
 
     // Sanitize and deduplicate facilities/features
     let rawDesc = (r.description || '')
@@ -830,8 +844,8 @@ export function HospitalDataProvider({ children }) {
       totalBeds: actualTotalBeds,
       availableBeds: actualAvailableBeds,
       roomsList: rawRooms,
-      price: priceStr,
-      price_per_night: priceNum,
+      price: priceDisplay,
+      price_per_night: r.price_per_night || r.price || priceDisplay,
       bpjsCovered: !cat.includes('vip'),
       insuranceCovered: true,
       image: formatImageUrl(r.image_url || r.image, fallbackImg),
@@ -1552,7 +1566,8 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'room': {
-          const priceNum = Number(String(payload.price || payload.price_per_night).replace(/[^0-9]/g, '')) || 750000;
+          const rawPrice = payload.price_per_night || payload.price || '';
+          const priceString = String(rawPrice).trim();
           let descText = payload.description || '';
           if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
             descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
@@ -1561,7 +1576,7 @@ export function HospitalDataProvider({ children }) {
             name: payload.name,
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
             description: descText,
-            price_per_night: priceNum,
+            price_per_night: priceString,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
@@ -1740,7 +1755,8 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'room': {
-          const priceNum = Number(String(payload.price || payload.price_per_night).replace(/[^0-9]/g, '')) || 750000;
+          const rawPrice = payload.price_per_night || payload.price || '';
+          const priceString = String(rawPrice).trim();
           let descText = payload.description || '';
           if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
             descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
@@ -1749,7 +1765,7 @@ export function HospitalDataProvider({ children }) {
             name: payload.name,
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
             description: descText,
-            price_per_night: priceNum,
+            price_per_night: priceString,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,

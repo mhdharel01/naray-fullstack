@@ -42,11 +42,15 @@ class RoomTypeController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->has('price') && !$request->has('price_per_night')) {
+            $request->merge(['price_per_night' => $request->input('price')]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'capacity' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'price_per_night' => ['required', 'numeric', 'min:0'],
+            'price_per_night' => ['nullable', 'string', 'max:255'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
@@ -67,11 +71,15 @@ class RoomTypeController extends Controller
     {
         $roomType = RoomType::findOrFail($id);
 
+        if ($request->has('price') && !$request->has('price_per_night')) {
+            $request->merge(['price_per_night' => $request->input('price')]);
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'capacity' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'price_per_night' => ['required', 'numeric', 'min:0'],
+            'price_per_night' => ['nullable', 'string', 'max:255'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],

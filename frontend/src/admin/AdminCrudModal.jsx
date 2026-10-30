@@ -731,15 +731,16 @@ export function AdminCrudModal({
                 </div>
 
                 <div className="admin-form-half">
-                  <label>Tarif per Malam (Rp) <span className="req">*</span></label>
+                  <label>Tarif per Malam (Bisa Rentang Harga) <span className="req">*</span></label>
                   <input
                     type="text"
                     name="price"
                     value={formData.price || formData.price_per_night || ''}
                     onChange={handleChange}
-                    placeholder="Contoh: 1850000"
+                    placeholder="Contoh: Rp 350.000 - Rp 500.000 atau 750000"
                     required
                   />
+                  <span className="text-[11px] text-slate-400 mt-1 block">Bisa diisi nominal satuan atau rentang harga (misal: Rp 350.000 - Rp 500.000).</span>
                 </div>
 
                 <div className="admin-form-half">

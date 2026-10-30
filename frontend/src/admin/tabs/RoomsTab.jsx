@@ -7,14 +7,15 @@ import {
 } from 'lucide-react';
 import StatusBadge from '../components/StatusBadge';
 
-// Helper format Rupiah
+// Helper format Rupiah & Rentang Tarif
 function formatPriceRupiah(val) {
   if (!val) return 'Hubungi Kami';
-  if (typeof val === 'string' && val.toLowerCase().includes('rp')) {
-    return val;
+  const str = String(val).trim();
+  if (str.toLowerCase().includes('rp') || str.includes('-') || str.includes('–')) {
+    return str.endsWith('/ malam') ? str : `${str} / malam`;
   }
-  const num = typeof val === 'number' ? val : parseInt(String(val).replace(/\D/g, ''), 10);
-  if (isNaN(num) || num <= 0) return typeof val === 'string' ? val : 'Hubungi Kami';
+  const num = typeof val === 'number' ? val : parseInt(str.replace(/\D/g, ''), 10);
+  if (isNaN(num) || num <= 0) return str;
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
