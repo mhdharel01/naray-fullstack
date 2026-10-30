@@ -21,10 +21,19 @@ function formatPriceRupiah(val) {
     }
     return out.endsWith('/ malam') ? out : `${out} / malam`;
   }
-  if (str.toLowerCase().includes('rp')) {
-    return str.endsWith('/ malam') ? str : `${str} / malam`;
+  let cleanStr = str.replace(/\s*\/\s*malam$/i, '').trim();
+
+  // PENTING: Bersihkan desimal .00 bawaan MySQL DECIMAL agar tidak dikira 60 Juta!
+  if (/^\d+\.00$/.test(cleanStr)) {
+    cleanStr = cleanStr.replace(/\.00$/, '');
   }
-  const num = typeof val === 'number' ? val : parseInt(str.replace(/\D/g, ''), 10);
+
+  if (cleanStr.toLowerCase().includes('rp')) {
+    cleanStr = cleanStr.replace(/\.00$/, '');
+    return cleanStr.endsWith('/ malam') ? cleanStr : `${cleanStr} / malam`;
+  }
+
+  const num = typeof val === 'number' ? val : parseInt(cleanStr.replace(/\D/g, ''), 10);
   if (isNaN(num) || num <= 0) return 'Hubungi Admisi';
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',

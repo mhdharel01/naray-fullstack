@@ -89,7 +89,18 @@ export function AdminCrudModal({
       const rawRoomPrice = (item.price_per_night !== undefined && item.price_per_night !== null && String(item.price_per_night).trim() !== 'Hubungi Admisi')
         ? String(item.price_per_night)
         : (item.price !== undefined && item.price !== null && String(item.price).trim() !== 'Hubungi Admisi' ? String(item.price) : '');
-      const cleanRoomPrice = rawRoomPrice.replace(/\s*\/\s*malam$/i, '').trim();
+      let cleanRoomPrice = rawRoomPrice.replace(/\s*\/\s*malam$/i, '').trim();
+      // Hilangkan desimal .00 bawaan MySQL DECIMAL (misal 600000.00 -> 600000)
+      if (/^\d+\.00$/.test(cleanRoomPrice)) {
+        cleanRoomPrice = cleanRoomPrice.replace(/\.00$/, '');
+      }
+      // Jika angka murni, format ramah dengan "Rp" agar admin nyaman membacanya
+      if (/^\d+$/.test(cleanRoomPrice)) {
+        const n = Number(cleanRoomPrice);
+        if (!isNaN(n) && n > 0) {
+          cleanRoomPrice = `Rp ${n.toLocaleString('id-ID')}`;
+        }
+      }
 
       setFormData({
         ...item,
@@ -279,7 +290,10 @@ export function AdminCrudModal({
         }
         // Pastikan nilai price dan price_per_night selalu sinkron dan bersih
         const rawP = payload.price !== undefined ? payload.price : payload.price_per_night;
-        const cleanP = rawP !== undefined && rawP !== null ? String(rawP).replace(/\s*\/\s*malam$/i, '').trim() : '';
+        let cleanP = rawP !== undefined && rawP !== null ? String(rawP).replace(/\s*\/\s*malam$/i, '').trim() : '';
+        if (/^\d+\.00$/.test(cleanP)) {
+          cleanP = cleanP.replace(/\.00$/, '');
+        }
         payload.price = cleanP;
         payload.price_per_night = cleanP;
       }

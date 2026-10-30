@@ -6,11 +6,35 @@ use App\Http\Controllers\Controller;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
 
 class RoomTypeController extends Controller
 {
+    /**
+     * Self-healing: Pastikan struktur tabel room_types mendukung category & string price range
+     */
+    private function ensureSchemaUpdated(): void
+    {
+        try {
+            if (!Schema::hasColumn('room_types', 'category')) {
+                Schema::table('room_types', function (Blueprint $table) {
+                    $table->string('category', 50)->default('rawat_inap')->after('name');
+                });
+            }
+            // Pastikan kolom price_per_night berupa VARCHAR(255) agar bisa menampung rentang teks
+            DB::statement("ALTER TABLE room_types MODIFY price_per_night VARCHAR(255) NULL");
+            // Bersihkan desimal .00 dari migrasi lama jika ada
+            DB::statement("UPDATE room_types SET price_per_night = REPLACE(price_per_night, '.00', '') WHERE price_per_night LIKE '%.00'");
+        } catch (\Throwable $e) {
+            // Aman diabaikan bila permission DB terbatas
+        }
+    }
+
     public function index(Request $request)
     {
+        $this->ensureSchemaUpdated();
         $query = RoomType::with('branch');
 
         if ($request->filled('search')) {
@@ -45,6 +69,7 @@ class RoomTypeController extends Controller
 
     public function store(Request $request)
     {
+        $this->ensureSchemaUpdated();
         if ($request->has('price') && !$request->filled('price_per_night')) {
             $request->merge(['price_per_night' => $request->input('price')]);
         }
@@ -77,6 +102,7 @@ class RoomTypeController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->ensureSchemaUpdated();
         $roomType = RoomType::findOrFail($id);
 
         if ($request->has('price') && !$request->filled('price_per_night')) {

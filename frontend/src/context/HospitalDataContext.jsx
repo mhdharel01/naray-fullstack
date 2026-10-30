@@ -700,15 +700,27 @@ export function HospitalDataProvider({ children }) {
         }
         return formatted.endsWith('/ malam') ? formatted : `${formatted} / malam`;
       }
-      // Jika sudah memiliki format mata uang Rp
-      if (raw.toLowerCase().includes('rp')) {
-        return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
+
+      // Bersihkan sufiks / malam jika ada
+      let cleanVal = raw.replace(/\s*\/\s*malam$/i, '').trim();
+
+      // PENTING: Bersihkan akhiran .00 bawaan MySQL DECIMAL (misal 600000.00 -> 600000)
+      // agar tidak terlipatgandakan 100x menjadi 60 Juta saat direplace regex digit!
+      if (/^\d+\.00$/.test(cleanVal)) {
+        cleanVal = cleanVal.replace(/\.00$/, '');
       }
-      const num = Number(raw.replace(/[^0-9]/g, ''));
+
+      // Jika sudah memiliki format mata uang Rp
+      if (cleanVal.toLowerCase().includes('rp')) {
+        cleanVal = cleanVal.replace(/\.00$/, '');
+        return cleanVal.endsWith('/ malam') ? cleanVal : `${cleanVal} / malam`;
+      }
+
+      const num = Number(cleanVal.replace(/[^0-9]/g, ''));
       if (!isNaN(num) && num > 0) {
         return `Rp ${num.toLocaleString('id-ID')} / malam`;
       }
-      return raw.endsWith('/ malam') ? raw : `${raw} / malam`;
+      return cleanVal.endsWith('/ malam') ? cleanVal : `${cleanVal} / malam`;
     };
 
     const priceDisplay = formatRoomTarif(r.price_per_night || r.price);
@@ -881,7 +893,9 @@ export function HospitalDataProvider({ children }) {
       availableBeds: actualAvailableBeds,
       roomsList: rawRooms,
       price: priceDisplay,
-      price_per_night: r.price_per_night || r.price || priceDisplay,
+      price_per_night: (r.price_per_night !== undefined && r.price_per_night !== null && r.price_per_night !== '' && r.price_per_night !== 'Hubungi Admisi')
+        ? String(r.price_per_night).replace(/\.00$/, '')
+        : priceDisplay,
       bpjsCovered: !cat.includes('vip'),
       insuranceCovered: true,
       image: formatImageUrl(r.image_url || r.image, fallbackImg),
@@ -1605,7 +1619,10 @@ export function HospitalDataProvider({ children }) {
           const rawPrice = payload.price !== undefined && payload.price !== null && payload.price !== ''
             ? payload.price
             : (payload.price_per_night !== undefined && payload.price_per_night !== null ? payload.price_per_night : '');
-          const priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
+          let priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
+          if (/^\d+\.00$/.test(priceString)) {
+            priceString = priceString.replace(/\.00$/, '');
+          }
           let descText = payload.description || '';
           if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
             descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
@@ -1798,7 +1815,10 @@ export function HospitalDataProvider({ children }) {
           const rawPrice = payload.price !== undefined && payload.price !== null && payload.price !== ''
             ? payload.price
             : (payload.price_per_night !== undefined && payload.price_per_night !== null ? payload.price_per_night : '');
-          const priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
+          let priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
+          if (/^\d+\.00$/.test(priceString)) {
+            priceString = priceString.replace(/\.00$/, '');
+          }
           let descText = payload.description || '';
           if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
             descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
