@@ -291,6 +291,24 @@ Route::middleware('auth:sanctum')->group(function () {
         'destroy'
     ]);
 
+    Route::post('/admin/hospital-info/leadership', [
+        AdminHospitalInfoController::class,
+        'updateLeadership'
+    ]);
+    Route::put('/admin/hospital-info/leadership', [
+        AdminHospitalInfoController::class,
+        'updateLeadership'
+    ]);
+
+    Route::post('/admin/hospital-info/banners', [
+        AdminHospitalInfoController::class,
+        'updateBanners'
+    ]);
+    Route::put('/admin/hospital-info/banners', [
+        AdminHospitalInfoController::class,
+        'updateBanners'
+    ]);
+
 
     // --------------------------------------------------------
     // MEDIA

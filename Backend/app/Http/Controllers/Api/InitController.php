@@ -143,6 +143,19 @@ class InitController extends Controller
             }
         }
 
+        $hospitalInfo = HospitalInfo::first();
+        if (!$hospitalInfo) {
+            try {
+                $hospitalInfo = HospitalInfo::create([
+                    'name' => 'Naray Hospital Dumai',
+                    'address' => 'Jl. Cut Nyak Dien, Dumai Barat, Riau',
+                    'phone' => '+62 813-7258-376',
+                    'emergency_hotline' => '+62 813-7258-376',
+                    'operating_hours' => '24 Jam Setiap Hari',
+                ]);
+            } catch (\Throwable $e) {}
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Data inisialisasi aplikasi berhasil dimuat',
@@ -161,7 +174,7 @@ class InitController extends Controller
                 'insurance_partners' => $insurancePartners,
                 'doctor_leaves' => $doctorLeaves,
                 'specializations' => Specialization::orderBy('name')->get(),
-                'hospital_info' => HospitalInfo::first(),
+                'hospital_info' => $hospitalInfo,
             ]
         ]);
     }

@@ -68,7 +68,9 @@ function AdminDashboard({ onLogout }) {
     simrsDoctorSchedules,
     bannerSlides = [],
     setBannerSlides,
+    saveBannerSlides,
     leadershipMessage,
+    saveLeadershipData,
     saveItem,
     deleteItem,
     refreshBackendData,
@@ -1037,6 +1039,7 @@ function AdminDashboard({ onLogout }) {
                 <BannersTab
                   bannerSlides={bannerSlides}
                   setBannerSlides={setBannerSlides}
+                  saveBannerSlides={saveBannerSlides}
                   DEFAULT_BANNER_SLIDES={DEFAULT_BANNER_SLIDES}
                   showToast={showToast}
                   setCrudModal={setCrudModal}

@@ -8,6 +8,7 @@ import {
 export default function BannersTab({
   bannerSlides = [],
   setBannerSlides,
+  saveBannerSlides,
   DEFAULT_BANNER_SLIDES = [],
   showToast,
   setCrudModal,
@@ -22,7 +23,6 @@ export default function BannersTab({
 
   // Move slide up / down for ordering
   const handleMoveSlide = (index, direction) => {
-    if (!setBannerSlides) return;
     const newSlides = [...bannerSlides];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newSlides.length) return;
@@ -31,12 +31,17 @@ export default function BannersTab({
     newSlides[index] = newSlides[targetIndex];
     newSlides[targetIndex] = temp;
 
-    setBannerSlides(newSlides);
+    if (saveBannerSlides) {
+      saveBannerSlides(newSlides).catch(() => {});
+    } else if (setBannerSlides) {
+      setBannerSlides(newSlides);
+    }
+
     try {
-      localStorage.setItem('naray_banner_slides', JSON.stringify(newSlides));
+      localStorage.removeItem('naray_banner_slides');
       if (showToast) showToast(`Urutan slide #${index + 1} berhasil dipindahkan ke #${targetIndex + 1}.`);
     } catch (e) {
-      console.warn('Gagal menyimpan urutan banner:', e);
+      console.warn('Gagal update urutan banner:', e);
     }
 
     if (selectedPreviewIndex === index) {
@@ -59,15 +64,20 @@ export default function BannersTab({
 
   // Reset to default banners
   const handleResetToDefault = () => {
-    if (!setBannerSlides || !DEFAULT_BANNER_SLIDES.length) return;
+    if (!DEFAULT_BANNER_SLIDES.length) return;
     const confirmReset = window.confirm(
       'Kembalikan seluruh slide banner ke setelan bawaan Naray Hospital? Semua perubahan kustom slide akan di-reset.'
     );
     if (!confirmReset) return;
 
-    setBannerSlides(DEFAULT_BANNER_SLIDES);
+    if (saveBannerSlides) {
+      saveBannerSlides(DEFAULT_BANNER_SLIDES).catch(() => {});
+    } else if (setBannerSlides) {
+      setBannerSlides(DEFAULT_BANNER_SLIDES);
+    }
+
     try {
-      localStorage.setItem('naray_banner_slides', JSON.stringify(DEFAULT_BANNER_SLIDES));
+      localStorage.removeItem('naray_banner_slides');
       if (showToast) showToast('Slide banner beranda berhasil dikembalikan ke standar awal.');
       setSelectedPreviewIndex(0);
     } catch (e) {

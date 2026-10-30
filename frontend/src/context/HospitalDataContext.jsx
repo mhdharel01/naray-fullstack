@@ -190,8 +190,8 @@ export function HospitalDataProvider({ children }) {
   const [simrsBedData, setSimrsBedData] = useState(null);
   const [simrsDoctorSchedules, setSimrsDoctorSchedules] = useState(null);
   const [simrsSurgeryData, setSimrsSurgeryData] = useState(null);
-  const [bannerSlides, setBannerSlides] = useState(() => getStoredData('naray_banner_slides', DEFAULT_BANNER_SLIDES));
-  const [leadershipMessage, setLeadershipMessage] = useState(() => getStoredData('naray_leadership_message', DEFAULT_LEADERSHIP_MESSAGE));
+  const [bannerSlides, setBannerSlides] = useState(DEFAULT_BANNER_SLIDES);
+  const [leadershipMessage, setLeadershipMessage] = useState(DEFAULT_LEADERSHIP_MESSAGE);
   const [hospitalInfo, setHospitalInfo] = useState(() => fallbackHospitalInfo);
 
   // Backend Connection States
@@ -1011,6 +1011,19 @@ export function HospitalDataProvider({ children }) {
             operatingHours: d.hospital_info.operating_hours || prev.operatingHours,
             description: d.hospital_info.description || prev.description,
           }));
+
+          if (d.hospital_info.leadership_data && typeof d.hospital_info.leadership_data === 'object' && Object.keys(d.hospital_info.leadership_data).length > 0) {
+            setLeadershipMessage(prev => ({
+              ...DEFAULT_LEADERSHIP_MESSAGE,
+              ...d.hospital_info.leadership_data
+            }));
+            try { localStorage.removeItem('naray_leadership_message'); } catch (e) {}
+          }
+
+          if (d.hospital_info.banner_slides && Array.isArray(d.hospital_info.banner_slides) && d.hospital_info.banner_slides.length > 0) {
+            setBannerSlides(d.hospital_info.banner_slides);
+            try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
+          }
         }
         setIsBackendConnected(true);
         setIsLoadingBackend(false);
@@ -1019,7 +1032,7 @@ export function HospitalDataProvider({ children }) {
     } catch (batchErr) {
       console.warn('[HospitalDataContext] Batch init gagal, fallback ke individual requests:', batchErr.message);
       try {
-        const [docRes, poliRes, artRes, facRes, centerRes, roomRes, mcuRes, mediaRes, specRes] = await Promise.allSettled([
+        const [docRes, poliRes, artRes, facRes, centerRes, roomRes, mcuRes, mediaRes, specRes, infoRes] = await Promise.allSettled([
           api.getDoctors({ per_page: 50 }),
           api.getPolikliniks({ per_page: 50 }),
           api.getArticles({ per_page: 20 }),
@@ -1028,7 +1041,8 @@ export function HospitalDataProvider({ children }) {
           api.getRoomTypes(),
           api.getMcuPackages(),
           api.getMedia({ per_page: 50 }),
-          api.getSpecializations()
+          api.getSpecializations(),
+          api.getHospitalInfo()
         ]);
 
         let connected = false;
@@ -1077,6 +1091,25 @@ export function HospitalDataProvider({ children }) {
             const { dbPhotos, dbVideos } = parseMedia(rawMedia);
             if (dbPhotos.length > 0) setGalleryActivities(dbPhotos);
             if (dbVideos.length > 0) setVideoList(dbVideos);
+          }
+        }
+        if (infoRes.status === 'fulfilled' && infoRes.value?.data?.data) {
+          connected = true;
+          const info = infoRes.value.data.data;
+          setHospitalInfo(prev => ({
+            ...prev,
+            ...info,
+          }));
+          if (info.leadership_data && typeof info.leadership_data === 'object' && Object.keys(info.leadership_data).length > 0) {
+            setLeadershipMessage(prev => ({
+              ...DEFAULT_LEADERSHIP_MESSAGE,
+              ...info.leadership_data
+            }));
+            try { localStorage.removeItem('naray_leadership_message'); } catch (e) {}
+          }
+          if (info.banner_slides && Array.isArray(info.banner_slides) && info.banner_slides.length > 0) {
+            setBannerSlides(info.banner_slides);
+            try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
           }
         }
         setIsBackendConnected(connected);
@@ -2218,6 +2251,35 @@ export function HospitalDataProvider({ children }) {
     return false;
   };
 
+  // Dedicated Database Server Handlers for Banners & Leadership
+  const saveBannerSlides = async (newSlides) => {
+    setBannerSlides(newSlides);
+    try {
+      localStorage.removeItem('naray_banner_slides');
+    } catch (e) { }
+    try {
+      const res = await api.adminUpdateBanners(newSlides);
+      return res;
+    } catch (err) {
+      console.warn('[HospitalDataContext] Gagal simpan banner slides ke database server:', err);
+      throw err;
+    }
+  };
+
+  const saveLeadershipData = async (data) => {
+    setLeadershipMessage(prev => ({ ...prev, ...data }));
+    try {
+      localStorage.removeItem('naray_leadership_message');
+    } catch (e) { }
+    try {
+      const res = await api.adminUpdateLeadership(data);
+      return res;
+    } catch (err) {
+      console.warn('[HospitalDataContext] Gagal simpan pesan kepemimpinan ke database server:', err);
+      throw err;
+    }
+  };
+
   // CRUD Universal Handler (Local & Backend Sync)
   const saveItem = (entityType, itemData, skipBackendSync = false) => {
     const isNew = !itemData.id || itemData.isNew;
@@ -2375,11 +2437,12 @@ export function HospitalDataProvider({ children }) {
           } else {
             updated = [...prev, { ...cleanItem, id: cleanItem.id || `slide-${Date.now()}` }];
           }
-          try {
-            localStorage.setItem('naray_banner_slides', JSON.stringify(updated));
-          } catch (e) {
-            console.warn('Failed saving banner slides:', e);
+          if (!skipBackendSync) {
+            api.adminUpdateBanners(updated).catch(err => {
+              console.warn('[HospitalDataContext] Gagal simpan banner slides ke database server:', err);
+            });
           }
+          try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
           return updated;
         });
         break;
@@ -2389,11 +2452,12 @@ export function HospitalDataProvider({ children }) {
       case 'leadershipMessage': {
         setLeadershipMessage(prev => {
           const updated = { ...prev, ...cleanItem };
-          try {
-            localStorage.setItem('naray_leadership_message', JSON.stringify(updated));
-          } catch (e) {
-            console.warn('Failed saving leadership message:', e);
+          if (!skipBackendSync) {
+            api.adminUpdateLeadership(updated).catch(err => {
+              console.warn('[HospitalDataContext] Gagal simpan pesan kepemimpinan ke database server:', err);
+            });
           }
+          try { localStorage.removeItem('naray_leadership_message'); } catch (e) {}
           return updated;
         });
         break;
@@ -2404,7 +2468,7 @@ export function HospitalDataProvider({ children }) {
     }
 
     // Jika dipanggil dari komponen luar (misal AdminEditModal), simpan otomatis ke backend
-    if (!skipBackendSync) {
+    if (!skipBackendSync && entityType !== 'banner' && entityType !== 'banners' && entityType !== 'leadership' && entityType !== 'leadershipMessage') {
       const targetId = cleanItem.dbId || cleanNumericId(cleanItem.id);
       if (targetId && !isNew) {
         adminUpdate(entityType, targetId, cleanItem).catch(err => {
@@ -2454,11 +2518,10 @@ export function HospitalDataProvider({ children }) {
       case 'banners':
         setBannerSlides(prev => {
           const updated = prev.filter(x => x.id !== id);
-          try {
-            localStorage.setItem('naray_banner_slides', JSON.stringify(updated));
-          } catch (e) {
-            console.warn('Failed saving banner slides:', e);
-          }
+          api.adminUpdateBanners(updated).catch(err => {
+            console.warn('[HospitalDataContext] Gagal hapus slide banner di database server:', err);
+          });
+          try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
           return updated;
         });
         break;
@@ -2477,6 +2540,8 @@ export function HospitalDataProvider({ children }) {
     try { localStorage.removeItem('naray_leadership_message'); } catch (e) { }
     setBannerSlides(DEFAULT_BANNER_SLIDES);
     setLeadershipMessage(DEFAULT_LEADERSHIP_MESSAGE);
+    api.adminUpdateBanners(DEFAULT_BANNER_SLIDES).catch(() => {});
+    api.adminUpdateLeadership(DEFAULT_LEADERSHIP_MESSAGE).catch(() => {});
     loadBackendData();
   };
 
@@ -2536,8 +2601,10 @@ export function HospitalDataProvider({ children }) {
         healthArticles,
         bannerSlides,
         setBannerSlides,
+        saveBannerSlides,
         leadershipMessage,
         setLeadershipMessage,
+        saveLeadershipData,
         isBackendConnected,
         isLoadingBackend,
         refreshBackendData: loadBackendData,

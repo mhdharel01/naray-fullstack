@@ -96,4 +96,69 @@ class HospitalInfoController extends Controller
             'message' => 'Informasi rumah sakit berhasil dihapus',
         ]);
     }
+
+    /**
+     * Simpan Kata Pengantar Direktur permanen ke database server
+     * POST /api/admin/hospital-info/leadership
+     */
+    public function updateLeadership(Request $request)
+    {
+        $info = HospitalInfo::first();
+        if (!$info) {
+            $info = HospitalInfo::create([
+                'name' => 'Naray Hospital Dumai',
+                'address' => 'Jl. Cut Nyak Dien, Dumai Barat, Riau',
+                'phone' => '+62 813-7258-376',
+                'emergency_hotline' => '+62 813-7258-376',
+                'operating_hours' => '24 Jam Setiap Hari',
+            ]);
+        }
+
+        $payload = $request->all();
+        $current = $info->leadership_data ?? [];
+        $merged = array_merge($current, $payload);
+
+        $info->update(['leadership_data' => $merged]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kata pengantar direktur berhasil disimpan ke database server.',
+            'data' => $merged,
+        ]);
+    }
+
+    /**
+     * Simpan Slide Banner Beranda permanen ke database server
+     * POST /api/admin/hospital-info/banners
+     */
+    public function updateBanners(Request $request)
+    {
+        $info = HospitalInfo::first();
+        if (!$info) {
+            $info = HospitalInfo::create([
+                'name' => 'Naray Hospital Dumai',
+                'address' => 'Jl. Cut Nyak Dien, Dumai Barat, Riau',
+                'phone' => '+62 813-7258-376',
+                'emergency_hotline' => '+62 813-7258-376',
+                'operating_hours' => '24 Jam Setiap Hari',
+            ]);
+        }
+
+        $banners = $request->input('banners') ?? $request->all();
+        if (!is_array($banners)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format data slide banner tidak valid.',
+            ], 422);
+        }
+
+        $bannersArray = array_values($banners);
+        $info->update(['banner_slides' => $bannersArray]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Slide banner beranda berhasil disimpan ke database server.',
+            'data' => $bannersArray,
+        ]);
+    }
 }

@@ -278,6 +278,11 @@ export const api = {
   adminUpdateUser: (id, data) => fetchApi(`/admin/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   adminDeleteUser: (id) => fetchApi(`/admin/users/${id}`, { method: 'DELETE' }),
   adminToggleUserStatus: (id) => fetchApi(`/admin/users/${id}/toggle-status`, { method: 'POST' }),
+
+  // 24. Admin Hospital Info, Leadership & Banners
+  adminUpdateHospitalInfo: (id, data) => fetchApi(`/admin/info/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  adminUpdateLeadership: (data) => fetchApi('/admin/hospital-info/leadership', { method: 'POST', body: JSON.stringify(data) }),
+  adminUpdateBanners: (banners) => fetchApi('/admin/hospital-info/banners', { method: 'POST', body: JSON.stringify({ banners }) }),
 };
 
 export default api;
