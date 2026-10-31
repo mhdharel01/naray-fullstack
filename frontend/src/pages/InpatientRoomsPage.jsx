@@ -200,31 +200,31 @@ export default function InpatientRoomsPage() {
           availableBeds = r.availableBeds || r.available_beds || defaultAvail;
         }
 
-        // Sanitasi fitur dan fasilitas untuk mencegah teks menempel dan duplikasi
-        const rawFeatures = Array.isArray(r.features) ? r.features : (Array.isArray(r.facilities) ? r.facilities : []);
-        const descText = (r.description || '')
-          .replace(/Wi-FiTempat Tidur/g, 'Wi-Fi\nTempat Tidur')
-          .replace(/Wi-FiKamar Mandi/g, 'Wi-Fi\nKamar Mandi');
-        
-        const candidateItems = [
-          ...rawFeatures,
-          ...descText.split('\n')
-        ];
+        // Ambil fasilitas terpisah tanpa mencampurkan deskripsi
+        let candidateItems = [];
+        if (Array.isArray(r.facilities)) {
+          candidateItems = r.facilities;
+        } else if (Array.isArray(r.features)) {
+          candidateItems = r.features;
+        } else if (typeof r.facilities === 'string' && r.facilities.trim()) {
+          try {
+            const parsed = JSON.parse(r.facilities);
+            if (Array.isArray(parsed)) candidateItems = parsed;
+          } catch {}
+          if (candidateItems.length === 0) {
+            candidateItems = r.facilities.split('\n');
+          }
+        }
 
         const seenFeats = new Set();
         const cleanFeatures = [];
         candidateItems.forEach(item => {
           if (!item || typeof item !== 'string') return;
-          let str = item.replace(/Wi-FiTempat Tidur/g, 'Wi-Fi\nTempat Tidur')
-                        .replace(/Wi-FiKamar Mandi/g, 'Wi-Fi\nKamar Mandi')
-                        .trim();
-          str.split('\n').forEach(sub => {
-            const cleanSub = sub.replace(/^[-•*]\s*/, '').trim();
-            if (cleanSub.length > 2 && !seenFeats.has(cleanSub.toLowerCase())) {
-              seenFeats.add(cleanSub.toLowerCase());
-              cleanFeatures.push(cleanSub);
-            }
-          });
+          const cleanSub = item.replace(/^[-•*]\s*/, '').trim();
+          if (cleanSub.length > 1 && !seenFeats.has(cleanSub.toLowerCase()) && !cleanSub.includes(' • ')) {
+            seenFeats.add(cleanSub.toLowerCase());
+            cleanFeatures.push(cleanSub);
+          }
         });
 
         let defaultFeats = [
@@ -283,7 +283,12 @@ export default function InpatientRoomsPage() {
           ];
         }
 
-        const finalFeatures = cleanFeatures.length >= 3 ? cleanFeatures : defaultFeats;
+        // Hanya gunakan defaultFeats jika data facilities/features sama sekali belum terdefinisi di backend
+        const hasCustomFacilities = r.facilities !== undefined || r.features !== undefined;
+        let finalFeatures = cleanFeatures;
+        if (!hasCustomFacilities && cleanFeatures.length === 0) {
+          finalFeatures = defaultFeats;
+        }
 
         // Tampilkan tarif kamar atau fallback elegan ke 'Hubungi Admisi' bila belum disetel
         const formattedPrice = r.price || r.price_per_night || 'Hubungi Admisi';
@@ -292,6 +297,8 @@ export default function InpatientRoomsPage() {
           ...r,
           id: r.id || `room-${r.dbId || idx}`,
           name: r.name || 'Ruang Perawatan',
+          description: r.description || r.desc || '',
+          desc: r.description || r.desc || '',
           tag: r.tag || (nameLower.includes('vip') ? 'Kenyamanan Tertinggi & Privasi Penuh' : nameLower.includes('icu') ? 'Perawatan Kritis & Terpadu 24 Jam' : 'Kenyamanan & Perawatan Prima'),
           capacity: r.capacity || `${totalBeds} Tempat Tidur Pasien`,
           totalBeds,
@@ -301,7 +308,8 @@ export default function InpatientRoomsPage() {
           bpjsCovered: r.bpjsCovered !== undefined ? r.bpjsCovered : (!nameLower.includes('vip') && !nameLower.includes('suite')),
           insuranceCovered: true,
           image: getRoomImage(r, idx),
-          features: finalFeatures
+          features: finalFeatures,
+          facilities: finalFeatures
         };
       });
   }, [contextRooms, simrsBedData]);
@@ -1114,21 +1122,23 @@ export default function InpatientRoomsPage() {
                         </div>
 
                         {/* Facilities Checklist */}
-                        <div className="pt-3 border-t border-slate-100">
-                          <span className="text-xs font-bold text-slate-900 block mb-3 font-mono tracking-wider">
-                            FASILITAS UTAMA:
-                          </span>
-                          <ul className="space-y-2.5 text-xs text-slate-600">
-                            {(room.features || []).slice(0, 5).map((feat, fIdx) => (
-                              <li key={fIdx} className="flex items-start gap-2.5">
-                                <div className="w-4 h-4 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 mt-0.5 border border-teal-200">
-                                  <Check size={11} strokeWidth={3} />
-                                </div>
-                                <span className="leading-relaxed font-medium text-slate-700">{feat}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                        {Array.isArray(room.features) && room.features.length > 0 && (
+                          <div className="pt-3 border-t border-slate-100">
+                            <span className="text-xs font-bold text-slate-900 block mb-3 font-mono tracking-wider">
+                              FASILITAS UTAMA:
+                            </span>
+                            <ul className="space-y-2.5 text-xs text-slate-600">
+                              {room.features.slice(0, 5).map((feat, fIdx) => (
+                                <li key={fIdx} className="flex items-start gap-2.5">
+                                  <div className="w-4 h-4 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 mt-0.5 border border-teal-200">
+                                    <Check size={11} strokeWidth={3} />
+                                  </div>
+                                  <span className="leading-relaxed font-medium text-slate-700">{feat}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
 
                       </div>
                     </div>

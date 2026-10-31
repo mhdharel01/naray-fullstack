@@ -10,10 +10,15 @@ class RoomType extends Model
         'category',
         'capacity',
         'description',
+        'facilities',
         'price_per_night',
         'image_url',
         'status',
         'branch_id'
+    ];
+
+    protected $casts = [
+        'facilities' => 'array',
     ];
 
     public function branch() { return $this->belongsTo(Branch::class); }

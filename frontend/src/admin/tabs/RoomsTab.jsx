@@ -102,15 +102,17 @@ export default function RoomsTab({
 
   // Extract facilities array safely
   const getRoomFacilities = (r) => {
-    if (Array.isArray(r.features) && r.features.length > 0) return r.features;
-    if (Array.isArray(r.facilities) && r.facilities.length > 0) return r.facilities;
-    if (typeof r.facilities === 'string') {
-      return r.facilities.split('\n').map(s => s.trim()).filter(Boolean);
+    if (!r) return [];
+    if (Array.isArray(r.facilities)) return r.facilities;
+    if (Array.isArray(r.features)) return r.features;
+    if (typeof r.facilities === 'string' && r.facilities.trim()) {
+      try {
+        const parsed = JSON.parse(r.facilities);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {}
+      return r.facilities.split('\n').map(s => s.trim().replace(/^[-*•]\s*/, '')).filter(Boolean);
     }
-    if (typeof r.description === 'string') {
-      return r.description.split('\n').map(s => s.trim()).filter(Boolean);
-    }
-    return ['Tempat Tidur Medis Ergonomis', 'Pendingin Ruangan (AC)', 'Kamar Mandi Bersih', 'Nurse Call 24 Jam'];
+    return [];
   };
 
   return (

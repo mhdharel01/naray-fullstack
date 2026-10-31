@@ -102,8 +102,25 @@ export function AdminCrudModal({
         }
       }
 
+      // Bersihkan daftar fasilitas (jangan sampai memuat gabungan bullet lama)
+      let initialFacilitiesList = [];
+      if (Array.isArray(item.facilities)) {
+        initialFacilitiesList = item.facilities.filter(f => !f.includes(' • '));
+      } else if (Array.isArray(item.features)) {
+        initialFacilitiesList = item.features.filter(f => !f.includes(' • '));
+      } else if (typeof item.facilities === 'string' && item.facilities) {
+        initialFacilitiesList = item.facilities.split('\n').map(s => s.trim().replace(/^[-*•]\s*/, '')).filter(Boolean);
+      }
+
+      // Bersihkan deskripsi dari teks fasilitas gabungan
+      let initialDesc = item.description || item.desc || '';
+      if (initialDesc.includes(' • ') && initialFacilitiesList.length > 0) {
+        initialDesc = '';
+      }
+
       setFormData({
         ...item,
+        description: initialDesc,
         price: entity === 'room' ? cleanRoomPrice : (item.price || ''),
         price_per_night: entity === 'room' ? cleanRoomPrice : (item.price_per_night || ''),
         category: typeof item.category === 'object' ? (item.category?.name || '') : (item.category || ''),
@@ -115,7 +132,7 @@ export function AdminCrudModal({
         poliklinik_id: item.poliklinik_id || item.assignedPoliId || (polikliniks[0]?.dbId || polikliniks[0]?.id || 1),
         capacity: item.capacity || item.bed_count || '',
         itemsText: Array.isArray(item.items) ? item.items.join('\n') : '',
-        facilitiesText: Array.isArray(item.facilities) ? item.facilities.join('\n') : '',
+        facilitiesText: initialFacilitiesList.join('\n'),
       });
     } else {
       // Default empty templates
@@ -285,7 +302,10 @@ export function AdminCrudModal({
       }
       if (entity === 'room') {
         if (payload.facilitiesText !== undefined) {
-          payload.facilities = payload.facilitiesText.split('\n').map(s => s.trim()).filter(Boolean);
+          payload.facilities = payload.facilitiesText
+            .split('\n')
+            .map(s => s.trim().replace(/^[-*•]\s*/, ''))
+            .filter(Boolean);
           delete payload.facilitiesText;
         }
         // Pastikan nilai price dan price_per_night selalu sinkron dan bersih
@@ -789,7 +809,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="price"
-                    value={formData.price !== undefined ? formData.price : (formData.price_per_night || '')}
+                    value={formData.price ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Rp 350.000 - Rp 500.000 (Kosongkan bila Hubungi Admisi)"
                   />

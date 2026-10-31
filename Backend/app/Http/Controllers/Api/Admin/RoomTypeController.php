@@ -23,6 +23,11 @@ class RoomTypeController extends Controller
                     $table->string('category', 50)->default('rawat_inap')->after('name');
                 });
             }
+            if (!Schema::hasColumn('room_types', 'facilities')) {
+                Schema::table('room_types', function (Blueprint $table) {
+                    $table->text('facilities')->nullable()->after('description');
+                });
+            }
             // Pastikan kolom price_per_night berupa VARCHAR(255) agar bisa menampung rentang teks
             DB::statement("ALTER TABLE room_types MODIFY price_per_night VARCHAR(255) NULL");
             // Bersihkan desimal .00 dari migrasi lama jika ada
@@ -79,11 +84,20 @@ class RoomTypeController extends Controller
             'category' => ['nullable', 'string', 'max:50'],
             'capacity' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'facilities' => ['nullable'],
             'price_per_night' => ['nullable', 'string', 'max:255'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ]);
+
+        if (array_key_exists('facilities', $validated) && is_string($validated['facilities']) && !empty($validated['facilities'])) {
+            $validated['facilities'] = array_values(array_filter(array_map('trim', explode("\n", $validated['facilities']))));
+        }
+
+        if (empty($validated['price_per_night']) || $validated['price_per_night'] === 'Hubungi Admisi' || $validated['price_per_night'] === '0') {
+            $validated['price_per_night'] = null;
+        }
 
         if (empty($validated['category'])) {
             $validated['category'] = 'rawat_inap';
@@ -114,11 +128,20 @@ class RoomTypeController extends Controller
             'category' => ['nullable', 'string', 'max:50'],
             'capacity' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'facilities' => ['nullable'],
             'price_per_night' => ['nullable', 'string', 'max:255'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
             'branch_id' => ['nullable', 'integer', 'exists:branches,id'],
         ]);
+
+        if (array_key_exists('facilities', $validated) && is_string($validated['facilities']) && !empty($validated['facilities'])) {
+            $validated['facilities'] = array_values(array_filter(array_map('trim', explode("\n", $validated['facilities']))));
+        }
+
+        if (empty($validated['price_per_night']) || $validated['price_per_night'] === 'Hubungi Admisi' || $validated['price_per_night'] === '0') {
+            $validated['price_per_night'] = null;
+        }
 
         if (empty($validated['category'])) {
             $validated['category'] = $roomType->category ?: 'rawat_inap';

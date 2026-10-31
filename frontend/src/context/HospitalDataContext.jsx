@@ -725,89 +725,54 @@ export function HospitalDataProvider({ children }) {
 
     const priceDisplay = formatRoomTarif(r.price_per_night || r.price);
 
-    // Sanitize and deduplicate facilities/features
-    let rawDesc = (r.description || '')
-      .replace(/Wi-FiTempat Tidur/g, 'Wi-Fi\nTempat Tidur')
-      .replace(/Wi-FiKamar Mandi/g, 'Wi-Fi\nKamar Mandi');
-
-    const descLines = rawDesc.split('\n').map(l => l.trim()).filter(Boolean);
-    const candidateFeatures = [];
-    descLines.forEach(l => {
-      const cleanLine = l.replace(/^[-•*]\s*/, '').trim();
-      if (cleanLine.length > 2) {
-        candidateFeatures.push(cleanLine);
+    // 1. Ekstrak fasilitas kamar secara terpisah dan bersih
+    let rawFacilities = [];
+    if (Array.isArray(r.facilities)) {
+      rawFacilities = r.facilities;
+    } else if (typeof r.facilities === 'string' && r.facilities.trim()) {
+      try {
+        const parsed = JSON.parse(r.facilities);
+        if (Array.isArray(parsed)) rawFacilities = parsed;
+        else rawFacilities = r.facilities.split('\n').map(s => s.trim()).filter(Boolean);
+      } catch {
+        rawFacilities = r.facilities.split('\n').map(s => s.trim()).filter(Boolean);
       }
-    });
-
-    // Case-insensitive deduplication
-    const seenFeats = new Set();
-    const cleanFeatures = [];
-    candidateFeatures.forEach(f => {
-      const low = f.toLowerCase();
-      if (!seenFeats.has(low)) {
-        seenFeats.add(low);
-        cleanFeatures.push(f);
-      }
-    });
-
-    let defaultFeats = [
-      'Tempat Tidur Pasien Ergonomis',
-      'Nurse Call System 24 Jam',
-      'Pendingin Ruangan (AC)',
-      'Kamar Mandi Bersih'
-    ];
-    if (nameLower.includes('vip') || nameLower.includes('suite')) {
-      defaultFeats = [
-        'Tempat Tidur Elektrik Ergonomis Multi-Posisi',
-        'Smart TV 55 Inch & Akses Wi-Fi Cepat',
-        'Kamar Mandi Pribadi & Water Heater',
-        'Sofa Bed Keluarga & Kulkas Mini',
-        'Nurse Call 24 Jam di Sisi Bed'
-      ];
-    } else if (nameLower.includes('icu') || nameLower.includes('staments') || nameLower.includes('intensif')) {
-      defaultFeats = [
-        'Tempat Tidur ICU Elektrik Multiposisi',
-        'Bedside Monitor Multi-Parameter 24 Jam',
-        'Ventilator Mekanik & Pasokan Central Oxygen',
-        'Syringe Pump & Infusion Pump Digital',
-        'Pengawasan Dokter Intensivis & Tim ICU 24 Jam'
-      ];
-    } else if (nameLower.includes('kelas 1') || nameLower.includes('green')) {
-      defaultFeats = [
-        'Tempat Tidur Pasien Elektrik Ergonomis',
-        'Tirai Penyekat Privasi Antarpasien',
-        'Pendingin Ruangan (AC) & Smart TV',
-        'Kamar Mandi Dalam Higienis & Water Heater',
-        'Nurse Call System 24 Jam Siaga'
-      ];
-    } else if (nameLower.includes('kelas 2') || nameLower.includes('red')) {
-      defaultFeats = [
-        'Tempat Tidur Pasien dengan Pengatur Sandaran',
-        'Tirai Penyekat Privasi di Setiap Bed',
-        'Pendingin Ruangan (AC) Sentral',
-        'Bed Side Cabinet & Meja Pasien Lipat',
-        'Nurse Call System Terintegrasi'
-      ];
-    } else if (nameLower.includes('kelas 3') || nameLower.includes('seroja')) {
-      defaultFeats = [
-        'Ranjang Pasien Medis dengan Tirai Penyekat',
-        'Pendingin Ruangan (AC) & Sirkulasi Udara Baik',
-        'Kamar Mandi Bersih dengan Pegangan Pengaman',
-        'Standar Rawat Inap Standar (KRIS) BPJS',
-        'Nurse Call System di Sisi Bed'
-      ];
-    } else if (nameLower.includes('isolasi')) {
-      defaultFeats = [
-        'Ruang Bertekanan Negatif dengan HEPA Filter',
-        'Ruang Antara (Anteroom) Standar PPI Kemenkes',
-        'Bed Pasien Khusus dengan Monitor Parameter',
-        'Kamar Mandi Khusus Ruang Isolasi',
-        'Pengawasan Medis 24 Jam & Kaca Observasi'
-      ];
+    } else if (r.description && (r.description.includes('\n-') || r.description.includes('\n•') || r.description.includes('\n*'))) {
+      // Legacy fallback: jika DB lama masih menggabungkan bullet dalam deskripsi
+      const lines = r.description.split('\n').map(l => l.trim()).filter(Boolean);
+      lines.forEach(l => {
+        if (/^[-*•]\s*/.test(l)) {
+          const clean = l.replace(/^[-*•]\s*/, '').trim();
+          if (clean && !clean.includes(' • ')) rawFacilities.push(clean);
+        }
+      });
     }
 
-    const feats = cleanFeatures.length >= 3 ? cleanFeatures : defaultFeats;
-    const cleanDesc = cleanFeatures.join(' • ');
+    // Deduplikasi fasilitas (case-insensitive)
+    const seenF = new Set();
+    const cleanFacilities = [];
+    rawFacilities.forEach(f => {
+      const clean = f.replace(/^[-*•]\s*/, '').trim();
+      const low = clean.toLowerCase();
+      if (clean && !seenF.has(low) && !clean.includes(' • ')) {
+        seenF.add(low);
+        cleanFacilities.push(clean);
+      }
+    });
+
+    // 2. Ekstrak deskripsi naratif bersih (jangan pernah campur fasilitas ke deskripsi!)
+    let cleanDesc = (r.description || '').trim();
+    if (cleanDesc.includes('\n-') || cleanDesc.includes('\n•') || cleanDesc.includes('\n*')) {
+      cleanDesc = cleanDesc.split('\n')
+        .filter(l => !l.trim().startsWith('-') && !l.trim().startsWith('•') && !l.trim().startsWith('*'))
+        .join(' ')
+        .trim();
+    }
+    if (cleanDesc.includes(' • ') && cleanFacilities.length > 0) {
+      cleanDesc = '';
+    }
+
+    const feats = cleanFacilities;
 
     let cat = (r.category || '').toLowerCase().trim();
     if (!cat) {
@@ -901,6 +866,7 @@ export function HospitalDataProvider({ children }) {
       image: formatImageUrl(r.image_url || r.image, fallbackImg),
       image_url: r.image_url || '',
       description: cleanDesc,
+      desc: cleanDesc,
       features: feats,
       facilities: feats,
       target: 'Pasien Rawat Inap',
@@ -1616,24 +1582,27 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'room': {
-          const rawPrice = payload.price !== undefined && payload.price !== null && payload.price !== ''
+          const rawPrice = payload.price !== undefined && payload.price !== null
             ? payload.price
             : (payload.price_per_night !== undefined && payload.price_per_night !== null ? payload.price_per_night : '');
           let priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
           if (/^\d+\.00$/.test(priceString)) {
             priceString = priceString.replace(/\.00$/, '');
           }
-          let descText = payload.description || '';
-          if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
-            descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
-          }
+          const finalPrice = (!priceString || priceString === 'Hubungi Admisi' || priceString === '0') ? null : priceString;
+
+          const facilitiesList = Array.isArray(payload.facilities)
+            ? payload.facilities
+            : (payload.facilitiesText ? payload.facilitiesText.split('\n').map(s => s.trim().replace(/^[-*•]\s*/, '')).filter(Boolean) : []);
+
           const body = {
             name: payload.name,
             category: payload.category || 'rawat_inap',
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
-            description: descText,
-            price: priceString || null,
-            price_per_night: priceString || null,
+            description: payload.description || '',
+            facilities: facilitiesList,
+            price: finalPrice,
+            price_per_night: finalPrice,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
@@ -1641,6 +1610,10 @@ export function HospitalDataProvider({ children }) {
           res = await api.adminCreateRoomType(body);
           if (res?.data) {
             const mapped = mapRoom(res.data);
+            mapped.description = body.description;
+            mapped.desc = body.description;
+            mapped.facilities = body.facilities;
+            mapped.features = body.facilities;
             const createdDbId = mapped.dbId || mapped.id;
             const clientFinalId = createdDbId ? `room-${createdDbId}` : (payload.id || `room-${Date.now()}`);
             saveItem('room', { ...mapped, id: clientFinalId, dbId: createdDbId });
@@ -1812,24 +1785,27 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'room': {
-          const rawPrice = payload.price !== undefined && payload.price !== null && payload.price !== ''
+          const rawPrice = payload.price !== undefined && payload.price !== null
             ? payload.price
             : (payload.price_per_night !== undefined && payload.price_per_night !== null ? payload.price_per_night : '');
           let priceString = String(rawPrice).replace(/\s*\/\s*malam$/i, '').trim();
           if (/^\d+\.00$/.test(priceString)) {
             priceString = priceString.replace(/\.00$/, '');
           }
-          let descText = payload.description || '';
-          if (Array.isArray(payload.facilities) && payload.facilities.length > 0) {
-            descText = (payload.description || '') + '\n' + payload.facilities.map(f => `- ${f}`).join('\n');
-          }
+          const finalPrice = (!priceString || priceString === 'Hubungi Admisi' || priceString === '0') ? null : priceString;
+
+          const facilitiesList = Array.isArray(payload.facilities)
+            ? payload.facilities
+            : (payload.facilitiesText ? payload.facilitiesText.split('\n').map(s => s.trim().replace(/^[-*•]\s*/, '')).filter(Boolean) : []);
+
           const body = {
             name: payload.name,
             category: payload.category || 'rawat_inap',
             capacity: payload.capacity || '1 - 2 Pasien per Kamar',
-            description: descText,
-            price: priceString || null,
-            price_per_night: priceString || null,
+            description: payload.description || '',
+            facilities: facilitiesList,
+            price: finalPrice,
+            price_per_night: finalPrice,
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
@@ -1841,9 +1817,13 @@ export function HospitalDataProvider({ children }) {
               mapped.image = formatImageUrl(body.image_url, '/images/default-image.svg');
               mapped.image_url = body.image_url;
             }
+            mapped.description = body.description;
+            mapped.desc = body.description;
+            mapped.facilities = body.facilities;
+            mapped.features = body.facilities;
             // Pastikan format display tarif selaras dengan yang baru disimpan
             mapped.price = formatRoomTarif(body.price_per_night);
-            mapped.price_per_night = body.price_per_night || mapped.price;
+            mapped.price_per_night = body.price_per_night ? body.price_per_night : mapped.price;
             saveItem('room', { ...mapped, id: rawTargetId, dbId: targetId }, true);
             loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
             return { success: true, data: mapped };
