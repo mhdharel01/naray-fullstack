@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="narayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#008C9E" />
+      <stop offset="50%" stop-color="#00B4D8" />
+      <stop offset="100%" stop-color="#0B2545" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F3C68F" />
+      <stop offset="100%" stop-color="#D4AF37" />
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Badge -->
+  <rect width="100" height="100" rx="24" fill="url(#narayGrad)" />
+  <!-- Medical Emblem Cross with Leaf Harmony -->
+  <path d="M50 18 C50 18 36 28 36 44 C36 58 50 78 50 78 C50 78 64 58 64 44 C64 28 50 18 50 18 Z" fill="white" fill-opacity="0.95" />
+  <!-- Center Heart / Pulse Core -->
+  <circle cx="50" cy="44" r="12" fill="url(#goldAccent)" />
+  <!-- Cross overlay -->
+  <path d="M46 44 H54 M50 40 V48" stroke="#0B2545" stroke-width="3" stroke-linecap="round" />
+  <!-- Dynamic Orbit ring -->
+  <path d="M25 65 C32 75 68 75 75 65" stroke="url(#goldAccent)" stroke-width="3.5" stroke-linecap="round" fill="none" />
+</svg>

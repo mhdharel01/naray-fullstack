@@ -8,5 +8,17 @@ class McuPackage extends Model
 {
     use SoftDeletes;
     
-    protected $fillable = ['name', 'slug', 'description', 'price', 'image_url', 'status'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'badge',
+        'description',
+        'highlight',
+        'duration',
+        'target',
+        'items',
+        'price',
+        'image_url',
+        'status'
+    ];
 }

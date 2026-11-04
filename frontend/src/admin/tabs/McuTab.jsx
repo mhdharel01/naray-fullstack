@@ -40,11 +40,21 @@ export default function McuTab({
   const getPackageItems = (pkg) => {
     if (Array.isArray(pkg.items) && pkg.items.length > 0) return pkg.items;
     if (Array.isArray(pkg.features) && pkg.features.length > 0) return pkg.features;
-    if (typeof pkg.items === 'string') {
-      return pkg.items.split('\n').map(s => s.trim()).filter(Boolean);
+    if (typeof pkg.items === 'string' && pkg.items.trim()) {
+      if (pkg.items.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(pkg.items);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (e) { }
+      }
+      return pkg.items.split('\n').map(s => s.trim().replace(/^[-•*]\s*/, '')).filter(Boolean);
     }
     if (typeof pkg.description === 'string') {
-      return pkg.description.split('\n').map(s => s.trim()).filter(Boolean);
+      const lines = pkg.description.split('\n').map(s => s.trim()).filter(Boolean);
+      const itemLines = lines.filter(l => l.startsWith('-') || l.startsWith('•') || l.startsWith('*'));
+      if (itemLines.length > 0) {
+        return itemLines.map(l => l.replace(/^[-•*]\s*/, ''));
+      }
     }
     return [
       'Pemeriksaan Fisik oleh Dokter',

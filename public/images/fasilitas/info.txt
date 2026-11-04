@@ -1,0 +1,3 @@
+# Folder Aset Fasilitas & Alat Medis
+Taruh foto peralatan diagnostik, laboratorium, CT-Scan, farmasi, ambulans di sini.
+Ukuran rekomendasi: 800x550px (format .webp / .jpg).

@@ -888,16 +888,31 @@ export function HospitalDataProvider({ children }) {
 
   const mapMcu = (m) => {
     const priceNum = Number(m.price) || 0;
-    let dbHighlight = '';
+    let dbHighlight = m.highlight || '';
     let dbItems = [];
+
+    if (Array.isArray(m.items) && m.items.length > 0) {
+      dbItems = m.items;
+    } else if (typeof m.items === 'string' && m.items.trim()) {
+      if (m.items.trim().startsWith('[')) {
+        try {
+          const parsed = JSON.parse(m.items);
+          if (Array.isArray(parsed) && parsed.length > 0) dbItems = parsed;
+        } catch (e) { }
+      }
+      if (dbItems.length === 0) {
+        dbItems = m.items.split('\n').map(l => l.trim().replace(/^[-•*]\s*/, '')).filter(Boolean);
+      }
+    }
+
     if (m.description) {
       const lines = m.description.split('\n').map(l => l.trim()).filter(Boolean);
       const itemLines = lines.filter(l => l.startsWith('-') || l.startsWith('•') || l.startsWith('*'));
       const highlightLines = lines.filter(l => !l.startsWith('-') && !l.startsWith('•') && !l.startsWith('*'));
-      if (highlightLines.length > 0) {
+      if (!dbHighlight && highlightLines.length > 0) {
         dbHighlight = highlightLines.join(' ');
       }
-      if (itemLines.length > 0) {
+      if (dbItems.length === 0 && itemLines.length > 0) {
         dbItems = itemLines.map(l => l.replace(/^[-•*]\s*/, ''));
       }
     }
@@ -908,12 +923,15 @@ export function HospitalDataProvider({ children }) {
       id: m.slug || `mcu-${m.id}`,
       dbId: m.id,
       name: m.name,
+      title: m.name,
+      slug: m.slug || '',
       badge: m.badge || 'Paket Rekomendasi',
       price: priceNum ? `Rp ${priceNum.toLocaleString('id-ID')}` : 'Hubungi Naray Care',
       originalPrice: priceNum ? `Rp ${(priceNum * 1.25).toLocaleString('id-ID')}` : '',
       duration: m.duration || '2 - 3 Jam',
       target: m.target || 'Pemeriksaan Kesehatan Berkala',
-      highlight: dbHighlight || m.highlight || m.name,
+      highlight: dbHighlight || m.name,
+      description: m.description || '',
       image: formatImageUrl(m.image_url || m.image, '/images/default-image.svg'),
       image_url: m.image_url || '',
       items: dbItems.length > 0 ? dbItems : ['Pemeriksaan Fisik Dokter Spesialis', 'Pemeriksaan Laboratorium Lengkap', 'Resume Medis Komprehensif'],
@@ -1575,22 +1593,46 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'mcu': {
+          const finalName = payload.name || payload.title || 'Paket MCU';
           const priceNum = Number(String(payload.price).replace(/[^0-9]/g, '')) || 500000;
           let description = payload.highlight || '';
-          if (Array.isArray(payload.items) && payload.items.length > 0) {
-            description += '\n' + payload.items.map(i => `- ${i}`).join('\n');
+          const itemsList = Array.isArray(payload.items) ? payload.items : (
+            payload.itemsText ? payload.itemsText.split('\n').map(s => s.trim().replace(/^[-•*]\s*/, '')).filter(Boolean) : []
+          );
+          if (itemsList.length > 0) {
+            description += (description ? '\n' : '') + itemsList.map(i => `- ${i}`).join('\n');
           } else if (payload.description) {
             description = payload.description;
           }
           const body = {
-            name: payload.name,
+            name: finalName,
             slug: payload.slug || undefined,
             price: priceNum,
+            badge: payload.badge !== undefined ? payload.badge : 'Paket Rekomendasi',
+            duration: payload.duration !== undefined ? payload.duration : '2 - 3 Jam',
+            target: payload.target !== undefined ? payload.target : 'Pemeriksaan Kesehatan Berkala',
+            highlight: payload.highlight || '',
+            items: itemsList,
             description,
-            image_url: payload.image_url || null,
+            image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
           };
           res = await api.adminCreateMcuPackage(body);
+          if (res?.data) {
+            const mapped = mapMcu(res.data);
+            mapped.name = finalName;
+            mapped.title = finalName;
+            mapped.badge = body.badge;
+            mapped.duration = body.duration;
+            mapped.target = body.target;
+            mapped.highlight = body.highlight;
+            mapped.items = itemsList;
+            mapped.price = `Rp ${priceNum.toLocaleString('id-ID')}`;
+            mapped.status = body.status;
+            saveItem('mcu', mapped, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         case 'room': {
@@ -1794,22 +1836,46 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'mcu': {
+          const finalName = payload.name || payload.title || 'Paket MCU';
           const priceNum = Number(String(payload.price).replace(/[^0-9]/g, '')) || 500000;
           let description = payload.highlight || '';
-          if (Array.isArray(payload.items) && payload.items.length > 0) {
-            description += '\n' + payload.items.map(i => `- ${i}`).join('\n');
+          const itemsList = Array.isArray(payload.items) ? payload.items : (
+            payload.itemsText ? payload.itemsText.split('\n').map(s => s.trim().replace(/^[-•*]\s*/, '')).filter(Boolean) : []
+          );
+          if (itemsList.length > 0) {
+            description += (description ? '\n' : '') + itemsList.map(i => `- ${i}`).join('\n');
           } else if (payload.description) {
             description = payload.description;
           }
           const body = {
-            name: payload.name,
+            name: finalName,
             slug: payload.slug || undefined,
             price: priceNum,
+            badge: payload.badge !== undefined ? payload.badge : 'Paket Rekomendasi',
+            duration: payload.duration !== undefined ? payload.duration : '2 - 3 Jam',
+            target: payload.target !== undefined ? payload.target : 'Pemeriksaan Kesehatan Berkala',
+            highlight: payload.highlight || '',
+            items: itemsList,
             description,
-            image_url: payload.image_url || null,
+            image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
           };
           res = await api.adminUpdateMcuPackage(targetId, body);
+          if (res?.data) {
+            const mapped = mapMcu(res.data);
+            mapped.name = finalName;
+            mapped.title = finalName;
+            mapped.badge = body.badge;
+            mapped.duration = body.duration;
+            mapped.target = body.target;
+            mapped.highlight = body.highlight;
+            mapped.items = itemsList;
+            mapped.price = `Rp ${priceNum.toLocaleString('id-ID')}`;
+            mapped.status = body.status;
+            saveItem('mcu', { ...mapped, id: rawTargetId, dbId: targetId }, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         case 'room': {

@@ -31,9 +31,24 @@ class McuPackageController extends Controller
         );
     }
 
+    protected function findPackage($id)
+    {
+        $package = null;
+        if (is_numeric($id)) {
+            $package = McuPackage::find($id);
+        }
+        if (!$package && is_string($id)) {
+            $package = McuPackage::where('slug', $id)->first();
+        }
+        if (!$package) {
+            $package = McuPackage::findOrFail($id);
+        }
+        return $package;
+    }
+
     public function show($id)
     {
-        $package = McuPackage::findOrFail($id);
+        $package = $this->findPackage($id);
 
         return response()->json($package);
     }
@@ -43,7 +58,12 @@ class McuPackageController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:mcu_packages,slug'],
+            'badge' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string'],
+            'highlight' => ['nullable', 'string'],
+            'duration' => ['nullable', 'string', 'max:100'],
+            'target' => ['nullable', 'string', 'max:255'],
+            'items' => ['nullable'],
             'price' => ['required', 'numeric', 'min:0'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
@@ -51,6 +71,10 @@ class McuPackageController extends Controller
 
         if (empty($validated['slug'])) {
             $validated['slug'] = \Illuminate\Support\Str::slug($validated['name']);
+        }
+
+        if (isset($validated['items']) && is_array($validated['items'])) {
+            $validated['items'] = json_encode($validated['items'], JSON_UNESCAPED_UNICODE);
         }
 
         $package = McuPackage::create($validated);
@@ -64,7 +88,7 @@ class McuPackageController extends Controller
 
     public function update(Request $request, $id)
     {
-        $package = McuPackage::findOrFail($id);
+        $package = $this->findPackage($id);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -75,7 +99,12 @@ class McuPackageController extends Controller
                 Rule::unique('mcu_packages', 'slug')
                     ->ignore($package->id),
             ],
+            'badge' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string'],
+            'highlight' => ['nullable', 'string'],
+            'duration' => ['nullable', 'string', 'max:100'],
+            'target' => ['nullable', 'string', 'max:255'],
+            'items' => ['nullable'],
             'price' => ['required', 'numeric', 'min:0'],
             'image_url' => ['nullable', 'string', 'max:2048'],
             'status' => ['required', Rule::in(['active', 'inactive'])],
@@ -83,6 +112,10 @@ class McuPackageController extends Controller
 
         if (empty($validated['slug'])) {
             $validated['slug'] = $package->slug ?? \Illuminate\Support\Str::slug($validated['name']);
+        }
+
+        if (isset($validated['items']) && is_array($validated['items'])) {
+            $validated['items'] = json_encode($validated['items'], JSON_UNESCAPED_UNICODE);
         }
 
         $package->update($validated);
@@ -96,7 +129,7 @@ class McuPackageController extends Controller
 
     public function destroy($id)
     {
-        $package = McuPackage::findOrFail($id);
+        $package = $this->findPackage($id);
 
         $package->delete();
 

@@ -95,6 +95,18 @@ class InitController extends Controller
             }
         } catch (\Throwable $e) {}
 
+        try {
+            if (!Schema::hasColumn('mcu_packages', 'badge')) {
+                Schema::table('mcu_packages', function (Blueprint $table) {
+                    $table->string('badge', 100)->nullable()->after('name');
+                    $table->string('duration', 100)->nullable()->after('price');
+                    $table->string('target', 255)->nullable()->after('duration');
+                    $table->text('highlight')->nullable()->after('target');
+                    $table->json('items')->nullable()->after('highlight');
+                });
+            }
+        } catch (\Throwable $e) {}
+
         $centersQuery = CenterOfExcellence::orderBy('name');
         if (!$includeAll) {
             $centersQuery->where('status', 'active');

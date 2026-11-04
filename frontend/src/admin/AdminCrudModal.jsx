@@ -119,13 +119,47 @@ export function AdminCrudModal({
       }
 
       const resolvedName = item.name || item.title || '';
+      
+      // Bersihkan tarif MCU untuk input form
+      const rawMcuPrice = item.price !== undefined && item.price !== null ? String(item.price) : '';
+      let cleanMcuPrice = rawMcuPrice.trim();
+      if (/^\d+\.00$/.test(cleanMcuPrice)) {
+        cleanMcuPrice = cleanMcuPrice.replace(/\.00$/, '');
+      }
+      if (/^\d+$/.test(cleanMcuPrice)) {
+        const n = Number(cleanMcuPrice);
+        if (!isNaN(n) && n > 0) {
+          cleanMcuPrice = `Rp ${n.toLocaleString('id-ID')}`;
+        }
+      }
+
+      // Bersihkan daftar item MCU (array atau JSON string)
+      let initialMcuItems = [];
+      if (Array.isArray(item.items)) {
+        initialMcuItems = item.items;
+      } else if (typeof item.items === 'string' && item.items.trim()) {
+        if (item.items.trim().startsWith('[')) {
+          try {
+            const parsed = JSON.parse(item.items);
+            if (Array.isArray(parsed)) initialMcuItems = parsed;
+          } catch (e) { }
+        }
+        if (initialMcuItems.length === 0) {
+          initialMcuItems = item.items.split('\n').map(s => s.trim().replace(/^[-*•]\s*/, '')).filter(Boolean);
+        }
+      }
+
       setFormData({
         ...item,
         name: resolvedName,
         title: resolvedName,
         tagline: item.tagline || '',
+        badge: item.badge ?? '',
+        duration: item.duration ?? '2 - 3 Jam',
+        target: item.target ?? '',
+        highlight: item.highlight ?? '',
         description: initialDesc,
-        price: entity === 'room' ? cleanRoomPrice : (item.price || ''),
+        price: entity === 'room' ? cleanRoomPrice : (entity === 'mcu' ? cleanMcuPrice : (item.price || '')),
         price_per_night: entity === 'room' ? cleanRoomPrice : (item.price_per_night || ''),
         category: typeof item.category === 'object' ? (item.category?.name || '') : (item.category || ''),
         category_id: Number(item.category_id || (typeof item.category === 'object' ? item.category?.id : 1) || 1),
@@ -135,7 +169,7 @@ export function AdminCrudModal({
         end_time: item.practiceEndTime || item.end_time || '14:00',
         poliklinik_id: item.poliklinik_id || item.assignedPoliId || (polikliniks[0]?.dbId || polikliniks[0]?.id || 1),
         capacity: item.capacity || item.bed_count || '',
-        itemsText: Array.isArray(item.items) ? item.items.join('\n') : '',
+        itemsText: initialMcuItems.join('\n'),
         facilitiesText: initialFacilitiesList.join('\n'),
       });
     } else {
@@ -680,7 +714,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="name"
-                    value={formData.name || ''}
+                    value={formData.name ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Paket Deteksi Dini Jantung Naray"
                     required
@@ -692,7 +726,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="badge"
-                    value={formData.badge || ''}
+                    value={formData.badge ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Rekomendasi Spesialis Jantung"
                   />
@@ -703,7 +737,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="price"
-                    value={formData.price || ''}
+                    value={formData.price ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: 2100000"
                     required
@@ -715,7 +749,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="duration"
-                    value={formData.duration || ''}
+                    value={formData.duration ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: 2 - 3 Jam"
                   />
@@ -726,7 +760,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="target"
-                    value={formData.target || ''}
+                    value={formData.target ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Pria &amp; Wanita (Usia 18 - 50 Tahun)"
                   />
@@ -736,7 +770,7 @@ export function AdminCrudModal({
                   <label>Status Paket MCU</label>
                   <select
                     name="status"
-                    value={formData.status || 'active'}
+                    value={formData.status ?? 'active'}
                     onChange={handleChange}
                   >
                     <option value="active">Tersedia / Aktif</option>
@@ -746,7 +780,7 @@ export function AdminCrudModal({
 
                 <ImageUploadField
                   label="Unggah Banner / Ilustrasi Paket MCU"
-                  value={formData.image_url || formData.image || ''}
+                  value={formData.image_url ?? formData.image ?? ''}
                   folder="mcu"
                   onChange={(uploadedUrl) => setFormData(prev => ({ ...prev, image_url: uploadedUrl, image: uploadedUrl }))}
                   helperText="Format: JPG, PNG, WEBP. Banner paket otomatis dikompresi ringan & aman."
@@ -757,7 +791,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="highlight"
-                    value={formData.highlight || ''}
+                    value={formData.highlight ?? ''}
                     onChange={handleChange}
                     placeholder="Pemeriksaan fungsi organ vital, kadar gula darah, kolesterol..."
                   />
@@ -768,7 +802,7 @@ export function AdminCrudModal({
                   <textarea
                     rows={6}
                     name="itemsText"
-                    value={formData.itemsText || ''}
+                    value={formData.itemsText ?? ''}
                     onChange={handleChange}
                     placeholder="Pemeriksaan Fisik oleh Dokter Spesialis&#10;Hematologi Rutin Lengkap&#10;Profil Lemak Lengkap&#10;Elektrokardiogram (EKG)"
                   />

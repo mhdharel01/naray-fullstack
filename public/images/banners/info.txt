@@ -1,0 +1,3 @@
+# Folder Aset Banner & Hero
+Taruh foto slide utama beranda (hero banner) atau header halaman di sini.
+Ukuran rekomendasi: 1920x800px (format .webp / .jpg).

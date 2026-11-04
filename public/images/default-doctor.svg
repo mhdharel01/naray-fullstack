@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="grad-doc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E6FFFA" />
+      <stop offset="100%" stop-color="#CCFBF1" />
+    </linearGradient>
+    <linearGradient id="grad-teal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D9488" />
+      <stop offset="100%" stop-color="#0F766E" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" fill="url(#grad-doc)" />
+  <!-- Stethoscope icon backdrop -->
+  <circle cx="100" cy="78" r="38" fill="#14B8A6" opacity="0.2" />
+  <!-- Doctor head -->
+  <circle cx="100" cy="74" r="32" fill="#0D9488" />
+  <!-- Medical head cap / hair contour -->
+  <path d="M72,70 C72,52 84,40 100,40 C116,40 128,52 128,70 C128,74 125,75 120,70 C112,62 88,62 80,70 C75,75 72,74 72,70 Z" fill="#0F766E" />
+  <!-- Doctor Coat / Body -->
+  <path d="M44,180 C44,136 68,118 100,118 C132,118 156,136 156,180 Z" fill="url(#grad-teal)" />
+  <!-- White Coat Lapels -->
+  <path d="M78,130 L100,165 L122,130 L112,120 L100,135 L88,120 Z" fill="#F8FAFC" />
+  <!-- Medical Tie / Shirt -->
+  <path d="M96,138 L104,138 L103,158 L97,158 Z" fill="#0D9488" />
+  <!-- Stethoscope around neck -->
+  <path d="M84,124 C84,142 90,154 96,155 M116,124 C116,142 110,154 104,155" stroke="#F1F5F9" stroke-width="4" fill="none" stroke-linecap="round" />
+  <circle cx="100" cy="162" r="5" fill="#F1F5F9" />
+</svg>
