@@ -16,6 +16,8 @@ use App\Models\InsurancePartner;
 use App\Models\HospitalInfo;
 use App\Models\Specialization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 class InitController extends Controller
 {
@@ -84,6 +86,14 @@ class InitController extends Controller
             $facilitiesQuery->where('status', 'active');
         }
         $facilities = $facilitiesQuery->get();
+
+        try {
+            if (!Schema::hasColumn('center_of_excellences', 'tagline')) {
+                Schema::table('center_of_excellences', function (Blueprint $table) {
+                    $table->string('tagline', 255)->nullable()->after('name');
+                });
+            }
+        } catch (\Throwable $e) {}
 
         $centersQuery = CenterOfExcellence::orderBy('name');
         if (!$includeAll) {

@@ -697,12 +697,13 @@ export function HospitalDataProvider({ children }) {
       id: c.slug || `center-${c.id}`,
       slug: c.slug,
       dbId: c.id,
-      title: c.name,
-      name: c.name,
-      shortTitle: c.name,
+      title: c.name || c.title,
+      name: c.name || c.title,
+      shortTitle: c.name || c.title || c.shortTitle,
       icon: 'HeartPulse',
       tagline: tagline,
       description: desc,
+      desc: desc,
       status: normalizedStatus,
       is_active: normalizedStatus === 'active',
       image: formatImageUrl(c.image_url || c.image, '/images/default-image.svg'),
@@ -1646,10 +1647,10 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'center': {
-          const titleStr = payload.title || payload.name || 'Pusat Unggulan';
-          const slugStr = payload.slug || titleStr.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `center-${Date.now()}`;
+          const finalName = payload.name || payload.title || 'Pusat Unggulan';
+          const slugStr = payload.slug || finalName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `center-${Date.now()}`;
           const body = {
-            name: titleStr,
+            name: finalName,
             slug: slugStr,
             tagline: payload.tagline || '',
             description: payload.description || '',
@@ -1661,8 +1662,12 @@ export function HospitalDataProvider({ children }) {
           if (res?.data || res?.id) {
             const rawCenter = res.data?.data || res.data || res;
             const mapped = mapCenter(rawCenter);
+            mapped.name = body.name;
+            mapped.title = body.name;
+            mapped.shortTitle = body.name;
             mapped.tagline = body.tagline;
             mapped.description = body.description;
+            mapped.desc = body.description;
             const createdDbId = mapped.dbId || rawCenter.id;
             const clientFinalId = createdDbId ? `center-${createdDbId}` : (mapped.slug || payload.id || `center-${Date.now()}`);
             saveItem('center', { ...mapped, id: clientFinalId, dbId: createdDbId });
@@ -1866,25 +1871,27 @@ export function HospitalDataProvider({ children }) {
           break;
         }
         case 'center': {
-          const titleStr = payload.title || payload.name || 'Pusat Unggulan';
+          const finalName = payload.name || payload.title || 'Pusat Unggulan';
+          const targetLookup = payload.dbId || cleanNumericId(payload.id) || payload.slug || targetId;
           const body = {
-            name: titleStr,
-            slug: payload.slug || titleStr.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `center-${targetId}`,
+            name: finalName,
+            slug: payload.slug || finalName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `center-${targetLookup}`,
             tagline: payload.tagline || '',
             description: payload.description || '',
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
           };
-          const targetLookup = payload.dbId || cleanNumericId(payload.id) || payload.slug || targetId;
           res = await api.adminUpdateCenterOfExcellence(targetLookup, body);
           if (res) {
             const rawCenter = res?.data?.data || res?.data || res;
             const mapped = mapCenter(rawCenter);
             mapped.name = body.name;
             mapped.title = body.name;
+            mapped.shortTitle = body.name;
             mapped.tagline = body.tagline;
             mapped.description = body.description;
+            mapped.desc = body.description;
             mapped.status = body.status;
             mapped.is_active = body.status === 'active';
             if (body.image_url) {
@@ -1892,7 +1899,8 @@ export function HospitalDataProvider({ children }) {
               mapped.image_url = body.image_url;
             }
             const centerDbId = mapped.dbId || cleanNumericId(targetLookup) || targetId;
-            saveItem('center', { ...mapped, id: rawTargetId, dbId: centerDbId }, true);
+            const finalId = payload.id || mapped.id || mapped.slug || `center-${centerDbId}`;
+            saveItem('center', { ...mapped, id: finalId, dbId: centerDbId }, true);
             loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
             return { success: true, data: mapped };
           }

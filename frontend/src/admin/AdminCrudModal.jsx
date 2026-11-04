@@ -118,8 +118,12 @@ export function AdminCrudModal({
         initialDesc = '';
       }
 
+      const resolvedName = item.name || item.title || '';
       setFormData({
         ...item,
+        name: resolvedName,
+        title: resolvedName,
+        tagline: item.tagline || '',
         description: initialDesc,
         price: entity === 'room' ? cleanRoomPrice : (item.price || ''),
         price_per_night: entity === 'room' ? cleanRoomPrice : (item.price_per_night || ''),
@@ -193,6 +197,16 @@ export function AdminCrudModal({
         ...prev,
         price: value,
         price_per_night: value,
+      }));
+      return;
+    }
+
+    // Sinkronkan name dan title secara simultan untuk entity seperti center
+    if (name === 'name' || name === 'title') {
+      setFormData(prev => ({
+        ...prev,
+        name: value,
+        title: value,
       }));
       return;
     }
@@ -841,7 +855,7 @@ export function AdminCrudModal({
                   <textarea
                     rows={3}
                     name="description"
-                    value={formData.description || ''}
+                    value={formData.description ?? ''}
                     onChange={handleChange}
                     placeholder="Kamar rawat inap privat berdesain elegan dengan kenyamanan bintang lima..."
                   />
@@ -912,7 +926,7 @@ export function AdminCrudModal({
                   <textarea
                     rows={4}
                     name="description"
-                    value={formData.description || ''}
+                    value={formData.description ?? ''}
                     onChange={handleChange}
                     placeholder="Pusat cuci darah berstandar internasional dengan mesin dialisis modern..."
                   />
@@ -928,7 +942,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="name"
-                    value={formData.name || formData.title || ''}
+                    value={formData.name ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Naray Heart & Vascular Center"
                     required
@@ -940,7 +954,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="tagline"
-                    value={formData.tagline || ''}
+                    value={formData.tagline ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Pusat Rujukan Penyakit Jantung Komprehensif"
                   />
@@ -971,7 +985,7 @@ export function AdminCrudModal({
                   <textarea
                     rows={4}
                     name="description"
-                    value={formData.description || ''}
+                    value={formData.description ?? ''}
                     onChange={handleChange}
                     placeholder="Deskripsi spesialisasi, teknologi pendukung, dan pelayanan..."
                   />
@@ -1138,7 +1152,7 @@ export function AdminCrudModal({
                   <textarea
                     rows={3}
                     name="description"
-                    value={formData.description || ''}
+                    value={formData.description ?? ''}
                     onChange={handleChange}
                     placeholder="Tuliskan penjelasan layanan atau pesan untuk pengunjung rumah sakit..."
                     required
