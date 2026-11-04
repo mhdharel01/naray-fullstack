@@ -999,10 +999,6 @@ export default function InpatientRoomsPage() {
             {/* Status Legend Badges */}
             <div className="flex items-center gap-4 text-xs font-semibold text-slate-600">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
-                Bed Siap Pakai
-              </span>
-              <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-teal-500 ring-2 ring-teal-200" />
                 Menerima BPJS Kesehatan
               </span>
@@ -1061,18 +1057,6 @@ export default function InpatientRoomsPage() {
                             getRoomCategory(room) === 'emargensi' ? 'EMERGENSI' : 'RAWAT INAP'
                           )}
                         </span>
-
-                        {/* Top-Right: Bed Availability Status Badge */}
-                        <div className="absolute top-4 right-4">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shadow-md backdrop-blur-md border ${
-                            isAvailable 
-                              ? 'bg-emerald-600/95 text-white border-emerald-400/30' 
-                              : 'bg-rose-700/95 text-white border-rose-400/30'
-                          }`}>
-                            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                            <span>{isAvailable ? `${avail} Bed Tersedia` : 'Kamar Penuh'}</span>
-                          </span>
-                        </div>
 
                         {/* Bottom Floating Price */}
                         <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-white bg-slate-950/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/15">
