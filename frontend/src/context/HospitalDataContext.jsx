@@ -999,10 +999,10 @@ export function HospitalDataProvider({ children }) {
 
   const loadBackendData = async (forceRefresh = false) => {
     setIsLoadingBackend(true);
+    const token = adminToken || (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) : null);
     try {
       // 1. Single Batch Init Endpoint (Hanya 1x request HTTP: pangkas load time dari 3s jadi ~300ms)
       // Jika admin login / adminToken ada, minta seluruh data (termasuk draf & non-aktif)
-      const token = adminToken || (typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.ADMIN_TOKEN) : null);
       const params = {};
       if (token) params.all = 1;
       if (forceRefresh) {
