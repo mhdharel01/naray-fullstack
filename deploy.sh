@@ -55,11 +55,22 @@ if [ -f "$SCRIPT_DIR/.env" ] && [ ! -f "$SCRIPT_DIR/Backend/.env" ]; then
     ln -sfn "$SCRIPT_DIR/.env" "$SCRIPT_DIR/Backend/.env"
 fi
 
-# 2. Update frontend public assets
+# 2. Update frontend public assets & API index.php entrypoint
 if [ -d "$SCRIPT_DIR/frontend/dist" ]; then
     echo "📦 Memperbarui aset frontend ke public/..."
     mkdir -p "$SCRIPT_DIR/public"
     \cp -rf "$SCRIPT_DIR/frontend/dist/"* "$SCRIPT_DIR/public/"
+fi
+
+echo "🔌 Memastikan gateway API (public/index.php) tersedia..."
+\cp -f "$SCRIPT_DIR/Backend/public/index.php" "$SCRIPT_DIR/public/index.php"
+if [ -f "$SCRIPT_DIR/Backend/public/.htaccess" ]; then
+    \cp -f "$SCRIPT_DIR/Backend/public/.htaccess" "$SCRIPT_DIR/public/.htaccess"
+fi
+
+# Pastikan symlink storage terhubung
+if [ -d "$SCRIPT_DIR/storage/app/public" ]; then
+    ln -sfn "$SCRIPT_DIR/storage/app/public" "$SCRIPT_DIR/public/storage"
 fi
 
 # 3. Jalankan Artisan Commands dari root server (tempat vendor & .env berada)
