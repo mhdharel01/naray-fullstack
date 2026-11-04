@@ -13,6 +13,7 @@ import {
   Maximize2,
   Sparkles,
   ShieldCheck,
+  Layers,
   PhoneCall,
   MessageCircle,
   AlertCircle,
@@ -23,14 +24,6 @@ import {
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 import { PageLayout } from '../layouts/PageLayout';
-
-const GALLERY_CATEGORIES = [
-  'Semua',
-  'Kegiatan Sosial / CSR',
-  'Edukasi Komunitas Sehat',
-  'Pelayanan Geriatri',
-  'Fasilitas Medis'
-];
 
 const getYouTubeId = (url) => {
   if (!url) return '';
@@ -52,15 +45,35 @@ export default function GalleryVideoPage() {
   const [lightboxVideo, setLightboxVideo] = useState(null);
   const [lightboxImg, setLightboxImg] = useState(null);
 
-  const availableCategories = useMemo(() => {
-    const set = new Set(['Semua']);
-    GALLERY_CATEGORIES.filter(c => c !== 'Semua').forEach(c => set.add(c));
-    galleryActivities.forEach(g => {
+  // Filter Active Data Only (Sesuai Data Riil Aktif di Database)
+  const activeVideos = useMemo(() => {
+    return (videoList || []).filter(v => (v.status || 'active').toLowerCase() === 'active');
+  }, [videoList]);
+
+  const activePhotos = useMemo(() => {
+    return (galleryActivities || []).filter(g => (g.status || 'active').toLowerCase() === 'active');
+  }, [galleryActivities]);
+
+  // Kategori Dinamis Khusus dari Foto yang Benar-Benar Aktif di Database
+  const activeCategories = useMemo(() => {
+    const set = new Set();
+    activePhotos.forEach(g => {
       const cat = typeof g.category === 'object' ? (g.category?.name || '') : String(g.category || '');
       if (cat && cat.trim()) set.add(cat.trim());
     });
     return Array.from(set);
-  }, [galleryActivities]);
+  }, [activePhotos]);
+
+  const availableCategories = useMemo(() => {
+    return ['Semua', ...activeCategories];
+  }, [activeCategories]);
+
+  // Reset selectedCategory jika kategori yang dipilih sudah tidak ada di data aktif
+  useEffect(() => {
+    if (selectedCategory !== 'Semua' && !availableCategories.includes(selectedCategory)) {
+      setSelectedCategory('Semua');
+    }
+  }, [availableCategories, selectedCategory]);
 
   const rawPhone = (hospitalInfo?.whatsappHotline || hospitalInfo?.emergencyHotline || '6285363395383').replace(/[^0-9]/g, '');
   const emergencyPhone = hospitalInfo?.emergencyHotline || hospitalInfo?.phone || '+6285363395383';
@@ -88,34 +101,29 @@ export default function GalleryVideoPage() {
 
   // Filter gallery photos (Active Only)
   const filteredGallery = useMemo(() => {
-    return galleryActivities
-      .filter(gal => (gal.status || 'active').toLowerCase() === 'active')
-      .filter((gal) => {
-        const catStr = typeof gal.category === 'object' ? (gal.category?.name || '') : String(gal.category || '');
-        const matchCat =
-          selectedCategory === 'Semua' ||
-          (catStr && catStr.toLowerCase().includes(selectedCategory.toLowerCase())) ||
-          (selectedCategory === 'Fasilitas Medis' && catStr.toLowerCase().includes('fasilitas'));
-        const matchSearch =
-          !searchKeyword ||
-          gal.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-          gal.desc?.toLowerCase().includes(searchKeyword.toLowerCase());
-        return matchCat && matchSearch;
-      });
-  }, [galleryActivities, selectedCategory, searchKeyword]);
+    return activePhotos.filter((gal) => {
+      const catStr = typeof gal.category === 'object' ? (gal.category?.name || '') : String(gal.category || '');
+      const matchCat =
+        selectedCategory === 'Semua' ||
+        catStr.trim().toLowerCase() === selectedCategory.trim().toLowerCase();
+      const matchSearch =
+        !searchKeyword ||
+        gal.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        gal.desc?.toLowerCase().includes(searchKeyword.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [activePhotos, selectedCategory, searchKeyword]);
 
   // Filter videos (Active Only)
   const filteredVideos = useMemo(() => {
-    return videoList
-      .filter(vid => (vid.status || 'active').toLowerCase() === 'active')
-      .filter((vid) => {
-        return (
-          !searchKeyword ||
-          vid.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-          vid.desc?.toLowerCase().includes(searchKeyword.toLowerCase())
-        );
-      });
-  }, [videoList, searchKeyword]);
+    return activeVideos.filter((vid) => {
+      return (
+        !searchKeyword ||
+        vid.title?.toLowerCase().includes(searchKeyword.toLowerCase()) ||
+        vid.desc?.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    });
+  }, [activeVideos, searchKeyword]);
 
   return (
     <PageLayout>
@@ -175,98 +183,142 @@ export default function GalleryVideoPage() {
           </div>
         </div>
 
-        {/* ── 3. Real-Time 4-Cards Stat Strip (Matching InpatientRoomsPage) ── */}
+        {/* ── 3. Real-Time 4-Cards Stat Strip (Sesuai Data Riil Aktif di Database) ── */}
         <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8 mb-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             
-            {/* Stat 1: Total Video */}
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+            {/* Stat 1: Total Video Aktif (Klik untuk Beralih Tab) */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('video')}
+              className={`text-left rounded-2xl border p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5 transition-all cursor-pointer ${
+                activeTab === 'video'
+                  ? 'bg-teal-50/80 border-teal-300 ring-2 ring-teal-500/20 shadow-xs'
+                  : 'bg-white border-slate-200/90 hover:border-teal-200 hover:bg-slate-50/60'
+              }`}
+            >
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                  activeTab === 'video'
+                    ? 'bg-teal-700 text-white shadow-xs'
+                    : 'bg-teal-50 border border-teal-100 text-teal-700'
+                }`}>
                   <Video className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-100">
+                <span className={`sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full ${
+                  activeTab === 'video' ? 'bg-teal-700 text-white' : 'bg-teal-50 text-teal-700 border border-teal-100'
+                }`}>
                   Video
                 </span>
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
+                <span className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-wider block font-mono leading-tight ${
+                  activeTab === 'video' ? 'text-teal-900 font-extrabold' : 'text-slate-400'
+                }`}>
                   DOKUMENTASI VIDEO
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
-                    {videoList.length}
+                  <span className={`font-heading text-xl sm:text-3xl font-black leading-tight ${
+                    activeTab === 'video' ? 'text-teal-950' : 'text-slate-900'
+                  }`}>
+                    {activeVideos.length}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Video</span>
+                  <span className={`text-[11px] sm:text-xs font-semibold ${
+                    activeTab === 'video' ? 'text-teal-700 font-bold' : 'text-slate-500'
+                  }`}>
+                    Video Aktif
+                  </span>
                 </div>
               </div>
-            </div>
+            </button>
 
-            {/* Stat 2: Total Galeri Foto */}
-            <div className="bg-emerald-50/70 rounded-2xl border border-emerald-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
+            {/* Stat 2: Total Galeri Foto Aktif (Klik untuk Beralih Tab) */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('gallery')}
+              className={`text-left rounded-2xl border p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5 transition-all cursor-pointer ${
+                activeTab === 'gallery'
+                  ? 'bg-emerald-50/80 border-emerald-300 ring-2 ring-emerald-500/20 shadow-xs'
+                  : 'bg-white border-slate-200/90 hover:border-emerald-200 hover:bg-slate-50/60'
+              }`}
+            >
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                  activeTab === 'gallery'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-emerald-50 border border-emerald-100 text-emerald-700'
+                }`}>
                   <Camera className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                <span className={`sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full ${
+                  activeTab === 'gallery' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-800 border border-emerald-100'
+                }`}>
                   Foto
                 </span>
               </div>
               <div className="min-w-0">
-                <span className="text-[10px] sm:text-[11px] font-bold text-emerald-800 uppercase tracking-wider block font-mono leading-tight">
+                <span className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-wider block font-mono leading-tight ${
+                  activeTab === 'gallery' ? 'text-emerald-900 font-extrabold' : 'text-slate-400'
+                }`}>
                   ARSIP FOTO
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="font-heading text-xl sm:text-3xl font-black text-emerald-950 leading-tight">
-                    {galleryActivities.length}
+                  <span className={`font-heading text-xl sm:text-3xl font-black leading-tight ${
+                    activeTab === 'gallery' ? 'text-emerald-950' : 'text-slate-900'
+                  }`}>
+                    {activePhotos.length}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-semibold text-emerald-700">Foto</span>
+                  <span className={`text-[11px] sm:text-xs font-semibold ${
+                    activeTab === 'gallery' ? 'text-emerald-700 font-bold' : 'text-slate-500'
+                  }`}>
+                    Foto Aktif
+                  </span>
                 </div>
               </div>
-            </div>
+            </button>
 
-            {/* Stat 3: Kegiatan CSR & Komunitas */}
+            {/* Stat 3: Total Kategori Aktif di DB */}
             <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
               <div className="flex items-center justify-between">
                 <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-sky-50 border border-sky-100 text-sky-700 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
+                  <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-100">
-                  CSR
+                  Kategori
                 </span>
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
-                  PROGRAM KOMUNITAS
+                  KATEGORI AKTIF
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
-                    CSR &amp; Sosial
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+                    {activeCategories.length}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Aktif</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Kategori</span>
                 </div>
               </div>
             </div>
 
-            {/* Stat 4: Privasi & Etika Pasien */}
+            {/* Stat 4: Total Seluruh Dokumentasi Aktif */}
             <div className="bg-white rounded-2xl border border-slate-200/90 p-3 sm:p-5 shadow-2xs flex flex-col justify-between sm:flex-row sm:items-center gap-2 sm:gap-3.5">
               <div className="flex items-center justify-between">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-100">
-                  KARS &amp; UU
+                <span className="sm:hidden text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  Total
                 </span>
               </div>
               <div className="min-w-0">
                 <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block font-mono leading-tight">
-                  ETIKA PUBLIKASI
+                  TOTAL ARSIP AKTIF
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
-                  <span className="font-heading text-lg sm:text-2xl font-black text-slate-900 leading-tight">
-                    Privasi Pasien
+                  <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
+                    {activeVideos.length + activePhotos.length}
                   </span>
-                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Terjaga</span>
+                  <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Publikasi</span>
                 </div>
               </div>
             </div>
@@ -299,7 +351,7 @@ export default function GalleryVideoPage() {
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'video' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
-                    {videoList.length}
+                    {activeVideos.length}
                   </span>
                 </button>
 
@@ -320,7 +372,7 @@ export default function GalleryVideoPage() {
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'gallery' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
-                    {galleryActivities.length}
+                    {activePhotos.length}
                   </span>
                 </button>
               </div>
