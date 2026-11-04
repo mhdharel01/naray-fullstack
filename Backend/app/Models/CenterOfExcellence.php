@@ -9,7 +9,7 @@ class CenterOfExcellence extends Model
     protected $table = 'center_of_excellences';
     use SoftDeletes;
     
-    protected $fillable = ['name', 'slug', 'description', 'image_url', 'status', 'branch_id'];
+    protected $fillable = ['name', 'slug', 'tagline', 'description', 'image_url', 'status', 'branch_id'];
 
     public function branch() { return $this->belongsTo(Branch::class); }
 }

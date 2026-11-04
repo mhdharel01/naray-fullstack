@@ -10,7 +10,11 @@ class CenterOfExcellenceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = CenterOfExcellence::where('status', 'active');
+        $query = CenterOfExcellence::query();
+
+        if (!$request->boolean('all') && !$request->boolean('include_inactive')) {
+            $query->where('status', 'active');
+        }
 
         if ($request->filled('search')) {
             $query->where(

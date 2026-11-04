@@ -8,6 +8,19 @@ use Illuminate\Http\Request;
 
 class FacilityController extends Controller
 {
+    /**
+     * Resolusi fleksibel ID: mendukung numeric ID atau string ID ber-prefix (fac-1)
+     */
+    private function resolveFacility($id)
+    {
+        $cleanId = is_numeric($id) ? (int)$id : (int)preg_replace('/[^\d]/', '', (string)$id);
+        if (!empty($cleanId)) {
+            $found = Facility::find($cleanId);
+            if ($found) return $found;
+        }
+        return Facility::find($id);
+    }
+
     public function index(Request $request)
     {
         $query = Facility::with('branch');
@@ -46,7 +59,7 @@ class FacilityController extends Controller
 
     public function show($id)
     {
-        $facility = Facility::with(['branch', 'rooms'])->find($id);
+        $facility = $this->resolveFacility($id);
 
         if (!$facility) {
             return response()->json([
@@ -55,6 +68,8 @@ class FacilityController extends Controller
                 'data' => null,
             ], 404);
         }
+
+        $facility->load(['branch', 'rooms']);
 
         return response()->json([
             'success' => true,
@@ -89,7 +104,7 @@ class FacilityController extends Controller
 
     public function update(Request $request, $id)
     {
-        $facility = Facility::find($id);
+        $facility = $this->resolveFacility($id);
 
         if (!$facility) {
             return response()->json([
@@ -123,7 +138,7 @@ class FacilityController extends Controller
 
     public function destroy($id)
     {
-        $facility = Facility::find($id);
+        $facility = $this->resolveFacility($id);
 
         if (!$facility) {
             return response()->json([

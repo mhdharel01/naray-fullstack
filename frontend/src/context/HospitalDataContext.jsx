@@ -679,9 +679,19 @@ export function HospitalDataProvider({ children }) {
   };
 
   const mapCenter = (c) => {
-    const lines = (c.description || '').split('\n').map(l => l.trim()).filter(Boolean);
-    const tagline = lines.length > 1 ? lines[0] : (c.description || 'Pusat Layanan Medis Terpadu');
-    const desc = lines.length > 1 ? lines.slice(1).join('\n') : (c.description || 'Pelayanan komprehensif didukung dokter spesialis dan peralatan mutakhir.');
+    let tagline = c.tagline || '';
+    let desc = c.description || '';
+    if (!tagline && desc) {
+      const lines = desc.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length > 1) {
+        tagline = lines[0];
+        desc = lines.slice(1).join('\n');
+      } else {
+        tagline = desc;
+      }
+    }
+    if (!tagline) tagline = 'Pusat Layanan Medis Terpadu';
+    if (!desc) desc = 'Pelayanan komprehensif didukung dokter spesialis dan peralatan mutakhir.';
     const normalizedStatus = (c.status || 'active').toLowerCase();
     return {
       id: c.slug || `center-${c.id}`,
@@ -1093,7 +1103,7 @@ export function HospitalDataProvider({ children }) {
           api.getPolikliniks({ per_page: 50 }),
           api.getArticles({ per_page: 20 }),
           api.getFacilities({ per_page: 30 }),
-          api.getCentersOfExcellence(),
+          api.getCentersOfExcellence({ all: token ? 1 : 0, include_inactive: token ? 1 : 0 }),
           api.getRoomTypes(),
           api.getMcuPackages(),
           api.getMedia({ per_page: 50 }),
@@ -1128,9 +1138,10 @@ export function HospitalDataProvider({ children }) {
           connected = true;
           setFacilitiesData(facRes.value.data.data.map(mapFacility));
         }
-        if (centerRes.status === 'fulfilled' && Array.isArray(centerRes.value?.data?.data)) {
+        if (centerRes.status === 'fulfilled' && (Array.isArray(centerRes.value?.data?.data) || Array.isArray(centerRes.value?.data))) {
           connected = true;
-          setCentersOfExcellence(centerRes.value.data.data.map(mapCenter));
+          const rawCenters = Array.isArray(centerRes.value.data.data) ? centerRes.value.data.data : centerRes.value.data;
+          setCentersOfExcellence(rawCenters.map(mapCenter));
         }
         if (roomRes.status === 'fulfilled' && Array.isArray(roomRes.value?.data?.data) && roomRes.value.data.data.length > 0) {
           connected = true;
@@ -1640,12 +1651,24 @@ export function HospitalDataProvider({ children }) {
           const body = {
             name: titleStr,
             slug: slugStr,
-            description: (payload.tagline ? `${payload.tagline}\n` : '') + (payload.description || ''),
+            tagline: payload.tagline || '',
+            description: payload.description || '',
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
           };
           res = await api.adminCreateCenterOfExcellence(body);
+          if (res?.data || res?.id) {
+            const rawCenter = res.data?.data || res.data || res;
+            const mapped = mapCenter(rawCenter);
+            mapped.tagline = body.tagline;
+            mapped.description = body.description;
+            const createdDbId = mapped.dbId || rawCenter.id;
+            const clientFinalId = createdDbId ? `center-${createdDbId}` : (mapped.slug || payload.id || `center-${Date.now()}`);
+            saveItem('center', { ...mapped, id: clientFinalId, dbId: createdDbId });
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         case 'gallery':
@@ -1847,12 +1870,32 @@ export function HospitalDataProvider({ children }) {
           const body = {
             name: titleStr,
             slug: payload.slug || titleStr.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `center-${targetId}`,
-            description: (payload.tagline ? `${payload.tagline}\n` : '') + (payload.description || ''),
+            tagline: payload.tagline || '',
+            description: payload.description || '',
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
           };
-          res = await api.adminUpdateCenterOfExcellence(targetId, body);
+          const targetLookup = payload.dbId || cleanNumericId(payload.id) || payload.slug || targetId;
+          res = await api.adminUpdateCenterOfExcellence(targetLookup, body);
+          if (res) {
+            const rawCenter = res?.data?.data || res?.data || res;
+            const mapped = mapCenter(rawCenter);
+            mapped.name = body.name;
+            mapped.title = body.name;
+            mapped.tagline = body.tagline;
+            mapped.description = body.description;
+            mapped.status = body.status;
+            mapped.is_active = body.status === 'active';
+            if (body.image_url) {
+              mapped.image = formatImageUrl(body.image_url, '/images/default-image.svg');
+              mapped.image_url = body.image_url;
+            }
+            const centerDbId = mapped.dbId || cleanNumericId(targetLookup) || targetId;
+            saveItem('center', { ...mapped, id: rawTargetId, dbId: centerDbId }, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         case 'gallery':
@@ -1879,8 +1922,9 @@ export function HospitalDataProvider({ children }) {
       }
 
       // Instant optimistic local update & non-blocking background sync
-      const updatedItem = res?.data || payload;
-      let itemToSave = { ...payload, ...updatedItem, id: rawTargetId, dbId: targetId };
+      const resData = (res && typeof res === 'object' && res.data !== undefined) ? res.data : res;
+      const updatedItem = (resData && typeof resData === 'object' && resData.data !== undefined) ? resData.data : (resData || payload);
+      let itemToSave = { ...payload, ...updatedItem, id: rawTargetId, dbId: updatedItem?.id || targetId };
       if (payload.image_url) {
         itemToSave.image = formatImageUrl(payload.image_url, '/images/default-image.svg');
         itemToSave.image_url = payload.image_url;
