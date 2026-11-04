@@ -171,6 +171,9 @@ export function AdminCrudModal({
         capacity: item.capacity || item.bed_count || '',
         itemsText: initialMcuItems.join('\n'),
         facilitiesText: initialFacilitiesList.join('\n'),
+        url: item.url || item.youtubeEmbed || item.image || '',
+        thumbnail_url: item.thumbnail_url || '',
+        type: (item.type === 'video' || entity === 'video') && item.type !== 'image' ? 'video' : 'image',
       });
     } else {
       // Default empty templates
@@ -194,9 +197,9 @@ export function AdminCrudModal({
         room: { name: '', category: 'rawat_inap', capacity: '1 - 2 Pasien per Kamar', price: '', description: '', image_url: '', facilitiesText: '', status: 'active' },
         facility: { name: '', type: 'advanced', description: '', image_url: '', status: 'active' },
         center: { name: '', tagline: '', description: '', image_url: '', status: 'active' },
-        media: { title: '', type: 'image', url: '', description: '', category: 'Kegiatan Naray', status: 'active' },
-        gallery: { title: '', type: 'image', url: '', description: '', category: 'Kegiatan Naray', status: 'active' },
-        video: { title: '', type: 'video', url: '', description: '', category: 'Edukasi Naray', status: 'active' },
+        media: { title: '', type: 'image', url: '', thumbnail_url: '', description: '', category: 'Kegiatan Naray', status: 'active' },
+        gallery: { title: '', type: 'image', url: '', thumbnail_url: '', description: '', category: 'Kegiatan Naray', status: 'active' },
+        video: { title: '', type: 'video', url: '', thumbnail_url: '', description: '', category: 'Edukasi Naray', status: 'active' },
         banner: {
           badge: 'Akreditasi Paripurna KARS',
           badgeType: 'primary',
@@ -368,6 +371,34 @@ export function AdminCrudModal({
       if (entity === 'banner') {
         payload.image = payload.image || payload.image_url || '/images/default-image.svg';
         payload.image_url = payload.image;
+      }
+      if (entity === 'media' || entity === 'gallery' || entity === 'video') {
+        const isVideo = (payload.type === 'video' || entity === 'video') && payload.type !== 'image';
+        const rawUrl = isVideo
+          ? (payload.url || payload.youtubeEmbed || '').trim()
+          : (payload.url || payload.image || '').trim();
+
+        if (isVideo) {
+          if (!rawUrl) {
+            setError('Link / URL video YouTube wajib diisi.');
+            setLoading(false);
+            return;
+          }
+        } else {
+          if (!rawUrl) {
+            setError('Silakan pilih dan unggah foto kegiatan terlebih dahulu.');
+            setLoading(false);
+            return;
+          }
+        }
+
+        payload.type = isVideo ? 'video' : 'image';
+        payload.url = rawUrl;
+        if (isVideo) {
+          payload.youtubeEmbed = rawUrl;
+        } else {
+          payload.image = rawUrl;
+        }
       }
 
       await onSave(payload, entity, item?.id, item?.dbId);
@@ -1035,7 +1066,7 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="title"
-                    value={formData.title || ''}
+                    value={formData.title ?? formData.name ?? ''}
                     onChange={handleChange}
                     placeholder="Contoh: Peresmian Layanan Poliklinik Eksekutif"
                     required
@@ -1046,7 +1077,7 @@ export function AdminCrudModal({
                   <label>Tipe Media <span className="req">*</span></label>
                   <select
                     name="type"
-                    value={formData.type || (entity === 'video' ? 'video' : 'image')}
+                    value={((formData.type === 'video' || entity === 'video') && formData.type !== 'image') ? 'video' : 'image'}
                     onChange={handleChange}
                   >
                     <option value="image">Foto Kegiatan (Gambar)</option>
@@ -1058,7 +1089,7 @@ export function AdminCrudModal({
                   <label>Status Tampil</label>
                   <select
                     name="status"
-                    value={formData.status || 'active'}
+                    value={formData.status ?? 'active'}
                     onChange={handleChange}
                   >
                     <option value="active">Aktif / Tampil di Website</option>
@@ -1071,20 +1102,20 @@ export function AdminCrudModal({
                   <input
                     type="text"
                     name="category"
-                    value={typeof formData.category === 'object' ? (formData.category?.name || '') : (formData.category || formData.category_name || '')}
+                    value={typeof formData.category === 'object' ? (formData.category?.name || '') : (formData.category ?? formData.category_name ?? '')}
                     onChange={handleChange}
                     placeholder="Contoh: Kegiatan Naray, Fasilitas & Layanan, Edukasi Medis, Bakti Sosial"
                   />
                 </div>
 
-                {(formData.type === 'video' || entity === 'video') ? (
+                {((formData.type === 'video' || entity === 'video') && formData.type !== 'image') ? (
                   <>
                     <div className="admin-form-full">
                       <label>Link Video YouTube (Watch / Embed URL) <span className="req">*</span></label>
                       <input
                         type="text"
                         name="url"
-                        value={formData.url || formData.youtubeEmbed || ''}
+                        value={formData.url ?? formData.youtubeEmbed ?? ''}
                         onChange={handleChange}
                         placeholder="Contoh: https://www.youtube.com/watch?v=... atau https://youtu.be/..."
                         required
@@ -1101,7 +1132,7 @@ export function AdminCrudModal({
 
                     <ImageUploadField
                       label="Unggah Thumbnail Kustom Video (Opsional)"
-                      value={formData.thumbnail_url || formData.image || ''}
+                      value={formData.thumbnail_url ?? formData.image ?? ''}
                       folder="media"
                       onChange={(uploadedUrl) => setFormData(prev => ({ ...prev, thumbnail_url: uploadedUrl, image: uploadedUrl }))}
                       helperText="Format: JPG, PNG, WEBP. Kompresi otomatis WebP ringan untuk sampul video."
@@ -1109,8 +1140,8 @@ export function AdminCrudModal({
                   </>
                 ) : (
                   <ImageUploadField
-                    label="Unggah Foto Kegiatan / Dokumentasi"
-                    value={formData.url || formData.image || ''}
+                    label="Unggah Foto Kegiatan / Dokumentasi *"
+                    value={formData.url ?? formData.image ?? ''}
                     folder="media"
                     required={true}
                     onChange={(uploadedUrl) => setFormData(prev => ({ ...prev, url: uploadedUrl, image: uploadedUrl }))}
@@ -1123,7 +1154,7 @@ export function AdminCrudModal({
                   <textarea
                     rows={3}
                     name="description"
-                    value={formData.description || formData.desc || ''}
+                    value={formData.description ?? formData.desc ?? ''}
                     onChange={handleChange}
                     placeholder="Tuliskan keterangan singkat mengenai kegiatan, narasumber, atau konteks dokumentasi..."
                   />

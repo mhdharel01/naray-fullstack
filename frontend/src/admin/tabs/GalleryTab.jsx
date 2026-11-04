@@ -11,7 +11,7 @@ import StatusBadge from '../components/StatusBadge';
 // Ekstrak ID video YouTube
 function getYouTubeVideoId(url) {
   if (!url) return null;
-  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
   return match ? match[1] : null;
 }
 

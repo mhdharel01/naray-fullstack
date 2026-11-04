@@ -4,13 +4,26 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Media;
+use App\Models\MediaCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MediaController extends Controller
 {
+    /**
+     * Cari Media berdasarkan ID numerik atau ID dengan awalan (misal: gal-1, vid-1, media-1)
+     */
+    protected function findMedia($id)
+    {
+        if (is_string($id) && preg_match('/^(?:gal|vid|media)-(\d+)$/', $id, $m)) {
+            $id = (int)$m[1];
+        }
+        return Media::findOrFail($id);
+    }
+
     public function index(Request $request)
     {
         $query = Media::with([
@@ -89,31 +102,60 @@ class MediaController extends Controller
                 'exists:media_categories,id',
             ],
 
+            'category' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+
+            'thumbnail_url' => [
+                'nullable',
+                'string',
+                'max:2048',
+            ],
+
             'status' => [
                 'required',
                 Rule::in(['active', 'inactive']),
             ],
+        ], [
+            'type.required' => 'Tipe media (foto atau video) wajib dipilih.',
+            'type.in' => 'Tipe media harus berupa foto (image) atau video.',
+            'url.required_without' => 'Foto atau link video wajib diisi/diunggah.',
+            'url.max' => 'URL maksimal 2048 karakter.',
+            'status.required' => 'Status tampil wajib dipilih.',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Upload gambar
-        |--------------------------------------------------------------------------
-        */
-
+        // Upload file jika ada
         if ($request->hasFile('file')) {
             $path = $request->file('file')->store('media', 'public');
-
             $validated['url'] = Storage::url($path);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Video menggunakan URL
-        |--------------------------------------------------------------------------
-        */
-
         unset($validated['file']);
+
+        // Auto-resolve atau buat kategori baru jika user mengetikkan nama kategori
+        if ($request->filled('category') && is_string($request->category)) {
+            $catName = trim($request->category);
+            if (!empty($catName)) {
+                $category = MediaCategory::firstOrCreate(
+                    ['name' => $catName],
+                    ['slug' => Str::slug($catName)]
+                );
+                $validated['category_id'] = $category->id;
+            }
+        }
+        unset($validated['category']);
+
+        // Fallback default category_id jika kosong
+        if (empty($validated['category_id'])) {
+            $firstCat = MediaCategory::first();
+            $validated['category_id'] = $firstCat ? $firstCat->id : 1;
+        }
+
+        // Fallback judul jika belum diisi
+        if (empty($validated['title'])) {
+            $validated['title'] = ($validated['type'] === 'video') ? 'Video Dokumentasi' : 'Foto Kegiatan';
+        }
 
         $validated['uploaded_by'] = Auth::id() ?? 1;
 
@@ -133,10 +175,11 @@ class MediaController extends Controller
 
     public function show($id)
     {
-        $media = Media::with([
+        $media = $this->findMedia($id);
+        $media->load([
             'category',
             'admin:id,name,email',
-        ])->findOrFail($id);
+        ]);
 
         return response()->json([
             'success' => true,
@@ -146,134 +189,129 @@ class MediaController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $media = Media::findOrFail($id);
+    {
+        $media = $this->findMedia($id);
 
-    $validated = $request->validate([
-        'type' => [
-            'sometimes',
-            Rule::in(['image', 'video']),
-        ],
+        $validated = $request->validate([
+            'type' => [
+                'sometimes',
+                Rule::in(['image', 'video']),
+            ],
 
-        'file' => [
-            'nullable',
-            'file',
-            'image',
-            'mimes:jpg,jpeg,png,webp',
-            'max:5120',
-        ],
+            'file' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
 
-        'url' => [
-            'nullable',
-            'string',
-            'max:2048',
-        ],
+            'url' => [
+                'nullable',
+                'string',
+                'max:2048',
+            ],
 
-        'title' => [
-            'sometimes',
-            'nullable',
-            'string',
-            'max:255',
-        ],
+            'title' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:255',
+            ],
 
-        'description' => [
-            'sometimes',
-            'nullable',
-            'string',
-        ],
+            'description' => [
+                'sometimes',
+                'nullable',
+                'string',
+            ],
 
-        'category_id' => [
-            'sometimes',
-            'nullable',
-            'integer',
-            'exists:media_categories,id',
-        ],
+            'category_id' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                'exists:media_categories,id',
+            ],
 
-        'status' => [
-            'sometimes',
-            Rule::in(['active', 'inactive']),
-        ],
-    ]);
+            'category' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:150',
+            ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Jika ada file gambar baru
-    |--------------------------------------------------------------------------
-    */
-    if ($request->hasFile('file')) {
+            'thumbnail_url' => [
+                'nullable',
+                'string',
+                'max:2048',
+            ],
 
-        // Hapus file lama jika merupakan file lokal Laravel
-        if (
-            $media->url &&
-            str_starts_with($media->url, '/storage/')
-        ) {
-            $oldPath = str_replace('/storage/', '', $media->url);
+            'status' => [
+                'sometimes',
+                Rule::in(['active', 'inactive']),
+            ],
+        ], [
+            'type.in' => 'Tipe media harus berupa foto (image) atau video.',
+            'url.max' => 'URL maksimal 2048 karakter.',
+        ]);
 
-            if (Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
+        // Jika upload file gambar baru
+        if ($request->hasFile('file')) {
+            if ($media->url && (str_starts_with($media->url, '/storage/') || str_starts_with($media->url, 'storage/'))) {
+                $oldPath = preg_replace('#^/?storage/#', '', $media->url);
+                if (Storage::disk('public')->exists($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
+
+            $path = $request->file('file')->store('media', 'public');
+            $validated['url'] = Storage::url($path);
+            $validated['type'] = 'image';
+        }
+        unset($validated['file']);
+
+        // Auto-resolve atau buat kategori jika user mengetik nama kategori
+        if ($request->filled('category') && is_string($request->category)) {
+            $catName = trim($request->category);
+            if (!empty($catName)) {
+                $category = MediaCategory::firstOrCreate(
+                    ['name' => $catName],
+                    ['slug' => Str::slug($catName)]
+                );
+                $validated['category_id'] = $category->id;
+            }
+        }
+        unset($validated['category']);
+
+        // Validasi tipe video
+        if (isset($validated['type']) && $validated['type'] === 'video') {
+            if (empty($validated['url']) && empty($media->url)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'URL video wajib diisi jika tipe adalah video.',
+                ], 422);
             }
         }
 
-        // Simpan file baru
-        $path = $request->file('file')->store('media', 'public');
+        $media->update($validated);
 
-        // Simpan URL baru
-        $validated['url'] = Storage::url($path);
+        $media->load([
+            'category',
+            'admin:id,name,email',
+        ]);
 
-        // Karena ini upload gambar
-        $validated['type'] = 'image';
+        return response()->json([
+            'success' => true,
+            'message' => 'Media berhasil diperbarui',
+            'data' => $media,
+        ]);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Jika tidak upload file tetapi type diubah menjadi video
-    |--------------------------------------------------------------------------
-    */
-    if (
-        isset($validated['type']) &&
-        $validated['type'] === 'video'
-    ) {
-        if (empty($validated['url'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'URL video wajib diisi jika type adalah video.',
-            ], 422);
-        }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Jika type tidak dikirim, pertahankan type lama
-    |--------------------------------------------------------------------------
-    */
-
-    $media->update($validated);
-
-    $media->load([
-        'category',
-        'admin:id,name,email',
-    ]);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Media berhasil diperbarui',
-        'data' => $media,
-    ]);
-}
 
     public function destroy($id)
     {
-        $media = Media::findOrFail($id);
+        $media = $this->findMedia($id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Hapus file dari storage jika media merupakan upload lokal
-        |--------------------------------------------------------------------------
-        */
-
-        if ($media->url && str_starts_with($media->url, '/storage/')) {
-            $path = str_replace('/storage/', '', $media->url);
-
+        if ($media->url && (str_starts_with($media->url, '/storage/') || str_starts_with($media->url, 'storage/'))) {
+            $path = preg_replace('#^/?storage/#', '', $media->url);
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
             }

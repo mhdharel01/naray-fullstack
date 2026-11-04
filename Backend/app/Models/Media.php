@@ -8,7 +8,7 @@ class Media extends Model
 {
     use SoftDeletes;
     
-    protected $fillable = ['type', 'url', 'title', 'description', 'category_id', 'uploaded_by', 'status'];
+    protected $fillable = ['type', 'url', 'thumbnail_url', 'title', 'description', 'category_id', 'uploaded_by', 'status'];
 
     public function admin() { return $this->belongsTo(Admin::class, 'uploaded_by'); }
     public function category() { return $this->belongsTo(MediaCategory::class, 'category_id'); }

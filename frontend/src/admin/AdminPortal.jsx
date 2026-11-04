@@ -385,9 +385,10 @@ function AdminDashboard({ onLogout }) {
       const normalizedStatus = (g.status || 'active').toLowerCase();
       return {
         ...g,
-        type: 'photo',
+        type: 'image',
         displayType: 'Foto Kegiatan',
-        url: g.image || g.url,
+        url: g.url || g.image,
+        image: g.image || g.url,
         category: cat,
         categoryName: cat,
         status: normalizedStatus,
@@ -401,7 +402,8 @@ function AdminDashboard({ onLogout }) {
         ...v,
         type: 'video',
         displayType: 'Video YouTube',
-        url: v.youtubeEmbed || v.url,
+        url: v.url || v.youtubeEmbed,
+        youtubeEmbed: v.url || v.youtubeEmbed,
         category: cat,
         categoryName: cat,
         status: normalizedStatus,
@@ -413,7 +415,9 @@ function AdminDashboard({ onLogout }) {
 
   const filteredMediaList = useMemo(() => {
     return allMediaList.filter(item => {
-      const matchType = mediaTypeFilter === 'all' ? true : item.type === mediaTypeFilter;
+      const matchType = mediaTypeFilter === 'all'
+        ? true
+        : (mediaTypeFilter === 'photo' ? (item.type === 'image' || item.type === 'photo') : item.type === 'video');
       const q = searchQuery.toLowerCase();
       const matchSearch = !searchQuery ||
         item.title?.toLowerCase().includes(q) ||

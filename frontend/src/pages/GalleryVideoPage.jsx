@@ -34,7 +34,7 @@ const GALLERY_CATEGORIES = [
 
 const getYouTubeId = (url) => {
   if (!url) return '';
-  const match = url.match(/(?:embed\/|v=|vi\/|youtu\.be\/|\/v\/)([^?&"'>]+)/);
+  const match = url.match(/(?:embed\/|v=|vi\/|youtu\.be\/|\/v\/|shorts\/)([^?&"'>]+)/);
   return match ? match[1] : '';
 };
 
@@ -51,6 +51,16 @@ export default function GalleryVideoPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [lightboxVideo, setLightboxVideo] = useState(null);
   const [lightboxImg, setLightboxImg] = useState(null);
+
+  const availableCategories = useMemo(() => {
+    const set = new Set(['Semua']);
+    GALLERY_CATEGORIES.filter(c => c !== 'Semua').forEach(c => set.add(c));
+    galleryActivities.forEach(g => {
+      const cat = typeof g.category === 'object' ? (g.category?.name || '') : String(g.category || '');
+      if (cat && cat.trim()) set.add(cat.trim());
+    });
+    return Array.from(set);
+  }, [galleryActivities]);
 
   const rawPhone = (hospitalInfo?.whatsappHotline || hospitalInfo?.emergencyHotline || '6285363395383').replace(/[^0-9]/g, '');
   const emergencyPhone = hospitalInfo?.emergencyHotline || hospitalInfo?.phone || '+6285363395383';
@@ -346,7 +356,7 @@ export default function GalleryVideoPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0 mr-1 font-mono">
                   Kategori Foto:
                 </span>
-                {GALLERY_CATEGORIES.map((cat) => {
+                {availableCategories.map((cat) => {
                   const isActive = selectedCategory === cat;
                   return (
                     <button

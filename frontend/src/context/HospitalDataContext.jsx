@@ -961,11 +961,14 @@ export function HospitalDataProvider({ children }) {
         dbVideos.push({
           id: `vid-${m.id}`,
           dbId: m.id,
-          title: m.title,
+          type: 'video',
+          title: m.title || 'Video Dokumentasi',
           category: catName,
           category_id: m.category_id,
           youtubeEmbed: m.url,
           url: m.url,
+          image: formatImageUrl(m.thumbnail_url || m.image, '/images/discovery/diagnostic-center.jpg'),
+          thumbnail_url: m.thumbnail_url || '',
           desc: m.description || '',
           description: m.description || '',
           status: normalizedStatus,
@@ -975,7 +978,8 @@ export function HospitalDataProvider({ children }) {
         dbPhotos.push({
           id: `gal-${m.id}`,
           dbId: m.id,
-          title: m.title,
+          type: 'image',
+          title: m.title || 'Foto Kegiatan',
           date: m.created_at
             ? new Date(m.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
             : 'Terbaru',
@@ -1721,7 +1725,7 @@ export function HospitalDataProvider({ children }) {
         case 'gallery':
         case 'video':
         case 'media': {
-          const isVideo = payload.type === 'video' || entity === 'video';
+          const isVideo = (payload.type === 'video' || entity === 'video') && payload.type !== 'image';
           const mediaUrl = isVideo
             ? (payload.url || payload.youtubeEmbed || '')
             : (payload.url || payload.image || '');
@@ -1730,10 +1734,38 @@ export function HospitalDataProvider({ children }) {
             title: payload.title || (isVideo ? 'Video Naray' : 'Foto Kegiatan'),
             url: mediaUrl,
             description: payload.description || payload.desc || '',
-            category_id: payload.category_id || 1,
+            category_id: payload.category_id || undefined,
+            category: typeof payload.category === 'object' ? payload.category?.name : (payload.category || undefined),
+            thumbnail_url: payload.thumbnail_url || undefined,
             status: payload.status || 'active',
           };
           res = await api.adminCreateMedia(body);
+          if (res?.data) {
+            const rawMedia = res.data;
+            const catName = rawMedia.category?.name || payload.category || 'Kegiatan Naray';
+            const mapped = {
+              id: isVideo ? `vid-${rawMedia.id}` : `gal-${rawMedia.id}`,
+              dbId: rawMedia.id,
+              type: isVideo ? 'video' : 'image',
+              title: rawMedia.title || body.title,
+              category: catName,
+              category_id: rawMedia.category_id,
+              url: rawMedia.url,
+              image: formatImageUrl(rawMedia.thumbnail_url || rawMedia.url, isVideo ? '/images/discovery/diagnostic-center.jpg' : '/images/default-image.svg'),
+              thumbnail_url: rawMedia.thumbnail_url || '',
+              youtubeEmbed: isVideo ? rawMedia.url : '',
+              desc: rawMedia.description || '',
+              description: rawMedia.description || '',
+              status: (rawMedia.status || 'active').toLowerCase(),
+              is_active: (rawMedia.status || 'active').toLowerCase() === 'active',
+              date: rawMedia.created_at
+                ? new Date(rawMedia.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                : 'Terbaru',
+            };
+            saveItem(isVideo ? 'video' : 'gallery', mapped, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
       }
@@ -1975,19 +2007,47 @@ export function HospitalDataProvider({ children }) {
         case 'gallery':
         case 'video':
         case 'media': {
-          const isVideo = payload.type === 'video' || entity === 'video';
+          const isVideo = (payload.type === 'video' || entity === 'video') && payload.type !== 'image';
           const mediaUrl = isVideo
             ? (payload.url || payload.youtubeEmbed || '')
             : (payload.url || payload.image || '');
           const body = {
             type: isVideo ? 'video' : 'image',
-            title: payload.title,
+            title: payload.title || (isVideo ? 'Video Naray' : 'Foto Kegiatan'),
             url: mediaUrl,
             description: payload.description || payload.desc || '',
-            category_id: payload.category_id || 1,
+            category_id: payload.category_id || undefined,
+            category: typeof payload.category === 'object' ? payload.category?.name : (payload.category || undefined),
+            thumbnail_url: payload.thumbnail_url || undefined,
             status: payload.status || 'active',
           };
           res = await api.adminUpdateMedia(targetId, body);
+          if (res?.data) {
+            const rawMedia = res.data;
+            const catName = rawMedia.category?.name || payload.category || 'Kegiatan Naray';
+            const mapped = {
+              id: isVideo ? `vid-${rawMedia.id}` : `gal-${rawMedia.id}`,
+              dbId: rawMedia.id,
+              type: isVideo ? 'video' : 'image',
+              title: rawMedia.title || body.title,
+              category: catName,
+              category_id: rawMedia.category_id,
+              url: rawMedia.url,
+              image: formatImageUrl(rawMedia.thumbnail_url || rawMedia.url, isVideo ? '/images/discovery/diagnostic-center.jpg' : '/images/default-image.svg'),
+              thumbnail_url: rawMedia.thumbnail_url || '',
+              youtubeEmbed: isVideo ? rawMedia.url : '',
+              desc: rawMedia.description || '',
+              description: rawMedia.description || '',
+              status: (rawMedia.status || 'active').toLowerCase(),
+              is_active: (rawMedia.status || 'active').toLowerCase() === 'active',
+              date: rawMedia.created_at
+                ? new Date(rawMedia.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })
+                : 'Terbaru',
+            };
+            saveItem(isVideo ? 'video' : 'gallery', { ...mapped, id: rawTargetId, dbId: targetId }, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         default:
@@ -2607,6 +2667,7 @@ export function HospitalDataProvider({ children }) {
             }
             return [normalized, ...prev];
           });
+          setGalleryActivities(prev => prev.filter(x => !isMatchItem(x, normalized)));
         } else {
           setGalleryActivities(prev => {
             const idx = prev.findIndex(x => isMatchItem(x, normalized));
@@ -2617,24 +2678,8 @@ export function HospitalDataProvider({ children }) {
             }
             return [normalized, ...prev];
           });
+          setVideoList(prev => prev.filter(x => !isMatchItem(x, normalized)));
         }
-        break;
-      }
-
-      case 'video': {
-        const catName = typeof cleanItem.category === 'object'
-          ? (cleanItem.category?.name || 'Edukasi Pasien')
-          : (cleanItem.category || 'Edukasi Pasien');
-        const normalized = { ...cleanItem, category: catName };
-        setVideoList(prev => {
-          const idx = prev.findIndex(x => isMatchItem(x, normalized));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...normalized };
-            return next;
-          }
-          return [normalized, ...prev];
-        });
         break;
       }
 

@@ -105,6 +105,11 @@ class InitController extends Controller
                     $table->json('items')->nullable()->after('highlight');
                 });
             }
+            if (!Schema::hasColumn('media', 'thumbnail_url')) {
+                Schema::table('media', function (Blueprint $table) {
+                    $table->string('thumbnail_url', 2048)->nullable()->after('url');
+                });
+            }
         } catch (\Throwable $e) {}
 
         $centersQuery = CenterOfExcellence::orderBy('name');
