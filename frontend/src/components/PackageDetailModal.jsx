@@ -6,8 +6,7 @@ import {
   UserCheck, 
   Sparkles, 
   FileText, 
-  MessageCircle,
-  AlertCircle
+  MessageCircle
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 
@@ -142,17 +141,6 @@ export function PackageDetailModal({ pkg, onClose }) {
               </div>
             </div>
           )}
-
-          {/* Fasting Notice */}
-          <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-amber-900 text-xs flex items-start gap-2.5">
-            <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-            <div className="flex flex-col gap-0.5">
-              <span className="font-bold">Persiapan Sebelum Pemeriksaan:</span>
-              <p className="m-0 leading-relaxed text-amber-900/90">
-                Disarankan berpuasa 10–12 jam sebelum jadwal pemeriksaan untuk tes gula darah puasa dan profil kolesterol. Tetap diperbolehkan minum air putih.
-              </p>
-            </div>
-          </div>
         </div>
 
         {/* Modal Footer */}
