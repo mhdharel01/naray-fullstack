@@ -59,62 +59,57 @@ export default function MedicalServicesPage() {
     { id: 'diagnostik', label: 'Radiologi & Lab' }
   ];
 
-  // Helper to match doctors with a center
-  const getRelatedDoctors = (center) => {
-    const shortT = (center.shortTitle || center.title || '').toLowerCase();
-    const titleT = (center.title || '').toLowerCase();
-    return (doctors || []).filter(d => {
-      const spec = (d.specialtyGroup || d.specialty || '').toLowerCase();
-      return spec.includes(shortT) || titleT.includes(spec) || shortT.includes(spec);
-    });
-  };
+  // 1. Data Rill Aktif tersimpan di DB (Status Active Only)
+  const activeCenters = useMemo(() => {
+    return (centersOfExcellence || []).filter(c => (c.status || 'active').toLowerCase() === 'active');
+  }, [centersOfExcellence]);
+
+  const activeFacilities = useMemo(() => {
+    return (allFacilities || []).filter(f => (f.status || 'active').toLowerCase() === 'active');
+  }, [allFacilities]);
 
   // Filter Centers (Active Only)
   const filteredCenters = useMemo(() => {
-    return (centersOfExcellence || [])
-      .filter(c => (c.status || 'active').toLowerCase() === 'active')
-      .filter(c => {
-        const matchesSearch = !searchTerm || 
-          (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (c.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (c.tagline || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (c.technologies || []).some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
+    return activeCenters.filter(c => {
+      const matchesSearch = !searchTerm || 
+        (c.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.tagline || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.technologies || []).some(t => t.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        let matchesTag = true;
-        if (selectedTag === 'jantung') matchesTag = (c.id || '').includes('jantung') || (c.title || '').toLowerCase().includes('jantung');
-        else if (selectedTag === 'ibu-anak') matchesTag = (c.id || '').includes('ibu-anak') || (c.title || '').toLowerCase().includes('anak');
-        else if (selectedTag === 'bedah') matchesTag = (c.id || '').includes('bedah') || (c.title || '').toLowerCase().includes('bedah');
-        else if (selectedTag === 'organ-dalam') matchesTag = (c.id || '').includes('penyakit-dalam') || (c.title || '').toLowerCase().includes('dalam');
-        else if (selectedTag === 'paru') matchesTag = (c.id || '').includes('paru') || (c.title || '').toLowerCase().includes('paru');
-        else if (selectedTag === 'mata-tht') matchesTag = (c.id || '').includes('mata-tht') || (c.title || '').toLowerCase().includes('mata') || (c.title || '').toLowerCase().includes('tht');
-        else if (selectedTag === 'diagnostik') matchesTag = false;
+      let matchesTag = true;
+      if (selectedTag === 'jantung') matchesTag = (c.id || '').includes('jantung') || (c.title || '').toLowerCase().includes('jantung');
+      else if (selectedTag === 'ibu-anak') matchesTag = (c.id || '').includes('ibu-anak') || (c.title || '').toLowerCase().includes('anak');
+      else if (selectedTag === 'bedah') matchesTag = (c.id || '').includes('bedah') || (c.title || '').toLowerCase().includes('bedah');
+      else if (selectedTag === 'organ-dalam') matchesTag = (c.id || '').includes('penyakit-dalam') || (c.title || '').toLowerCase().includes('dalam');
+      else if (selectedTag === 'paru') matchesTag = (c.id || '').includes('paru') || (c.title || '').toLowerCase().includes('paru');
+      else if (selectedTag === 'mata-tht') matchesTag = (c.id || '').includes('mata-tht') || (c.title || '').toLowerCase().includes('mata') || (c.title || '').toLowerCase().includes('tht');
+      else if (selectedTag === 'diagnostik') matchesTag = false;
 
-        return matchesSearch && matchesTag;
-      });
-  }, [centersOfExcellence, searchTerm, selectedTag]);
+      return matchesSearch && matchesTag;
+    });
+  }, [activeCenters, searchTerm, selectedTag]);
 
   // Filter Facilities (Active Only)
   const filteredFacilities = useMemo(() => {
-    return (allFacilities || [])
-      .filter(f => (f.status || 'active').toLowerCase() === 'active')
-      .filter(f => {
-        const cat = typeof f.category === 'object' ? (f.category?.name || '') : (f.category || f.tag || '');
-        const desc = f.description || f.desc || '';
-        
-        const matchesSearch = !searchTerm || 
-          (f.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-          desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          cat.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (f.features || []).some(feat => feat.toLowerCase().includes(searchTerm.toLowerCase()));
+    return activeFacilities.filter(f => {
+      const cat = typeof f.category === 'object' ? (f.category?.name || '') : (f.category || f.tag || '');
+      const desc = f.description || f.desc || '';
+      
+      const matchesSearch = !searchTerm || 
+        (f.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cat.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (f.features || []).some(feat => feat.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        let matchesTag = true;
-        if (selectedTag === 'diagnostik') matchesTag = true;
-        else if (selectedTag === 'bedah') matchesTag = (f.name || '').toLowerCase().includes('bedah') || (f.name || '').toLowerCase().includes('operasi');
-        else if (selectedTag !== 'all') matchesTag = false;
+      let matchesTag = true;
+      if (selectedTag === 'diagnostik') matchesTag = true;
+      else if (selectedTag === 'bedah') matchesTag = (f.name || '').toLowerCase().includes('bedah') || (f.name || '').toLowerCase().includes('operasi');
+      else if (selectedTag !== 'all') matchesTag = false;
 
-        return matchesSearch && matchesTag;
-      });
-  }, [allFacilities, searchTerm, selectedTag]);
+      return matchesSearch && matchesTag;
+    });
+  }, [activeFacilities, searchTerm, selectedTag]);
 
   const totalFilteredCount = (activeTab === 'all' 
     ? filteredCenters.length + filteredFacilities.length 
@@ -157,14 +152,14 @@ export default function MedicalServicesPage() {
                 </span>
                 <span>Pusat Layanan Medis Terpadu</span>
                 <span className="text-emerald-300">•</span>
-                <span className="font-mono text-[11px] text-emerald-700">6 Centers of Excellence &amp; Diagnostik Modern</span>
+                <span className="font-mono text-[11px] text-emerald-700">{activeCenters.length} Centers of Excellence &amp; Diagnostik Modern</span>
               </div>
 
               <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-3">
                 Pelayanan Medis &amp; Fasilitas Terpadu
               </h1>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-                Menghadirkan 6 Pusat Unggulan Terpadu (Centers of Excellence) dan fasilitas penunjang medis berstandar KARS Paripurna di Kota Dumai, didukung 30 dokter spesialis berdedikasi dan IGD 24 Jam siaga cepat.
+                Menghadirkan {activeCenters.length} Pusat Unggulan Terpadu (Centers of Excellence) dan fasilitas penunjang medis berstandar KARS Paripurna di Kota Dumai, didukung 30 dokter spesialis berdedikasi dan IGD 24 Jam siaga cepat.
               </p>
             </div>
 
@@ -201,7 +196,7 @@ export default function MedicalServicesPage() {
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
                   <span className="font-heading text-xl sm:text-3xl font-black text-slate-900 leading-tight">
-                    {(centersOfExcellence || []).length || 6}
+                    {activeCenters.length}
                   </span>
                   <span className="text-[11px] sm:text-xs font-semibold text-slate-500">Divisi CoE</span>
                 </div>
@@ -224,7 +219,7 @@ export default function MedicalServicesPage() {
                 </span>
                 <div className="flex items-baseline gap-1 mt-0.5">
                   <span className="font-heading text-xl sm:text-3xl font-black text-emerald-950 leading-tight">
-                    {(allFacilities || []).length || 6}
+                    {activeFacilities.length}
                   </span>
                   <span className="text-[11px] sm:text-xs font-semibold text-emerald-700">Unit Siap</span>
                 </div>
@@ -306,7 +301,7 @@ export default function MedicalServicesPage() {
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
-                    {(centersOfExcellence || []).length + (allFacilities || []).length}
+                    {activeCenters.length + activeFacilities.length}
                   </span>
                 </button>
 
@@ -327,7 +322,7 @@ export default function MedicalServicesPage() {
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'centers' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
-                    {(centersOfExcellence || []).length}
+                    {activeCenters.length}
                   </span>
                 </button>
 
@@ -348,7 +343,7 @@ export default function MedicalServicesPage() {
                   <span className={`px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold leading-none ${
                     activeTab === 'facilities' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
-                    {(allFacilities || []).length}
+                    {activeFacilities.length}
                   </span>
                 </button>
               </div>
@@ -431,7 +426,6 @@ export default function MedicalServicesPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {filteredCenters.map((center) => {
-                  const relatedDocs = getRelatedDoctors(center);
                   const shortT = center.shortTitle || center.title;
                   const cImg = formatImageUrl ? formatImageUrl(center.image, '/images/centers/HFWDjPiKyEsJ3BXJrNZaluU2BKSLyIBRKadfNUfu.webp') : (center.image || '/images/centers/HFWDjPiKyEsJ3BXJrNZaluU2BKSLyIBRKadfNUfu.webp');
 
@@ -455,11 +449,6 @@ export default function MedicalServicesPage() {
                         <span className="absolute top-3.5 left-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-950/75 backdrop-blur-md text-teal-300 border border-teal-500/30 shadow-sm font-mono">
                           <Sparkles size={12} />
                           <span>{shortT}</span>
-                        </span>
-
-                        <span className="absolute bottom-3.5 right-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-teal-800 border border-white/80 shadow-md font-mono">
-                          <Users size={12} className="text-teal-600" />
-                          <span>{relatedDocs.length > 0 ? `${relatedDocs.length} Dokter Spesialis` : 'Tim Terpadu'}</span>
                         </span>
                       </div>
 
@@ -768,10 +757,6 @@ export default function MedicalServicesPage() {
           <CenterDetailModal 
             center={activeCenterDetail}
             onClose={() => setActiveCenterDetail(null)}
-            onSelectDoctor={(doc) => {
-              setActiveCenterDetail(null);
-              navigate(`/dokter-jadwal?keyword=${encodeURIComponent(doc.name || '')}`);
-            }}
           />
         )}
 

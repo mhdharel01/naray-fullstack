@@ -4,25 +4,15 @@ import {
   Sparkles, 
   CheckCircle2, 
   Cpu, 
-  Users, 
-  ChevronRight,
   MessageCircle 
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 
-export function CenterDetailModal({ center, onClose, onSelectDoctor }) {
-  const { doctors = [], hospitalInfo = {} } = useHospitalData();
+export function CenterDetailModal({ center, onClose }) {
+  const { hospitalInfo = {} } = useHospitalData();
   if (!center) return null;
 
   const shortTitle = center.shortTitle || center.title || '';
-
-  // Find related doctors from live context
-  const relatedDoctors = doctors.filter(d => {
-    const spec = (d.specialtyGroup || d.specialty || '').toLowerCase();
-    const st = shortTitle.toLowerCase();
-    const ct = (center.title || '').toLowerCase();
-    return spec.includes(st) || ct.includes(spec);
-  });
 
   const waNum = (hospitalInfo.whatsappHotline || '628117529798').replace(/[^0-9]/g, '');
 
@@ -105,43 +95,6 @@ export function CenterDetailModal({ center, onClose, onSelectDoctor }) {
                   <div key={idx} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-50 border border-teal-100 text-teal-800 text-xs font-semibold">
                     <Sparkles size={13} className="text-teal-600" />
                     <span>{tech}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Doctors in this center */}
-          {relatedDoctors.length > 0 && (
-            <div>
-              <h4 className="font-heading text-sm font-bold uppercase tracking-wider text-slate-900 mb-3 flex items-center gap-2">
-                <Users size={16} className="text-teal-600" />
-                <span>Tim Dokter Spesialis Terkait</span>
-              </h4>
-              <div className="flex flex-col gap-2.5">
-                {relatedDoctors.slice(0, 3).map((doc) => (
-                  <div key={doc.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
-                    <img 
-                      src={doc.photo} 
-                      alt={doc.name} 
-                      className="w-11 h-11 rounded-lg object-cover object-top border border-slate-200" 
-                      onError={(e) => { e.currentTarget.src = '/images/default-doctor.svg'; }}
-                    />
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <strong className="text-xs sm:text-sm font-bold text-slate-900 truncate">{doc.name}</strong>
-                      <span className="text-xs text-teal-600 truncate">{doc.specialty}</span>
-                    </div>
-                    <button 
-                      type="button"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-teal-300 text-slate-700 hover:text-teal-700 hover:bg-teal-50 text-xs font-semibold transition-all shrink-0 cursor-pointer"
-                      onClick={() => {
-                        onClose();
-                        if (onSelectDoctor) onSelectDoctor(doc);
-                      }}
-                    >
-                      <span>Jadwal</span>
-                      <ChevronRight size={13} />
-                    </button>
                   </div>
                 ))}
               </div>
