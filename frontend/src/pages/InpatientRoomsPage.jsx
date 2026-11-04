@@ -384,11 +384,11 @@ export default function InpatientRoomsPage() {
       const match = allRooms.find(r => {
         const n = (r.name || '').toLowerCase();
         if (clean.includes('vip') && (n.includes('vip') || n.includes('suite') || n.includes('pistillum'))) return true;
-        if ((clean.includes('kelas 1') || clean.includes('kelas i')) && (n.includes('kelas 1') || n.includes('green'))) return true;
-        if ((clean.includes('kelas 2') || clean.includes('kelas ii')) && (n.includes('kelas 2') || n.includes('red'))) return true;
-        if ((clean.includes('kelas 3') || clean.includes('kelas iii')) && (n.includes('kelas 3') || n.includes('seroja') || n.includes('reguler'))) return true;
         if (clean.includes('intensif') && (n.includes('icu') || n.includes('staments') || n.includes('intensif'))) return true;
         if (clean.includes('isolasi') && n.includes('isolasi')) return true;
+        if ((clean.includes('kelas 3') || clean.includes('kelas iii')) && (n.includes('kelas 3') || n.includes('seroja') || n.includes('reguler'))) return true;
+        if ((clean.includes('kelas 2') || clean.includes('kelas ii')) && (n.includes('kelas 2') || n.includes('red'))) return true;
+        if ((clean.includes('kelas 1') || clean.includes('kelas i')) && (n.includes('kelas 1') || n.includes('green'))) return true;
         return n.includes(clean);
       });
       if (match) {
@@ -723,17 +723,9 @@ export default function InpatientRoomsPage() {
                           <td className="py-4 px-6 font-bold text-slate-900">
                             <div className="flex items-center gap-3">
                               <div className={`w-3 h-3 rounded-full shrink-0 ${isAvail ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                              <div>
-                                <span className="font-heading text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-teal-700 transition-colors block">{row.kelas}</span>
-                                <span className="text-[11px] text-slate-400 font-normal group-hover:text-teal-600 transition-colors">
-                                  {row.kelas.includes('VIP') ? 'Suite & VVIP Pistillum' :
-                                   row.kelas.includes('KELAS I') ? 'Kelas 1 (Green Petals)' :
-                                   row.kelas.includes('KELAS II') ? 'Kelas 2 (Red Petals)' :
-                                   row.kelas.includes('KELAS III') ? 'Kelas 3 Reguler (Seroja)' :
-                                   row.kelas.includes('ISOLASI') ? 'Ruang Tekanan Negatif HEPA' :
-                                   row.kelas.includes('INTENSIF') ? 'ICU Staments & Ventilator' : 'Rawat Inap Terpadu'}
-                                </span>
-                              </div>
+                              <span className="font-heading text-sm sm:text-base font-extrabold text-slate-900 group-hover:text-teal-700 transition-colors">
+                                {row.kelas}
+                              </span>
                             </div>
                           </td>
                           <td className="py-4 px-6 text-center font-mono font-bold text-slate-700">
@@ -797,19 +789,9 @@ export default function InpatientRoomsPage() {
                       <div className="flex items-start justify-between gap-2 mb-2.5">
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className={`w-3 h-3 rounded-full shrink-0 ${isAvail ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                          <div className="min-w-0">
-                            <h4 className="font-heading font-extrabold text-slate-900 text-sm leading-tight truncate">
-                              {row.kelas}
-                            </h4>
-                            <p className="text-[11px] text-slate-400 font-normal leading-tight mt-0.5 truncate">
-                              {row.kelas.includes('VIP') ? 'Suite & VVIP Pistillum' :
-                               row.kelas.includes('KELAS I') ? 'Kelas 1 (Green Petals)' :
-                               row.kelas.includes('KELAS II') ? 'Kelas 2 (Red Petals)' :
-                               row.kelas.includes('KELAS III') ? 'Kelas 3 Reguler (Seroja)' :
-                               row.kelas.includes('ISOLASI') ? 'Ruang Tekanan Negatif HEPA' :
-                               row.kelas.includes('INTENSIF') ? 'ICU Staments & Ventilator' : 'Rawat Inap Terpadu'}
-                            </p>
-                          </div>
+                          <h4 className="font-heading font-extrabold text-slate-900 text-sm leading-tight truncate">
+                            {row.kelas}
+                          </h4>
                         </div>
 
                         {/* Status Badge */}
