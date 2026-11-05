@@ -40,12 +40,25 @@ mkdir -p "$SCRIPT_DIR/storage/logs"
 mkdir -p "$SCRIPT_DIR/storage/framework/cache" "$SCRIPT_DIR/storage/framework/sessions" "$SCRIPT_DIR/storage/framework/views"
 touch "$SCRIPT_DIR/storage/logs/laravel.log" 2>/dev/null || true
 
-# 3. Hubungkan symlink storage ke public/storage (satu-satunya symlink standar Laravel)
-echo "🔗 Menghubungkan storage publik (public/storage)..."
-if [ ! -L "$SCRIPT_DIR/public/storage" ]; then
-    rm -rf "$SCRIPT_DIR/public/storage" 2>/dev/null || true
-    ln -sfn "$SCRIPT_DIR/storage/app/public" "$SCRIPT_DIR/public/storage"
+# Sinkronkan seluruh foto upload (dokter, fasilitas, ruangan, banner, artikel, dll)
+echo "🖼️ Memastikan seluruh foto upload tersedia di storage..."
+for f in doctors articles rooms facilities centers media banners avatars leadership general; do
+    if [ -d "$SCRIPT_DIR/public/images/$f" ]; then
+        \cp -rn "$SCRIPT_DIR/public/images/$f/"* "$SCRIPT_DIR/storage/app/public/uploads/$f/" 2>/dev/null || true
+    fi
+done
+
+# Jika ada backup cadangan di /home/nginx/storage_backup_aman, gabungkan juga
+if [ -d "/home/nginx/storage_backup_aman" ]; then
+    echo "📦 Menggabungkan foto dari folder backup aman..."
+    \cp -rn /home/nginx/storage_backup_aman/app/public/* "$SCRIPT_DIR/storage/app/public/" 2>/dev/null || true
+    \cp -rn /home/nginx/storage_backup_aman/uploads/* "$SCRIPT_DIR/storage/app/public/uploads/" 2>/dev/null || true
 fi
+
+# 3. Hubungkan symlink storage ke public/storage (selalu perbarui agar mengarah ke storage baru)
+echo "🔗 Menghubungkan storage publik (public/storage)..."
+rm -f "$SCRIPT_DIR/public/storage" 2>/dev/null || true
+ln -sfn "$SCRIPT_DIR/storage/app/public" "$SCRIPT_DIR/public/storage"
 
 # 4. Update aset frontend dari dist ke public/ jika ada update
 if [ -d "$SCRIPT_DIR/frontend/dist" ]; then
