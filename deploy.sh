@@ -17,6 +17,13 @@ for link in app routes config bootstrap database artisan; do
     fi
 done
 
+# Amankan file upload dari Backend/storage lama jika ada
+if [ -d "$SCRIPT_DIR/Backend/storage/app/public" ]; then
+    echo "📦 Mengamankan file upload dari folder Backend lama..."
+    mkdir -p "$SCRIPT_DIR/storage/app/public"
+    \cp -rn "$SCRIPT_DIR/Backend/storage/app/public/"* "$SCRIPT_DIR/storage/app/public/" 2>/dev/null || true
+fi
+
 # Hapus folder Backend lama jika masih tertinggal di server agar tidak ganda/membingungkan
 if [ -d "$SCRIPT_DIR/Backend" ]; then
     echo "🗑️ Menghapus folder Backend lama agar tidak dobel..."
