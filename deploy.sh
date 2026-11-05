@@ -108,6 +108,10 @@ php "$SCRIPT_DIR/artisan" migrate --force
 echo "📋 Memverifikasi rute admin appointments..."
 php "$SCRIPT_DIR/artisan" route:list --path=appointments
 
+# 7. Reload PHP-FPM agar OPcache memuat file PHP terbaru ke memory server
+echo "🔄 Mereload PHP-FPM / OPcache..."
+systemctl reload php-fpm 2>/dev/null || systemctl restart php-fpm 2>/dev/null || service php-fpm reload 2>/dev/null || systemctl reload php8.2-fpm 2>/dev/null || true
+
 echo "========================================="
 echo " ✅ DEPLOYMENT BERHASIL 100%!"
 echo " Struktur bersih: Backend di root, Frontend di public/."
