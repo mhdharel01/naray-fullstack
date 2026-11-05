@@ -8,95 +8,81 @@ echo "========================================="
 echo " 🚀 NARAY HOSPITAL - DEPLOYMENT SCRIPT"
 echo "========================================="
 
-# Helper function: Link atau Sync direktori
-sync_dir() {
-    src="$1"
-    dst="$2"
-    if [ -d "$dst" ] && [ ! -L "$dst" ]; then
-        echo "📂 Menyalin $src/* ke $dst/..."
-        mkdir -p "$dst"
-        \cp -rf "$src/"* "$dst/"
-    else
-        echo "🔗 Menghubungkan symlink $src -> $dst..."
-        ln -sfn "$src" "$dst"
+# 1. Bersihkan sisa shortcut/symlink lama jika ada
+echo "🧹 Membersihkan shortcut lama agar struktur murni & rapi..."
+for link in app routes config bootstrap database artisan; do
+    if [ -L "$SCRIPT_DIR/$link" ]; then
+        rm -f "$SCRIPT_DIR/$link"
+        echo "   Dihapus shortcut: $link"
     fi
-}
+done
 
-# 1. Pastikan struktur root server terhubung sempurna ke Backend
-echo "⚙️ Menyiapkan struktur Laravel di folder server utama..."
-sync_dir "$SCRIPT_DIR/Backend/app" "$SCRIPT_DIR/app"
-sync_dir "$SCRIPT_DIR/Backend/routes" "$SCRIPT_DIR/routes"
-sync_dir "$SCRIPT_DIR/Backend/config" "$SCRIPT_DIR/config"
-sync_dir "$SCRIPT_DIR/Backend/bootstrap" "$SCRIPT_DIR/bootstrap"
-sync_dir "$SCRIPT_DIR/Backend/database" "$SCRIPT_DIR/database"
-
-# Pastikan artisan tersedia di root
-if [ -f "$SCRIPT_DIR/artisan" ] && [ ! -L "$SCRIPT_DIR/artisan" ]; then
-    \cp -f "$SCRIPT_DIR/Backend/artisan" "$SCRIPT_DIR/artisan"
-else
-    ln -sfn "$SCRIPT_DIR/Backend/artisan" "$SCRIPT_DIR/artisan"
+# Hapus folder Backend lama jika masih tertinggal di server agar tidak ganda/membingungkan
+if [ -d "$SCRIPT_DIR/Backend" ]; then
+    echo "🗑️ Menghapus folder Backend lama agar tidak dobel..."
+    rm -rf "$SCRIPT_DIR/Backend"
 fi
 
-# Pastikan storage tersedia di root & Backend beserta seluruh subfolder upload
+# 2. Siapkan folder storage, upload, dan cache
 echo "📁 Menyiapkan folder storage dan upload..."
 for f in doctors articles rooms facilities centers media banners avatars leadership general; do
-    mkdir -p "$SCRIPT_DIR/Backend/storage/app/public/uploads/$f"
-    mkdir -p "$SCRIPT_DIR/storage/app/public/uploads/$f" 2>/dev/null || true
+    mkdir -p "$SCRIPT_DIR/storage/app/public/uploads/$f"
 done
-mkdir -p "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || true
-mkdir -p "$SCRIPT_DIR/Backend/storage/logs" "$SCRIPT_DIR/storage/logs"
-mkdir -p "$SCRIPT_DIR/Backend/storage/framework/cache" "$SCRIPT_DIR/Backend/storage/framework/sessions" "$SCRIPT_DIR/Backend/storage/framework/views"
-mkdir -p "$SCRIPT_DIR/storage/framework/cache" "$SCRIPT_DIR/storage/framework/sessions" "$SCRIPT_DIR/storage/framework/views" 2>/dev/null || true
-
-touch "$SCRIPT_DIR/Backend/storage/logs/laravel.log" 2>/dev/null || true
+mkdir -p "$SCRIPT_DIR/bootstrap/cache"
+mkdir -p "$SCRIPT_DIR/storage/logs"
+mkdir -p "$SCRIPT_DIR/storage/framework/cache" "$SCRIPT_DIR/storage/framework/sessions" "$SCRIPT_DIR/storage/framework/views"
 touch "$SCRIPT_DIR/storage/logs/laravel.log" 2>/dev/null || true
 
-if [ ! -d "$SCRIPT_DIR/storage" ]; then
-    ln -sfn "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage"
+# 3. Hubungkan symlink storage ke public/storage (satu-satunya symlink standar Laravel)
+echo "🔗 Menghubungkan storage publik (public/storage)..."
+if [ ! -L "$SCRIPT_DIR/public/storage" ]; then
+    rm -rf "$SCRIPT_DIR/public/storage" 2>/dev/null || true
+    ln -sfn "$SCRIPT_DIR/storage/app/public" "$SCRIPT_DIR/public/storage"
 fi
 
-# Pastikan Backend juga memiliki akses jika ada script yang mengeksekusi dari dalam Backend
-if [ -d "$SCRIPT_DIR/vendor" ] && [ ! -d "$SCRIPT_DIR/Backend/vendor" ]; then
-    ln -sfn "$SCRIPT_DIR/vendor" "$SCRIPT_DIR/Backend/vendor"
-fi
-
-if [ -f "$SCRIPT_DIR/.env" ] && [ ! -f "$SCRIPT_DIR/Backend/.env" ]; then
-    ln -sfn "$SCRIPT_DIR/.env" "$SCRIPT_DIR/Backend/.env"
-fi
-
-# 2. Update frontend public assets & API index.php entrypoint
+# 4. Update aset frontend dari dist ke public/ jika ada update
 if [ -d "$SCRIPT_DIR/frontend/dist" ]; then
     echo "📦 Memperbarui aset frontend ke public/..."
     mkdir -p "$SCRIPT_DIR/public"
     \cp -rf "$SCRIPT_DIR/frontend/dist/"* "$SCRIPT_DIR/public/"
 fi
 
-echo "🔌 Memastikan gateway API (public/index.php) tersedia..."
-\cp -f "$SCRIPT_DIR/Backend/public/index.php" "$SCRIPT_DIR/public/index.php"
-if [ -f "$SCRIPT_DIR/Backend/public/.htaccess" ]; then
-    \cp -f "$SCRIPT_DIR/Backend/public/.htaccess" "$SCRIPT_DIR/public/.htaccess"
+# Pastikan public/index.php dan .htaccess selalu ada
+if [ ! -f "$SCRIPT_DIR/public/index.php" ]; then
+    echo "⚠️ public/index.php tidak ditemukan, membuat ulang..."
+    cat << 'EOF' > "$SCRIPT_DIR/public/index.php"
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+require __DIR__.'/../vendor/autoload.php';
+
+/** @var Application $app */
+$app = require_once __DIR__.'/../bootstrap/app.php';
+
+$app->handleRequest(Request::capture());
+EOF
 fi
 
-# Pastikan symlink storage terhubung
-if [ -d "$SCRIPT_DIR/Backend/storage/app/public" ]; then
-    ln -sfn "$SCRIPT_DIR/Backend/storage/app/public" "$SCRIPT_DIR/public/storage"
-elif [ -d "$SCRIPT_DIR/storage/app/public" ]; then
-    ln -sfn "$SCRIPT_DIR/storage/app/public" "$SCRIPT_DIR/public/storage"
-fi
-
-# Atur izin akses (permissions) storage, logs, & cache agar webserver (nginx / php-fpm) bisa menulis tanpa Permission Denied
-echo "🔒 Menyetel izin akses storage, logs, & upload (chmod 777)..."
-chmod -R 777 "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || true
-chmod 666 "$SCRIPT_DIR/Backend/storage/logs/laravel.log" 2>/dev/null || true
+# 5. Atur izin akses (permissions) agar webserver nginx & php-fpm bisa menulis
+echo "🔒 Menyetel izin akses storage, logs, & cache (chmod 777)..."
+chmod -R 777 "$SCRIPT_DIR/storage" "$SCRIPT_DIR/bootstrap/cache" "$SCRIPT_DIR/public/storage" 2>/dev/null || true
 chmod 666 "$SCRIPT_DIR/storage/logs/laravel.log" 2>/dev/null || true
-chown -R nginx:nginx "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || chown -R www-data:www-data "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || true
+chown -R nginx:nginx "$SCRIPT_DIR/storage" "$SCRIPT_DIR/bootstrap/cache" "$SCRIPT_DIR/public/storage" 2>/dev/null || chown -R www-data:www-data "$SCRIPT_DIR/storage" "$SCRIPT_DIR/bootstrap/cache" "$SCRIPT_DIR/public/storage" 2>/dev/null || true
 
-# 3. Jalankan Artisan Commands dari root server (tempat vendor & .env berada)
+# 6. Jalankan Artisan Commands langsung dari root
 echo "🧹 Membersihkan cache Laravel & rute API..."
 php "$SCRIPT_DIR/artisan" optimize:clear
 php "$SCRIPT_DIR/artisan" route:clear
 
-echo "🗄️ Menjalankan migrasi tabel database baru..."
+echo "🗄️ Menjalankan migrasi tabel database..."
 php "$SCRIPT_DIR/artisan" migrate --force
 
 echo "📋 Memverifikasi rute admin appointments..."
@@ -104,4 +90,5 @@ php "$SCRIPT_DIR/artisan" route:list --path=appointments
 
 echo "========================================="
 echo " ✅ DEPLOYMENT BERHASIL 100%!"
+echo " Struktur bersih: Backend di root, Frontend di public/."
 echo "========================================="

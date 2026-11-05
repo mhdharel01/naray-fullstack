@@ -12,15 +12,15 @@ id_rsa*
 *.key
 
 # Laravel Backend specific
-Backend/storage/framework/cache/*
-Backend/storage/framework/sessions/*
-Backend/storage/framework/views/*
-Backend/storage/logs/*
-Backend/bootstrap/cache/*.php
-!Backend/bootstrap/cache/.gitignore
-Backend/public/storage
-Backend/storage/app/public/*
-!Backend/storage/app/public/.gitignore
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+/public/storage
+/storage/app/public/*
+!/storage/app/public/.gitignore
 
 # Frontend build tracked for zero-build server deployment
 !frontend/dist/
