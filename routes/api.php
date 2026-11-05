@@ -842,6 +842,12 @@ Route::get('/services', [
     'index'
 ]);
 
+// Article Categories
+Route::get('/article-categories', [
+    AdminArticleCategoryController::class,
+    'index'
+]);
+
 // Facilities
 Route::get('/facilities', [
     FacilityController::class,

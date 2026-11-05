@@ -275,7 +275,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-slate-100 aspect-4/3">
                   <img 
-                    src="/images/discovery/diagnostic-center.jpg" 
+                    src="/images/discovery/naray.png"
                     alt="Fasilitas Naray Hospital Dumai" 
                     className="w-full h-full object-cover"
                   />

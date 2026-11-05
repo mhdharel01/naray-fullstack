@@ -32,13 +32,13 @@ const DEFAULT_CATEGORIES = [
   'Kesehatan Paru',
   'Bedah & Ortopedi',
   'Kebidanan & Kandungan',
-  'Berita',
-  'Pengumuman',
-  'Tips Sehat'
+  'Tips Gaya Hidup Sehat',
+  'Info Medis & Layanan RS',
+  'Kesehatan Umum'
 ];
 
 export default function ArticlePage() {
-  const { healthArticles = [], hospitalInfo = {}, refreshBackendData } = useHospitalData();
+  const { healthArticles = [], hospitalInfo = {}, articleCategories = [], refreshBackendData } = useHospitalData();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [selectedCategory, setSelectedCategory] = useState(
@@ -122,28 +122,51 @@ export default function ArticlePage() {
     return healthArticles.filter(a => (a.status || 'published').toLowerCase() === 'published');
   }, [healthArticles]);
 
+  // Combined categories from defaults, backend categories, and articles
+  const allCategories = useMemo(() => {
+    const list = [...DEFAULT_CATEGORIES];
+    if (Array.isArray(articleCategories)) {
+      articleCategories.forEach(c => {
+        if (c?.name && !list.some(existing => existing.toLowerCase() === c.name.toLowerCase())) {
+          list.push(c.name);
+        }
+      });
+    }
+    publishedArticles.forEach(a => {
+      const catName = typeof a.category === 'object' ? a.category?.name : a.category;
+      if (catName && typeof catName === 'string' && catName.trim() && !list.some(existing => existing.toLowerCase() === catName.toLowerCase())) {
+        list.push(catName);
+      }
+    });
+    return list;
+  }, [articleCategories, publishedArticles]);
+
   // Calculate dynamic article counts per category
   const categoryCounts = useMemo(() => {
     const counts = { 'Semua': publishedArticles.length };
-    DEFAULT_CATEGORIES.forEach(cat => {
+    allCategories.forEach(cat => {
       if (cat !== 'Semua') {
         const catLower = cat.toLowerCase();
         counts[cat] = publishedArticles.filter(a => {
-          const aCat = (a.category || '').toLowerCase();
-          return aCat.includes(catLower) || catLower.includes(aCat);
+          const aCat = (typeof a.category === 'object' ? a.category?.name : (a.category || '')).toLowerCase();
+          return aCat === catLower || aCat.includes(catLower) || catLower.includes(aCat);
         }).length;
       }
     });
     return counts;
-  }, [publishedArticles]);
+  }, [publishedArticles, allCategories]);
 
   // Filtered articles
   const filteredArticles = useMemo(() => {
     return publishedArticles.filter((art) => {
+      const aCat = (typeof art.category === 'object' ? art.category?.name : (art.category || '')).toLowerCase();
+      const sCat = selectedCategory.toLowerCase();
+
       const matchCat =
         selectedCategory === 'Semua' ||
-        (art.category || '').toLowerCase().includes(selectedCategory.toLowerCase()) ||
-        selectedCategory.toLowerCase().includes((art.category || '').toLowerCase());
+        aCat === sCat ||
+        aCat.includes(sCat) ||
+        sCat.includes(aCat);
 
       const matchSearch =
         !searchKeyword ||
@@ -253,7 +276,7 @@ export default function ArticlePage() {
                 className="w-full h-12 px-4 rounded-xl text-xs sm:text-sm text-slate-700 bg-transparent focus:bg-slate-50/50 outline-none cursor-pointer font-medium appearance-none"
               >
                 <option value="Semua">Semua Kategori ({publishedArticles.length})</option>
-                {DEFAULT_CATEGORIES.filter(c => c !== 'Semua').map((cat) => (
+                {allCategories.filter(c => c !== 'Semua').map((cat) => (
                   <option key={cat} value={cat}>
                     {cat} ({categoryCounts[cat] || 0})
                   </option>
@@ -297,7 +320,7 @@ export default function ArticlePage() {
 
           {/* ── 5. Category Filter Pills Row (Horizontal Carousel with Badges) ── */}
           <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Kategori Artikel">
-            {DEFAULT_CATEGORIES.map((cat) => {
+            {allCategories.map((cat) => {
               const isActive = selectedCategory === cat;
               const count = categoryCounts[cat] || 0;
 

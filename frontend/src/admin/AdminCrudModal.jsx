@@ -162,7 +162,7 @@ export function AdminCrudModal({
         price: entity === 'room' ? cleanRoomPrice : (entity === 'mcu' ? cleanMcuPrice : (item.price || '')),
         price_per_night: entity === 'room' ? cleanRoomPrice : (item.price_per_night || ''),
         category: typeof item.category === 'object' ? (item.category?.name || '') : (item.category || ''),
-        category_id: Number(item.category_id || (typeof item.category === 'object' ? item.category?.id : 1) || 1),
+        category_id: Number(item.category_id || (typeof item.category === 'object' ? item.category?.id : (categories.find(c => c.name.toLowerCase() === (item.category || '').toLowerCase())?.id)) || 1),
         specialization_id: Number(item.specialization_id || item.specialization?.id || 1),
         practice_days: initialPracticeDays,
         start_time: item.practiceStartTime || item.start_time || '09:00',
@@ -352,6 +352,13 @@ export function AdminCrudModal({
         payload.type = (payload.type === 'basic') ? 'basic' : 'advanced';
       }
 
+      if (entity === 'article') {
+        const catId = Number(payload.category_id) || 1;
+        const matched = categories.find(c => Number(c.id) === catId);
+        payload.category_id = catId;
+        payload.category = matched ? matched.name : (payload.category || 'Edukasi Kesehatan');
+      }
+
       // Process newline-separated text for MCU items and Room facilities
       if (entity === 'mcu' && payload.itemsText !== undefined) {
         payload.items = payload.itemsText.split('\n').map(s => s.trim()).filter(Boolean);
@@ -488,9 +495,15 @@ export function AdminCrudModal({
                     ) : (
                       <>
                         <option value={1}>Edukasi Kesehatan</option>
-                        <option value={2}>Penyakit Dalam &amp; Jantung</option>
-                        <option value={3}>Ibu &amp; Anak</option>
-                        <option value={4}>Tips Pola Makan &amp; Nutrisi</option>
+                        <option value={2}>Penyakit Dalam</option>
+                        <option value={3}>Kesehatan Jantung</option>
+                        <option value={4}>Kesehatan Anak</option>
+                        <option value={5}>Kesehatan Paru</option>
+                        <option value={6}>Bedah & Ortopedi</option>
+                        <option value={7}>Kebidanan & Kandungan</option>
+                        <option value={8}>Tips Gaya Hidup Sehat</option>
+                        <option value={9}>Info Medis & Layanan RS</option>
+                        <option value={10}>Kesehatan Umum</option>
                       </>
                     )}
                   </select>

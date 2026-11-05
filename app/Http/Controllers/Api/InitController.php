@@ -190,6 +190,7 @@ class InitController extends Controller
                 'doctors' => $doctors,
                 'polikliniks' => $polikliniks,
                 'articles' => $articles,
+                'article_categories' => \App\Models\ArticleCategory::orderBy('id')->get(),
                 'facilities' => $facilities,
                 'centers' => $centers,
                 'room_types' => $roomTypes,

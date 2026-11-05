@@ -49,6 +49,7 @@ function AdminDashboard({ onLogout }) {
     inpatientRooms = [],
     mcuPackages = [],
     healthArticles = [],
+    articleCategories = [],
     facilities = [],
     centersOfExcellence = [],
     galleryActivities = [],
@@ -427,12 +428,21 @@ function AdminDashboard({ onLogout }) {
     });
   }, [allMediaList, mediaTypeFilter, searchQuery]);
 
-  const categoriesList = useMemo(() => [
-    { id: 1, name: 'Tips Kesehatan' },
-    { id: 2, name: 'Info Medis' },
-    { id: 3, name: 'Layanan Rumah Sakit' },
-    { id: 4, name: 'Gaya Hidup Sehat' },
-  ], []);
+  const categoriesList = useMemo(() => {
+    if (articleCategories && articleCategories.length > 0) return articleCategories;
+    return [
+      { id: 1, name: 'Edukasi Kesehatan' },
+      { id: 2, name: 'Penyakit Dalam' },
+      { id: 3, name: 'Kesehatan Jantung' },
+      { id: 4, name: 'Kesehatan Anak' },
+      { id: 5, name: 'Kesehatan Paru' },
+      { id: 6, name: 'Bedah & Ortopedi' },
+      { id: 7, name: 'Kebidanan & Kandungan' },
+      { id: 8, name: 'Tips Gaya Hidup Sehat' },
+      { id: 9, name: 'Info Medis & Layanan RS' },
+      { id: 10, name: 'Kesehatan Umum' },
+    ];
+  }, [articleCategories]);
 
   const liveStats = useMemo(() => {
     const docCount = adminDashboardStats?.active_doctors ?? (doctors?.length || 0);

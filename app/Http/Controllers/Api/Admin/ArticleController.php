@@ -4,12 +4,44 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\ArticleCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
+    /**
+     * Resolusi fleksibel ID kategori atau nama kategori artikel
+     */
+    private function resolveCategoryId(Request $request, $defaultId = 1)
+    {
+        if ($request->filled('category_id')) {
+            $catId = (int)$request->category_id;
+            if (ArticleCategory::where('id', $catId)->exists()) {
+                return $catId;
+            }
+        }
+
+        if ($request->filled('category')) {
+            $catName = trim((string)$request->category);
+            $foundCat = ArticleCategory::where('name', 'like', $catName)->first();
+            if ($foundCat) {
+                return $foundCat->id;
+            }
+
+            $created = ArticleCategory::create([
+                'name' => $catName,
+                'slug' => Str::slug($catName) ?: 'cat-' . time(),
+            ]);
+            return $created->id;
+        }
+
+        $fallback = ArticleCategory::where('id', $defaultId)->first() ?: ArticleCategory::first();
+        return $fallback ? $fallback->id : 1;
+    }
+
     public function index(Request $request)
     {
         $query = Article::with('category');
@@ -47,12 +79,15 @@ class ArticleController extends Controller
 
     public function store(Request $request)
     {
-        // Menyesuaikan status menjadi huruf kecil
+        // Normalisasi status
         if ($request->filled('status')) {
-            $request->merge([
-                'status' => strtolower($request->status),
-            ]);
+            $rawStatus = strtolower((string)$request->status);
+            $cleanStatus = in_array($rawStatus, ['published', 'tayang', 'tayang (published)'], true) ? 'published' : 'draft';
+            $request->merge(['status' => $cleanStatus]);
         }
+
+        $resolvedCatId = $this->resolveCategoryId($request, 1);
+        $request->merge(['category_id' => $resolvedCatId]);
 
         $validated = $request->validate([
             'title' => [
@@ -92,7 +127,6 @@ class ArticleController extends Controller
             'category_id' => [
                 'nullable',
                 'integer',
-                'exists:article_categories,id',
             ],
 
             'status' => [
@@ -106,8 +140,10 @@ class ArticleController extends Controller
             ],
         ]);
 
+        $validated['category_id'] = $resolvedCatId;
+
         if (empty($validated['slug'])) {
-            $validated['slug'] = \Illuminate\Support\Str::slug($validated['title']) . '-' . time();
+            $validated['slug'] = Str::slug($validated['title']) . '-' . time();
         }
 
         if ($request->filled('thumbnail_url')) {
@@ -124,7 +160,7 @@ class ArticleController extends Controller
             $validated['published_at'] = now();
         }
 
-        // Upload gambar jika tersedia
+        // Upload gambar jika tersedia via form-data
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')
                 ->store('articles', 'public');
@@ -135,7 +171,6 @@ class ArticleController extends Controller
         unset($validated['thumbnail']);
 
         $article = Article::create($validated);
-
         $article->load('category');
 
         return response()->json([
@@ -162,10 +197,13 @@ class ArticleController extends Controller
         $article = Article::findOrFail($id);
 
         if ($request->filled('status')) {
-            $request->merge([
-                'status' => strtolower($request->status),
-            ]);
+            $rawStatus = strtolower((string)$request->status);
+            $cleanStatus = in_array($rawStatus, ['published', 'tayang', 'tayang (published)'], true) ? 'published' : 'draft';
+            $request->merge(['status' => $cleanStatus]);
         }
+
+        $resolvedCatId = $this->resolveCategoryId($request, $article->category_id ?? 1);
+        $request->merge(['category_id' => $resolvedCatId]);
 
         $validated = $request->validate([
             'title' => [
@@ -206,7 +244,6 @@ class ArticleController extends Controller
             'category_id' => [
                 'nullable',
                 'integer',
-                'exists:article_categories,id',
             ],
 
             'status' => [
@@ -220,8 +257,10 @@ class ArticleController extends Controller
             ],
         ]);
 
+        $validated['category_id'] = $resolvedCatId;
+
         if (empty($validated['slug'])) {
-            $validated['slug'] = $article->slug ?? (\Illuminate\Support\Str::slug($validated['title']) . '-' . time());
+            $validated['slug'] = $article->slug ?? (Str::slug($validated['title']) . '-' . time());
         }
 
         if ($request->filled('thumbnail_url')) {
@@ -239,7 +278,7 @@ class ArticleController extends Controller
                 $article->published_at ?? now();
         }
 
-        // Ganti gambar jika ada file baru
+        // Ganti gambar jika ada file baru via multipart
         if ($request->hasFile('thumbnail')) {
             if (
                 $article->thumbnail_url &&
@@ -261,7 +300,6 @@ class ArticleController extends Controller
         unset($validated['thumbnail']);
 
         $article->update($validated);
-
         $article->load('category');
 
         return response()->json([

@@ -223,6 +223,7 @@ export function HospitalDataProvider({ children }) {
   const [galleryActivities, setGalleryActivities] = useState([]);
   const [videoList, setVideoList] = useState([]);
   const [healthArticles, setHealthArticles] = useState([]);
+  const [articleCategories, setArticleCategories] = useState([]);
   const [doctorLeaves, setDoctorLeaves] = useState([]);
   const [simrsBedData, setSimrsBedData] = useState(null);
   const [simrsDoctorSchedules, setSimrsDoctorSchedules] = useState(null);
@@ -630,10 +631,31 @@ export function HospitalDataProvider({ children }) {
 
   const mapArticle = (a) => {
     let catName = 'Kesehatan Umum';
-    if (typeof a.category === 'string') {
+    if (typeof a.category === 'string' && a.category.trim()) {
       catName = a.category;
     } else if (a.category && typeof a.category === 'object' && a.category.name) {
       catName = a.category.name;
+    } else if (a.category_id) {
+      const standardCats = {
+        1: 'Edukasi Kesehatan',
+        2: 'Penyakit Dalam',
+        3: 'Kesehatan Jantung',
+        4: 'Kesehatan Anak',
+        5: 'Kesehatan Paru',
+        6: 'Bedah & Ortopedi',
+        7: 'Kebidanan & Kandungan',
+        8: 'Tips Gaya Hidup Sehat',
+        9: 'Info Medis & Layanan RS',
+        10: 'Kesehatan Umum'
+      };
+      const found = Array.isArray(articleCategories)
+        ? articleCategories.find(c => Number(c.id) === Number(a.category_id))
+        : null;
+      if (found?.name) {
+        catName = found.name;
+      } else if (standardCats[a.category_id]) {
+        catName = standardCats[a.category_id];
+      }
     }
 
     const artSlug = a.slug || (a.title ? a.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : `art-${a.id}`);
@@ -1037,6 +1059,9 @@ export function HospitalDataProvider({ children }) {
         }
         if (Array.isArray(d.articles) && d.articles.length > 0) {
           setHealthArticles(d.articles.map(mapArticle));
+        }
+        if (Array.isArray(d.article_categories) && d.article_categories.length > 0) {
+          setArticleCategories(d.article_categories);
         }
         if (Array.isArray(d.facilities) && d.facilities.length > 0) {
           setFacilitiesData(d.facilities.map(mapFacility));
@@ -1541,13 +1566,16 @@ export function HospitalDataProvider({ children }) {
           return await createSpecialization(payload);
         }
         case 'article': {
+          const catId = Number(payload.category_id) || 1;
+          const matchedCat = articleCategories.find(c => Number(c.id) === catId);
           const body = {
             title: payload.title,
             slug: payload.slug || undefined,
             content: payload.content || payload.excerpt || payload.title,
             thumbnail_url: payload.thumbnail_url || payload.image || payload.thumbnail,
             status: payload.status || 'published',
-            category_id: payload.category_id || 1,
+            category_id: catId,
+            category: matchedCat ? matchedCat.name : (payload.category || undefined),
           };
           res = await api.adminCreateArticle(body);
           if (res?.data) {
@@ -1827,13 +1855,16 @@ export function HospitalDataProvider({ children }) {
       const targetId = cleanNumericId(rawTargetId);
       switch (entity) {
         case 'article': {
+          const catId = Number(payload.category_id) || 1;
+          const matchedCat = articleCategories.find(c => Number(c.id) === catId);
           const body = {
             title: payload.title,
             slug: payload.slug || undefined,
             content: payload.content || payload.excerpt || payload.title,
             thumbnail_url: payload.thumbnail_url || payload.image || payload.thumbnail,
             status: payload.status || 'published',
-            category_id: payload.category_id || 1,
+            category_id: catId,
+            category: matchedCat ? matchedCat.name : (payload.category || undefined),
           };
           res = await api.adminUpdateArticle(targetId, body);
           const rawArt = res?.data || { ...payload, id: targetId, dbId: targetId };
@@ -2907,6 +2938,7 @@ export function HospitalDataProvider({ children }) {
         galleryActivities,
         videoList,
         healthArticles,
+        articleCategories,
         bannerSlides,
         setBannerSlides,
         saveBannerSlides,
