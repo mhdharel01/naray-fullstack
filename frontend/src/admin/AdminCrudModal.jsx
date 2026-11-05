@@ -964,7 +964,7 @@ export function AdminCrudModal({
                   <label>Kategori Layanan</label>
                   <select
                     name="type"
-                    value={formData.type || 'advanced'}
+                    value={formData.type === 'basic' ? 'basic' : 'advanced'}
                     onChange={handleChange}
                   >
                     <option value="advanced">Layanan Unggulan (Advanced)</option>

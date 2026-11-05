@@ -80,22 +80,23 @@ class FacilityController extends Controller
 
     public function store(Request $request)
     {
-        $rawType = $request->input('type', 'advanced');
-        $type = in_array(strtolower((string)$rawType), ['basic', 'standar', 'penunjang'], true) ? 'basic' : 'advanced';
-        $request->merge(['type' => $type]);
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'in:basic,advanced'],
+            'type' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string', 'max:2048'],
-            'status' => ['required', 'in:active,inactive'],
+            'status' => ['nullable', 'string'],
             'branch_id' => [
                 'nullable',
                 'integer',
                 'exists:branches,id',
             ],
         ]);
+
+        $rawType = $request->input('type', 'advanced');
+        $type = in_array(strtolower((string)$rawType), ['basic', 'standar', 'penunjang'], true) ? 'basic' : 'advanced';
+        $validated['type'] = $type;
+        $validated['status'] = in_array($request->input('status'), ['active', 'inactive'], true) ? $request->input('status') : 'active';
 
         $facility = Facility::create($validated);
 
@@ -118,22 +119,23 @@ class FacilityController extends Controller
             ], 404);
         }
 
-        $rawType = $request->input('type', $facility->type ?? 'advanced');
-        $type = in_array(strtolower((string)$rawType), ['basic', 'standar', 'penunjang'], true) ? 'basic' : 'advanced';
-        $request->merge(['type' => $type]);
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'in:basic,advanced'],
+            'type' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'image_url' => ['nullable', 'string', 'max:2048'],
-            'status' => ['required', 'in:active,inactive'],
+            'status' => ['nullable', 'string'],
             'branch_id' => [
                 'nullable',
                 'integer',
                 'exists:branches,id',
             ],
         ]);
+
+        $rawType = $request->input('type', $facility->type ?? 'advanced');
+        $type = in_array(strtolower((string)$rawType), ['basic', 'standar', 'penunjang'], true) ? 'basic' : 'advanced';
+        $validated['type'] = $type;
+        $validated['status'] = in_array($request->input('status'), ['active', 'inactive'], true) ? $request->input('status') : ($facility->status ?? 'active');
 
         $facility->update($validated);
 

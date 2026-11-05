@@ -1690,6 +1690,23 @@ export function HospitalDataProvider({ children }) {
             branch_id: 1,
           };
           res = await api.adminCreateFacility(body);
+          if (res?.data || res?.success) {
+            const rawFacility = res?.data?.data || res?.data || res;
+            const mapped = mapFacility(rawFacility);
+            mapped.name = body.name;
+            mapped.description = body.description;
+            mapped.desc = body.description;
+            mapped.type = body.type;
+            mapped.status = body.status;
+            mapped.is_active = body.status === 'active';
+            if (body.image_url) {
+              mapped.image = formatImageUrl(body.image_url, '/images/default-image.svg');
+              mapped.image_url = body.image_url;
+            }
+            saveItem('facility', mapped, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         case 'center': {
@@ -1966,6 +1983,23 @@ export function HospitalDataProvider({ children }) {
             branch_id: 1,
           };
           res = await api.adminUpdateFacility(targetId, body);
+          if (res?.data || res?.success) {
+            const rawFacility = res?.data?.data || res?.data || res;
+            const mapped = mapFacility(rawFacility);
+            mapped.name = body.name;
+            mapped.description = body.description;
+            mapped.desc = body.description;
+            mapped.type = body.type;
+            mapped.status = body.status;
+            mapped.is_active = body.status === 'active';
+            if (body.image_url) {
+              mapped.image = formatImageUrl(body.image_url, '/images/default-image.svg');
+              mapped.image_url = body.image_url;
+            }
+            saveItem('facility', { ...mapped, id: rawTargetId, dbId: targetId }, true);
+            loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
+            return { success: true, data: mapped };
+          }
           break;
         }
         case 'center': {
