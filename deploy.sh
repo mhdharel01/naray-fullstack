@@ -43,6 +43,7 @@ for f in doctors articles rooms facilities centers media banners avatars leaders
     mkdir -p "$SCRIPT_DIR/Backend/storage/app/public/uploads/$f"
     mkdir -p "$SCRIPT_DIR/storage/app/public/uploads/$f" 2>/dev/null || true
 done
+mkdir -p "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || true
 mkdir -p "$SCRIPT_DIR/Backend/storage/logs" "$SCRIPT_DIR/storage/logs"
 mkdir -p "$SCRIPT_DIR/Backend/storage/framework/cache" "$SCRIPT_DIR/Backend/storage/framework/sessions" "$SCRIPT_DIR/Backend/storage/framework/views"
 mkdir -p "$SCRIPT_DIR/storage/framework/cache" "$SCRIPT_DIR/storage/framework/sessions" "$SCRIPT_DIR/storage/framework/views" 2>/dev/null || true
@@ -83,12 +84,12 @@ elif [ -d "$SCRIPT_DIR/storage/app/public" ]; then
     ln -sfn "$SCRIPT_DIR/storage/app/public" "$SCRIPT_DIR/public/storage"
 fi
 
-# Atur izin akses (permissions) storage & logs agar webserver (nginx / php-fpm) bisa menulis tanpa Permission Denied
+# Atur izin akses (permissions) storage, logs, & cache agar webserver (nginx / php-fpm) bisa menulis tanpa Permission Denied
 echo "🔒 Menyetel izin akses storage, logs, & upload (chmod 777)..."
-chmod -R 777 "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" 2>/dev/null || true
+chmod -R 777 "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || true
 chmod 666 "$SCRIPT_DIR/Backend/storage/logs/laravel.log" 2>/dev/null || true
 chmod 666 "$SCRIPT_DIR/storage/logs/laravel.log" 2>/dev/null || true
-chown -R nginx:nginx "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" 2>/dev/null || chown -R www-data:www-data "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" 2>/dev/null || true
+chown -R nginx:nginx "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || chown -R www-data:www-data "$SCRIPT_DIR/Backend/storage" "$SCRIPT_DIR/storage" "$SCRIPT_DIR/public/storage" "$SCRIPT_DIR/Backend/bootstrap/cache" "$SCRIPT_DIR/bootstrap/cache" 2>/dev/null || true
 
 # 3. Jalankan Artisan Commands dari root server (tempat vendor & .env berada)
 echo "🧹 Membersihkan cache Laravel & rute API..."
