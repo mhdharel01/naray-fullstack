@@ -67,11 +67,11 @@ class UploadController extends Controller
         $storageDir = storage_path('app/public/' . $relativeDir);
         $publicDir = public_path('storage/' . $relativeDir);
 
-        if (!file_exists($storageDir)) {
-            @mkdir($storageDir, 0755, true);
+        if (!is_dir($storageDir)) {
+            @mkdir($storageDir, 0777, true);
         }
-        if (!file_exists($publicDir)) {
-            @mkdir($publicDir, 0755, true);
+        if (!is_dir($publicDir)) {
+            @mkdir($publicDir, 0777, true);
         }
 
         $targetFullPath = $storageDir . '/' . $safeFilename;
@@ -161,11 +161,29 @@ class UploadController extends Controller
 
             // Simpan sebagai WebP dengan kualitas tinggi (92% untuk banner agar jernih maksimal, 85% untuk lainnya)
             $quality = ($folder === 'banners') ? 92 : 85;
-            imagewebp($resizedImage, $targetFullPath, $quality);
+            
+            // Pastikan direktori tujuan sudah ada dengan izin penuh
+            if (!is_dir(dirname($targetFullPath))) {
+                @mkdir(dirname($targetFullPath), 0777, true);
+            }
+
+            $saved = @imagewebp($resizedImage, $targetFullPath, $quality);
 
             // Bersihkan memori
             imagedestroy($sourceImage);
             imagedestroy($resizedImage);
+
+            // Jika imagewebp gagal menulis file, fallback simpan via Storage Laravel
+            if (!$saved || !file_exists($targetFullPath)) {
+                $ext = strtolower($file->getClientOriginalExtension());
+                $safeExt = in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true) ? $ext : 'jpg';
+                $safeFilename = Str::random(40) . '.' . $safeExt;
+                $file->storeAs($relativeDir, $safeFilename, 'public');
+                $targetFullPath = storage_path('app/public/' . $relativeDir . '/' . $safeFilename);
+                if (isset($publicDir)) {
+                    $publicFullPath = $publicDir . '/' . $safeFilename;
+                }
+            }
         } else {
             // Fallback aman jika GD tidak dapat me-render: simpan file secara aman dengan ekstensi aslinya
             $ext = strtolower($file->getClientOriginalExtension());
