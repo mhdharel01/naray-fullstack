@@ -173,7 +173,9 @@ export function AdminCrudModal({
         facilitiesText: initialFacilitiesList.join('\n'),
         url: item.url || item.youtubeEmbed || item.image || '',
         thumbnail_url: item.thumbnail_url || '',
-        type: (item.type === 'video' || entity === 'video') && item.type !== 'image' ? 'video' : 'image',
+        type: (entity === 'media' || entity === 'gallery' || entity === 'video')
+          ? (((item.type === 'video' || entity === 'video') && item.type !== 'image') ? 'video' : 'image')
+          : (item.type || (entity === 'facility' ? 'advanced' : '')),
       });
     } else {
       // Default empty templates
@@ -345,6 +347,10 @@ export function AdminCrudModal({
 
     try {
       const payload = { ...formData };
+
+      if (entity === 'facility') {
+        payload.type = (payload.type === 'basic') ? 'basic' : 'advanced';
+      }
 
       // Process newline-separated text for MCU items and Room facilities
       if (entity === 'mcu' && payload.itemsText !== undefined) {

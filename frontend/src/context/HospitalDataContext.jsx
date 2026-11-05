@@ -1684,7 +1684,7 @@ export function HospitalDataProvider({ children }) {
           const body = {
             name: payload.name,
             description: payload.description || '',
-            type: payload.type || 'advanced',
+            type: (payload.type === 'basic') ? 'basic' : 'advanced',
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,
@@ -1960,7 +1960,7 @@ export function HospitalDataProvider({ children }) {
           const body = {
             name: payload.name,
             description: payload.description || '',
-            type: payload.type || 'advanced',
+            type: (payload.type === 'basic') ? 'basic' : 'advanced',
             image_url: payload.image_url || payload.image || null,
             status: payload.status || 'active',
             branch_id: 1,

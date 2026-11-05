@@ -80,6 +80,10 @@ class FacilityController extends Controller
 
     public function store(Request $request)
     {
+        $rawType = $request->input('type', 'advanced');
+        $type = in_array(strtolower((string)$rawType), ['basic', 'standar', 'penunjang'], true) ? 'basic' : 'advanced';
+        $request->merge(['type' => $type]);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', 'in:basic,advanced'],
@@ -113,6 +117,10 @@ class FacilityController extends Controller
                 'data' => null,
             ], 404);
         }
+
+        $rawType = $request->input('type', $facility->type ?? 'advanced');
+        $type = in_array(strtolower((string)$rawType), ['basic', 'standar', 'penunjang'], true) ? 'basic' : 'advanced';
+        $request->merge(['type' => $type]);
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
