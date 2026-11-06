@@ -30,6 +30,7 @@ import {
   FileText,
   Check
 } from 'lucide-react';
+import { isScheduleCoveredByLeave, rangeIncludesDayOfWeek } from '../../utils/dateHelpers';
 
 export default function DoctorsTab({
   // Active navigation
@@ -253,6 +254,12 @@ export default function DoctorsTab({
       return s && e && s <= todayYMD && todayYMD <= e;
     });
     const leaveEndFormatted = leaveInfo?.end_date ? formatDateShort(leaveInfo.end_date) : '';
+
+    const isSessionOnLeave = (sch) => {
+      if (sch.isLeaveOverride) return true;
+      if (sch.doctorIsOnLeave) return true;
+      return sortedDocLeaves.some(l => isScheduleCoveredByLeave(sch, l, todayYMD));
+    };
 
     return (
       <div className="space-y-6 animate-in fade-in duration-200 font-sans">
@@ -517,7 +524,7 @@ export default function DoctorsTab({
 
                       <div className="flex items-center gap-2 shrink-0">
                         {/* Status Sesi */}
-                        {doc.isOnLeave || sch.doctorIsOnLeave ? (
+                        {isSessionOnLeave(sch) ? (
                           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
                             Diliburkan (Cuti)
                           </span>

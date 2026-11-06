@@ -3,6 +3,7 @@ import api from '../services/api';
 import {
   hospitalInfo as fallbackHospitalInfo
 } from '../data/hospitalData';
+import { rangeIncludesDayOfWeek, isScheduleCoveredByLeave, parseDayNum } from '../utils/dateHelpers';
 
 const HospitalDataContext = createContext(null);
 
@@ -443,14 +444,17 @@ export function HospitalDataProvider({ children }) {
       practiceStatusText = 'Tidak Praktik';
     }
 
-    // Jika cuti aktif, beri penanda ke seluruh jadwal
+    // Beri penanda cuti HANYA pada sesi jadwal yang harinya masuk dalam rentang cuti aktif
     if (isOnLeave && activeTodayLeave) {
-      formattedSchedules = formattedSchedules.map(sch => ({
-        ...sch,
-        isLeaveOverride: true,
-        leaveReason: activeTodayLeave.reason,
-        leaveUntil: activeTodayLeave.end_date
-      }));
+      formattedSchedules = formattedSchedules.map(sch => {
+        const isSlotOnLeave = isScheduleCoveredByLeave(sch, activeTodayLeave, todayStr);
+        return {
+          ...sch,
+          isLeaveOverride: isSlotOnLeave,
+          leaveReason: isSlotOnLeave ? activeTodayLeave.reason : undefined,
+          leaveUntil: isSlotOnLeave ? activeTodayLeave.end_date : undefined
+        };
+      });
     }
 
     const docSlug = d.slug || (d.name ? d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : `dokter-${d.id}`);

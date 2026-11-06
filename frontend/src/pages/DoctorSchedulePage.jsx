@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 import { PageLayout } from '../layouts/PageLayout';
+import { isScheduleCoveredByLeave, parseDayNum } from '../utils/dateHelpers';
 
 // Day mapping helpers
 const DAY_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
@@ -634,6 +635,18 @@ export default function DoctorSchedulePage() {
                   const schedule = getDoctorDaySchedule(doc, selectedDay);
                   const targetSlug = doc.slug || toSlug(doc.name) || doc.id;
 
+                  const now = new Date();
+                  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                  let isDocOnLeaveThisDay = false;
+                  if (selectedDay !== 'Semua') {
+                    const targetDayIdx = DAY_ORDER.indexOf(selectedDay);
+                    const targetDayNum = targetDayIdx !== -1 ? targetDayIdx + 1 : parseDayNum(selectedDay);
+                    isDocOnLeaveThisDay = (doc.leaves || []).some(l => isScheduleCoveredByLeave({ day_of_week: targetDayNum, day: selectedDay }, l, todayStr)) ||
+                      (doc.currentLeave ? isScheduleCoveredByLeave({ day_of_week: targetDayNum, day: selectedDay }, doc.currentLeave, todayStr) : false);
+                  } else {
+                    isDocOnLeaveThisDay = Boolean(doc.isOnLeave);
+                  }
+
                   return (
                     <Link
                       key={doc.id}
@@ -662,12 +675,12 @@ export default function DoctorSchedulePage() {
 
                               {/* Status Pill Badge (PRAKTIK vs CUTI DARI DB OVERRIDE) */}
                               <span className={`shrink-0 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full tracking-wider border flex items-center gap-1.5 ${
-                                doc.isOnLeave
+                                isDocOnLeaveThisDay
                                   ? 'bg-rose-50 text-rose-700 border-rose-300 shadow-2xs'
                                   : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${doc.isOnLeave ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
-                                <span>{doc.isOnLeave ? 'SEDANG CUTI' : 'PRAKTIK'}</span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${isDocOnLeaveThisDay ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`} />
+                                <span>{isDocOnLeaveThisDay ? 'SEDANG CUTI' : 'PRAKTIK'}</span>
                               </span>
                             </div>
 
@@ -704,7 +717,7 @@ export default function DoctorSchedulePage() {
 
                       {/* Bottom Row: Quote Bubble / Leave Alert with Date & Reason */}
                       <div className="pt-2">
-                        {doc.isOnLeave ? (
+                        {isDocOnLeaveThisDay ? (
                           <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-900 text-xs leading-relaxed flex items-start gap-2.5">
                             <AlertCircle size={17} className="text-amber-600 shrink-0 mt-0.5" />
                             <div className="min-w-0 flex-1">

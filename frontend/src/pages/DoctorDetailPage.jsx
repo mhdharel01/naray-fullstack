@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useHospitalData } from '../context/HospitalDataContext';
 import { PageLayout } from '../layouts/PageLayout';
+import { isScheduleCoveredByLeave } from '../utils/dateHelpers';
 
 export default function DoctorDetailPage() {
   const { slug } = useParams();
@@ -203,12 +204,19 @@ export default function DoctorDetailPage() {
         ? `${uniqueTimes.join(' & ')} WIB`
         : (primarySchedule?.time || 'Sesuai Jadwal');
 
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const isDayOnLeave = matchingDaySchedules.some(s => s.isLeaveOverride) ||
+        (doctor.leaves || []).some(l => isScheduleCoveredByLeave({ day_of_week: targetDayNum, day: dayName }, l, todayStr)) ||
+        (doctor.currentLeave ? isScheduleCoveredByLeave({ day_of_week: targetDayNum, day: dayName }, doctor.currentLeave, todayStr) : false);
+
       return {
         dayName,
         dayIdx,
         timeFormatted,
         room: primarySchedule?.room || (doctor.specialty ? `Poliklinik ${doctor.specialty}` : 'Poliklinik Rawat Jalan'),
-        schedules: matchingDaySchedules
+        schedules: matchingDaySchedules,
+        isOnLeave: isDayOnLeave
       };
     }).filter(Boolean);
   }, [doctor, daysOfWeek]);
@@ -457,9 +465,9 @@ export default function DoctorDetailPage() {
                         <div className="flex items-center justify-between mb-3">
                           <strong className="text-base font-bold text-slate-900">{item.dayName}</strong>
                           <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ${
-                            doctor.isOnLeave ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                            item.isOnLeave ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                           }`}>
-                            {doctor.isOnLeave ? 'Cuti' : 'Praktik'}
+                            {item.isOnLeave ? 'Cuti' : 'Praktik'}
                           </span>
                         </div>
 
