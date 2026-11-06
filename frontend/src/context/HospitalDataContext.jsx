@@ -2703,6 +2703,7 @@ export function HospitalDataProvider({ children }) {
   // Dedicated Database Server Handlers for Banners & Leadership
   const saveBannerSlides = async (newSlides) => {
     setBannerSlides(newSlides);
+    updateCachedSnapshot({ bannerSlides: newSlides });
     try {
       localStorage.removeItem('naray_banner_slides');
     } catch (e) { }
@@ -2716,7 +2717,11 @@ export function HospitalDataProvider({ children }) {
   };
 
   const saveLeadershipData = async (data) => {
-    setLeadershipMessage(prev => ({ ...prev, ...data }));
+    setLeadershipMessage(prev => {
+      const next = { ...prev, ...data };
+      updateCachedSnapshot({ leadershipMessage: next });
+      return next;
+    });
     try {
       localStorage.removeItem('naray_leadership_message');
     } catch (e) { }
@@ -2867,6 +2872,7 @@ export function HospitalDataProvider({ children }) {
             });
           }
           try { localStorage.removeItem('naray_banner_slides'); } catch (e) {}
+          updateCachedSnapshot({ bannerSlides: updated });
           return updated;
         });
         break;
@@ -2882,6 +2888,7 @@ export function HospitalDataProvider({ children }) {
             });
           }
           try { localStorage.removeItem('naray_leadership_message'); } catch (e) {}
+          updateCachedSnapshot({ leadershipMessage: updated });
           return updated;
         });
         break;
