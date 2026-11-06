@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   ADMIN_USER: 'naray_admin_user',
   ADMIN_CACHED_APPOINTMENTS: 'naray_admin_cached_appointments',
   ADMIN_CACHED_STATS: 'naray_admin_cached_stats',
+  INSTANT_CACHE_V2: 'naray_instant_cache_v2',
 };
 
 const getStoredData = (key, fallback) => {
@@ -213,29 +214,49 @@ export function HospitalDataProvider({ children }) {
   const [adminUserStats, setAdminUserStats] = useState(null);
   const [isLoadingAdminUsers, setIsLoadingAdminUsers] = useState(false);
 
-  // 2. Data Collections (Murni dari Database Backend & SIMRS - Anti Data Mentah Palsu)
-  const [poliklinikList, setPoliklinikList] = useState([]);
-  const [specializationsList, setSpecializationsList] = useState(DEFAULT_SPECIALIZATIONS);
-  const [doctors, setDoctors] = useState([]);
-  const [centersOfExcellence, setCentersOfExcellence] = useState([]);
-  const [facilitiesData, setFacilitiesData] = useState([]);
-  const [inpatientRooms, setInpatientRooms] = useState([]);
-  const [mcuPackages, setMcuPackages] = useState([]);
-  const [galleryActivities, setGalleryActivities] = useState([]);
-  const [videoList, setVideoList] = useState([]);
-  const [healthArticles, setHealthArticles] = useState([]);
-  const [articleCategories, setArticleCategories] = useState([]);
-  const [doctorLeaves, setDoctorLeaves] = useState([]);
-  const [simrsBedData, setSimrsBedData] = useState(null);
-  const [simrsDoctorSchedules, setSimrsDoctorSchedules] = useState(null);
-  const [simrsSurgeryData, setSimrsSurgeryData] = useState(null);
-  const [bannerSlides, setBannerSlides] = useState(() => getStoredData('naray_banner_slides', DEFAULT_BANNER_SLIDES));
-  const [leadershipMessage, setLeadershipMessage] = useState(() => getStoredData('naray_leadership_message', DEFAULT_LEADERSHIP_MESSAGE));
-  const [hospitalInfo, setHospitalInfo] = useState(() => fallbackHospitalInfo);
+  // 1c. Instant Cache Snapshot (SWR Pattern - 0ms Load Time on Refresh/Navigation)
+  const initialCachedSnapshot = typeof window !== 'undefined'
+    ? getStoredData(STORAGE_KEYS.INSTANT_CACHE_V2, null)
+    : null;
 
-  // Backend Connection States
-  const [isBackendConnected, setIsBackendConnected] = useState(false);
-  const [isLoadingBackend, setIsLoadingBackend] = useState(true);
+  const updateCachedSnapshot = (dataToMerge) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const existing = getStoredData(STORAGE_KEYS.INSTANT_CACHE_V2, {}) || {};
+      const updated = {
+        ...existing,
+        ...dataToMerge,
+        _cachedAt: Date.now(),
+      };
+      localStorage.setItem(STORAGE_KEYS.INSTANT_CACHE_V2, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('[HospitalDataContext] Gagal update instant cache snapshot:', e);
+    }
+  };
+
+  // 2. Data Collections (Murni dari Database Backend & SIMRS - Anti Data Mentah Palsu)
+  const [poliklinikList, setPoliklinikList] = useState(() => initialCachedSnapshot?.polikliniks || []);
+  const [specializationsList, setSpecializationsList] = useState(() => initialCachedSnapshot?.specializations || DEFAULT_SPECIALIZATIONS);
+  const [doctors, setDoctors] = useState(() => initialCachedSnapshot?.doctors || []);
+  const [centersOfExcellence, setCentersOfExcellence] = useState(() => initialCachedSnapshot?.centers || []);
+  const [facilitiesData, setFacilitiesData] = useState(() => initialCachedSnapshot?.facilities || []);
+  const [inpatientRooms, setInpatientRooms] = useState(() => initialCachedSnapshot?.rooms || []);
+  const [mcuPackages, setMcuPackages] = useState(() => initialCachedSnapshot?.packages || []);
+  const [galleryActivities, setGalleryActivities] = useState(() => initialCachedSnapshot?.photos || []);
+  const [videoList, setVideoList] = useState(() => initialCachedSnapshot?.videos || []);
+  const [healthArticles, setHealthArticles] = useState(() => initialCachedSnapshot?.articles || []);
+  const [articleCategories, setArticleCategories] = useState(() => initialCachedSnapshot?.articleCategories || []);
+  const [doctorLeaves, setDoctorLeaves] = useState(() => initialCachedSnapshot?.doctorLeaves || []);
+  const [simrsBedData, setSimrsBedData] = useState(() => initialCachedSnapshot?.simrsBeds || null);
+  const [simrsDoctorSchedules, setSimrsDoctorSchedules] = useState(() => initialCachedSnapshot?.simrsSchedules || null);
+  const [simrsSurgeryData, setSimrsSurgeryData] = useState(() => initialCachedSnapshot?.simrsSurgeries || null);
+  const [bannerSlides, setBannerSlides] = useState(() => initialCachedSnapshot?.bannerSlides || getStoredData('naray_banner_slides', DEFAULT_BANNER_SLIDES));
+  const [leadershipMessage, setLeadershipMessage] = useState(() => initialCachedSnapshot?.leadershipMessage || getStoredData('naray_leadership_message', DEFAULT_LEADERSHIP_MESSAGE));
+  const [hospitalInfo, setHospitalInfo] = useState(() => initialCachedSnapshot?.hospitalInfo || fallbackHospitalInfo);
+
+  // Backend Connection States: Jika cache lokal sudah ada, siap pakai di detik ke-0 (0ms flash-free)
+  const [isBackendConnected, setIsBackendConnected] = useState(() => Boolean(initialCachedSnapshot));
+  const [isLoadingBackend, setIsLoadingBackend] = useState(() => !initialCachedSnapshot);
 
   const DAY_NUM_TO_NAME = {
     1: 'Senin',
@@ -1053,28 +1074,40 @@ export function HospitalDataProvider({ children }) {
           ? d.specializations
           : specializationsList;
 
+        let finalDocs = [];
         if (Array.isArray(d.doctors) && d.doctors.length > 0) {
           const mappedDocs = d.doctors.map(doc => mapDoctor(doc, activeSpecs, leaves, d.simrs_doctor_schedules));
           const autoSimrsDocs = extractSimrsNewDoctors(d.simrs_doctor_schedules, mappedDocs, activeSpecs);
-          setDoctors([...mappedDocs, ...autoSimrsDocs]);
+          finalDocs = [...mappedDocs, ...autoSimrsDocs];
+          setDoctors(finalDocs);
         }
+        let mappedPolis = [];
         if (Array.isArray(d.polikliniks) && d.polikliniks.length > 0) {
-          setPoliklinikList(d.polikliniks.map(mapPoliklinik));
+          mappedPolis = d.polikliniks.map(mapPoliklinik);
+          setPoliklinikList(mappedPolis);
         }
+        let mappedArticles = [];
         if (Array.isArray(d.articles) && d.articles.length > 0) {
-          setHealthArticles(d.articles.map(mapArticle));
+          mappedArticles = d.articles.map(mapArticle);
+          setHealthArticles(mappedArticles);
         }
         if (Array.isArray(d.article_categories) && d.article_categories.length > 0) {
           setArticleCategories(d.article_categories);
         }
+        let mappedFacilities = [];
         if (Array.isArray(d.facilities) && d.facilities.length > 0) {
-          setFacilitiesData(d.facilities.map(mapFacility));
+          mappedFacilities = d.facilities.map(mapFacility);
+          setFacilitiesData(mappedFacilities);
         }
+        let mappedCenters = [];
         if (Array.isArray(d.centers) && d.centers.length > 0) {
-          setCentersOfExcellence(d.centers.map(mapCenter));
+          mappedCenters = d.centers.map(mapCenter);
+          setCentersOfExcellence(mappedCenters);
         }
+        let mappedRooms = [];
         if (Array.isArray(d.room_types) && d.room_types.length > 0) {
-          setInpatientRooms(d.room_types.map(mapRoom));
+          mappedRooms = d.room_types.map(mapRoom);
+          setInpatientRooms(mappedRooms);
         }
         if (d.simrs_beds) {
           setSimrsBedData(d.simrs_beds);
@@ -1082,26 +1115,36 @@ export function HospitalDataProvider({ children }) {
         if (d.simrs_surgeries) {
           setSimrsSurgeryData(d.simrs_surgeries);
         }
+        let mappedPackages = [];
         if (Array.isArray(d.mcu_packages) && d.mcu_packages.length > 0) {
-          setMcuPackages(d.mcu_packages.map(mapMcu));
+          mappedPackages = d.mcu_packages.map(mapMcu);
+          setMcuPackages(mappedPackages);
         }
+        let dbPhotos = [];
+        let dbVideos = [];
         if (Array.isArray(d.media) && d.media.length > 0) {
-          const { dbPhotos, dbVideos } = parseMedia(d.media);
+          const { dbPhotos: p, dbVideos: v } = parseMedia(d.media);
+          dbPhotos = p;
+          dbVideos = v;
           if (dbPhotos.length > 0) setGalleryActivities(dbPhotos);
           if (dbVideos.length > 0) setVideoList(dbVideos);
         }
+        let mergedHospitalInfo = null;
         if (d.hospital_info) {
+          mergedHospitalInfo = {
+            ...d.hospital_info,
+            name: d.hospital_info.name || fallbackHospitalInfo.name,
+            address: d.hospital_info.address || fallbackHospitalInfo.address,
+            phone: d.hospital_info.phone || fallbackHospitalInfo.phone,
+            callCenter: d.hospital_info.call_center || fallbackHospitalInfo.callCenter || '+62 813-7258-376',
+            emergencyHotline: d.hospital_info.emergency_hotline || fallbackHospitalInfo.emergencyHotline,
+            whatsappHotline: d.hospital_info.phone || fallbackHospitalInfo.whatsappHotline,
+            operatingHours: d.hospital_info.operating_hours || fallbackHospitalInfo.operatingHours,
+            description: d.hospital_info.description || fallbackHospitalInfo.description,
+          };
           setHospitalInfo(prev => ({
             ...prev,
-            ...d.hospital_info,
-            name: d.hospital_info.name || prev.name,
-            address: d.hospital_info.address || prev.address,
-            phone: d.hospital_info.phone || prev.phone,
-            callCenter: d.hospital_info.call_center || prev.callCenter || '+62 813-7258-376',
-            emergencyHotline: d.hospital_info.emergency_hotline || prev.emergencyHotline,
-            whatsappHotline: d.hospital_info.phone || prev.whatsappHotline,
-            operatingHours: d.hospital_info.operating_hours || prev.operatingHours,
-            description: d.hospital_info.description || prev.description,
+            ...mergedHospitalInfo,
           }));
 
           if (d.hospital_info.leadership_data && typeof d.hospital_info.leadership_data === 'object' && Object.keys(d.hospital_info.leadership_data).length > 0) {
@@ -1143,6 +1186,29 @@ export function HospitalDataProvider({ children }) {
             } catch (e) {}
           }
         }
+
+        // Simpan snapshot lengkap ke Instant Cache (SWR) agar refresh F5 berikutnya 0ms
+        updateCachedSnapshot({
+          doctors: finalDocs.length > 0 ? finalDocs : undefined,
+          polikliniks: mappedPolis.length > 0 ? mappedPolis : undefined,
+          articles: mappedArticles.length > 0 ? mappedArticles : undefined,
+          articleCategories: Array.isArray(d.article_categories) && d.article_categories.length > 0 ? d.article_categories : undefined,
+          facilities: mappedFacilities.length > 0 ? mappedFacilities : undefined,
+          centers: mappedCenters.length > 0 ? mappedCenters : undefined,
+          rooms: mappedRooms.length > 0 ? mappedRooms : undefined,
+          packages: mappedPackages.length > 0 ? mappedPackages : undefined,
+          photos: dbPhotos.length > 0 ? dbPhotos : undefined,
+          videos: dbVideos.length > 0 ? dbVideos : undefined,
+          specializations: activeSpecs,
+          doctorLeaves: leaves,
+          simrsBeds: d.simrs_beds || null,
+          simrsSchedules: d.simrs_doctor_schedules || null,
+          simrsSurgeries: d.simrs_surgeries || null,
+          hospitalInfo: mergedHospitalInfo || undefined,
+          bannerSlides: (d.hospital_info?.banner_slides && d.hospital_info.banner_slides.length > 0) ? d.hospital_info.banner_slides : undefined,
+          leadershipMessage: (d.hospital_info?.leadership_data && Object.keys(d.hospital_info.leadership_data).length > 0) ? d.hospital_info.leadership_data : undefined,
+        });
+
         setIsBackendConnected(true);
         setIsLoadingBackend(false);
         return;
@@ -1252,6 +1318,19 @@ export function HospitalDataProvider({ children }) {
               }
             } catch (e) {}
           }
+        }
+        if (connected) {
+          updateCachedSnapshot({
+            doctors: docRes.status === 'fulfilled' && Array.isArray(docRes.value?.data?.data) ? docRes.value.data.data.map(d => mapDoctor(d, activeSpecs)) : undefined,
+            polikliniks: poliRes.status === 'fulfilled' && Array.isArray(poliRes.value?.data?.data) ? poliRes.value.data.data.map(mapPoliklinik) : undefined,
+            articles: artRes.status === 'fulfilled' && Array.isArray(artRes.value?.data?.data) ? artRes.value.data.data.map(mapArticle) : undefined,
+            facilities: facRes.status === 'fulfilled' && Array.isArray(facRes.value?.data?.data) ? facRes.value.data.data.map(mapFacility) : undefined,
+            centers: centerRes.status === 'fulfilled' ? ((Array.isArray(centerRes.value?.data?.data) ? centerRes.value.data.data : centerRes.value?.data) || []).map(mapCenter) : undefined,
+            rooms: roomRes.status === 'fulfilled' && Array.isArray(roomRes.value?.data?.data) ? roomRes.value.data.data.map(mapRoom) : undefined,
+            packages: mcuRes.status === 'fulfilled' && Array.isArray(mcuRes.value?.data?.data) ? mcuRes.value.data.data.map(mapMcu) : undefined,
+            specializations: activeSpecs,
+            hospitalInfo: infoRes.status === 'fulfilled' && infoRes.value?.data?.data ? infoRes.value.data.data : undefined,
+          });
         }
         setIsBackendConnected(connected);
       } catch (err) {
@@ -2529,7 +2608,11 @@ export function HospitalDataProvider({ children }) {
         status: leaveData.status || 'active',
       });
       if (res?.success && res.data) {
-        setDoctorLeaves(prev => [res.data, ...prev]);
+        setDoctorLeaves(prev => {
+          const next = [res.data, ...prev];
+          updateCachedSnapshot({ doctorLeaves: next });
+          return next;
+        });
         loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
         return { success: true, data: res.data };
       }
@@ -2552,7 +2635,11 @@ export function HospitalDataProvider({ children }) {
         status: leaveData.status,
       });
       if (res?.success && res.data) {
-        setDoctorLeaves(prev => prev.map(l => (l.id === targetId ? res.data : l)));
+        setDoctorLeaves(prev => {
+          const next = prev.map(l => (l.id === targetId ? res.data : l));
+          updateCachedSnapshot({ doctorLeaves: next });
+          return next;
+        });
         loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
         return { success: true, data: res.data };
       }
@@ -2567,7 +2654,11 @@ export function HospitalDataProvider({ children }) {
     try {
       const targetId = cleanNumericId(id);
       await api.adminDeleteDoctorLeave(targetId);
-      setDoctorLeaves(prev => prev.filter(l => l.id !== targetId));
+      setDoctorLeaves(prev => {
+        const next = prev.filter(l => l.id !== targetId);
+        updateCachedSnapshot({ doctorLeaves: next });
+        return next;
+      });
       loadBackendData().catch(e => console.warn('[HospitalDataContext] Background sync failed:', e));
       return { success: true };
     } catch (err) {
@@ -2649,60 +2740,50 @@ export function HospitalDataProvider({ children }) {
       case 'poliklinik':
         setPoliklinikList(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, cleanItem));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...cleanItem };
-            return next;
-          }
-          return [...prev, cleanItem];
+          const next = idx >= 0 ? [...prev] : [...prev, cleanItem];
+          if (idx >= 0) next[idx] = { ...next[idx], ...cleanItem };
+          updateCachedSnapshot({ polikliniks: next });
+          return next;
         });
         break;
 
       case 'doctor':
         setDoctors(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, cleanItem));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...cleanItem };
-            return next;
-          }
-          return [cleanItem, ...prev];
+          const next = idx >= 0 ? [...prev] : [cleanItem, ...prev];
+          if (idx >= 0) next[idx] = { ...next[idx], ...cleanItem };
+          updateCachedSnapshot({ doctors: next });
+          return next;
         });
         break;
 
       case 'center':
         setCentersOfExcellence(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, cleanItem));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...cleanItem };
-            return next;
-          }
-          return [...prev, cleanItem];
+          const next = idx >= 0 ? [...prev] : [...prev, cleanItem];
+          if (idx >= 0) next[idx] = { ...next[idx], ...cleanItem };
+          updateCachedSnapshot({ centers: next });
+          return next;
         });
         break;
 
       case 'facility':
         setFacilitiesData(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, cleanItem));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...cleanItem };
-            return next;
-          }
-          return [...prev, cleanItem];
+          const next = idx >= 0 ? [...prev] : [...prev, cleanItem];
+          if (idx >= 0) next[idx] = { ...next[idx], ...cleanItem };
+          updateCachedSnapshot({ facilities: next });
+          return next;
         });
         break;
 
       case 'room':
         setInpatientRooms(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, cleanItem));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...cleanItem };
-            return next;
-          }
-          return [...prev, cleanItem];
+          const next = idx >= 0 ? [...prev] : [...prev, cleanItem];
+          if (idx >= 0) next[idx] = { ...next[idx], ...cleanItem };
+          updateCachedSnapshot({ rooms: next });
+          return next;
         });
         break;
 
@@ -2710,12 +2791,10 @@ export function HospitalDataProvider({ children }) {
       case 'package':
         setMcuPackages(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, cleanItem));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...cleanItem };
-            return next;
-          }
-          return [...prev, cleanItem];
+          const next = idx >= 0 ? [...prev] : [...prev, cleanItem];
+          if (idx >= 0) next[idx] = { ...next[idx], ...cleanItem };
+          updateCachedSnapshot({ packages: next });
+          return next;
         });
         break;
 
@@ -2729,25 +2808,29 @@ export function HospitalDataProvider({ children }) {
         if (normalized.type === 'video' || normalized.youtubeEmbed) {
           setVideoList(prev => {
             const idx = prev.findIndex(x => isMatchItem(x, normalized));
-            if (idx >= 0) {
-              const next = [...prev];
-              next[idx] = { ...next[idx], ...normalized };
-              return next;
-            }
-            return [normalized, ...prev];
+            const next = idx >= 0 ? [...prev] : [normalized, ...prev];
+            if (idx >= 0) next[idx] = { ...next[idx], ...normalized };
+            updateCachedSnapshot({ videos: next });
+            return next;
           });
-          setGalleryActivities(prev => prev.filter(x => !isMatchItem(x, normalized)));
+          setGalleryActivities(prev => {
+            const next = prev.filter(x => !isMatchItem(x, normalized));
+            updateCachedSnapshot({ photos: next });
+            return next;
+          });
         } else {
           setGalleryActivities(prev => {
             const idx = prev.findIndex(x => isMatchItem(x, normalized));
-            if (idx >= 0) {
-              const next = [...prev];
-              next[idx] = { ...next[idx], ...normalized };
-              return next;
-            }
-            return [normalized, ...prev];
+            const next = idx >= 0 ? [...prev] : [normalized, ...prev];
+            if (idx >= 0) next[idx] = { ...next[idx], ...normalized };
+            updateCachedSnapshot({ photos: next });
+            return next;
           });
-          setVideoList(prev => prev.filter(x => !isMatchItem(x, normalized)));
+          setVideoList(prev => {
+            const next = prev.filter(x => !isMatchItem(x, normalized));
+            updateCachedSnapshot({ videos: next });
+            return next;
+          });
         }
         break;
       }
@@ -2759,12 +2842,10 @@ export function HospitalDataProvider({ children }) {
         const normalized = { ...cleanItem, category: catName };
         setHealthArticles(prev => {
           const idx = prev.findIndex(x => isMatchItem(x, normalized));
-          if (idx >= 0) {
-            const next = [...prev];
-            next[idx] = { ...next[idx], ...normalized };
-            return next;
-          }
-          return [normalized, ...prev];
+          const next = idx >= 0 ? [...prev] : [normalized, ...prev];
+          if (idx >= 0) next[idx] = { ...next[idx], ...normalized };
+          updateCachedSnapshot({ articles: next });
+          return next;
         });
         break;
       }
@@ -2828,34 +2909,74 @@ export function HospitalDataProvider({ children }) {
   const deleteItem = (entityType, id) => {
     switch (entityType) {
       case 'poliklinik':
-        setPoliklinikList(prev => prev.filter(x => String(x.id) !== String(id) && String(x.dbId) !== String(id) && `poli-${x.dbId}` !== String(id) && `poli-${x.id}` !== String(id)));
+        setPoliklinikList(prev => {
+          const next = prev.filter(x => String(x.id) !== String(id) && String(x.dbId) !== String(id) && `poli-${x.dbId}` !== String(id) && `poli-${x.id}` !== String(id));
+          updateCachedSnapshot({ polikliniks: next });
+          return next;
+        });
         break;
       case 'doctor':
-        setDoctors(prev => prev.filter(x => x.id !== id));
+        setDoctors(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ doctors: next });
+          return next;
+        });
         break;
       case 'center':
-        setCentersOfExcellence(prev => prev.filter(x => x.id !== id));
+        setCentersOfExcellence(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ centers: next });
+          return next;
+        });
         break;
       case 'facility':
-        setFacilitiesData(prev => prev.filter(x => x.id !== id));
+        setFacilitiesData(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ facilities: next });
+          return next;
+        });
         break;
       case 'room':
-        setInpatientRooms(prev => prev.filter(x => x.id !== id));
+        setInpatientRooms(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ rooms: next });
+          return next;
+        });
         break;
       case 'mcu':
       case 'package':
-        setMcuPackages(prev => prev.filter(x => x.id !== id));
+        setMcuPackages(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ packages: next });
+          return next;
+        });
         break;
       case 'media':
       case 'gallery':
-        setGalleryActivities(prev => prev.filter(x => x.id !== id));
-        setVideoList(prev => prev.filter(x => x.id !== id));
+        setGalleryActivities(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ photos: next });
+          return next;
+        });
+        setVideoList(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ videos: next });
+          return next;
+        });
         break;
       case 'video':
-        setVideoList(prev => prev.filter(x => x.id !== id));
+        setVideoList(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ videos: next });
+          return next;
+        });
         break;
       case 'article':
-        setHealthArticles(prev => prev.filter(x => x.id !== id));
+        setHealthArticles(prev => {
+          const next = prev.filter(x => x.id !== id);
+          updateCachedSnapshot({ articles: next });
+          return next;
+        });
         break;
       case 'banner':
       case 'banners':
