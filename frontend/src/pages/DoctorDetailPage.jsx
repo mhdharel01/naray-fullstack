@@ -157,9 +157,9 @@ export default function DoctorDetailPage() {
   // WhatsApp Registration Link Helper
   const getWhatsAppRegistrationUrl = () => {
     if (!doctor) return '#';
-    const phone = (hospitalInfo.emergencyHotline || '6285363395383').replace(/[^0-9]/g, '');
+    const consultationPhone = (hospitalInfo.consultationNumber || hospitalInfo.whatsapp || '628117529798').replace(/[^0-9]/g, '') || '628117529798';
     const msg = `Halo Naray Hospital Dumai, saya ingin mendaftar janji temu / konsultasi dengan:\n*Dokter:* ${doctor.name}\n*Spesialisasi:* ${doctor.specialty}\nMohon informasi ketersediaan nomor antrean. Terima kasih.`;
-    return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+    return `https://wa.me/${consultationPhone}?text=${encodeURIComponent(msg)}`;
   };
 
   // Related Doctors from same or complementary specialty
@@ -586,6 +586,9 @@ export default function DoctorDetailPage() {
                   <MessageCircle size={16} />
                   <span>Daftar via WhatsApp Sekarang</span>
                 </a>
+                <p className="text-center text-[11px] text-slate-500 mt-2.5">
+                  WhatsApp Konsultasi: <strong className="text-teal-700 font-bold">+62 811-7529-798</strong>
+                </p>
               </div>
 
               {/* Related Doctors Card */}

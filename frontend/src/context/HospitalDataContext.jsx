@@ -1137,8 +1137,9 @@ export function HospitalDataProvider({ children }) {
             address: d.hospital_info.address || fallbackHospitalInfo.address,
             phone: d.hospital_info.phone || fallbackHospitalInfo.phone,
             callCenter: d.hospital_info.call_center || fallbackHospitalInfo.callCenter || '+62 813-7258-376',
-            emergencyHotline: d.hospital_info.emergency_hotline || fallbackHospitalInfo.emergencyHotline,
-            whatsappHotline: d.hospital_info.phone || fallbackHospitalInfo.whatsappHotline,
+            emergencyHotline: d.hospital_info.emergency_hotline || fallbackHospitalInfo.emergencyHotline || '+62 853-6339-5383',
+            whatsappHotline: d.hospital_info.whatsapp_hotline || fallbackHospitalInfo.whatsappHotline || '+62 811-7529-798',
+            whatsapp: d.hospital_info.whatsapp || fallbackHospitalInfo.whatsapp || '628117529798',
             operatingHours: d.hospital_info.operating_hours || fallbackHospitalInfo.operatingHours,
             description: d.hospital_info.description || fallbackHospitalInfo.description,
           };

@@ -430,7 +430,7 @@ export default function ArticleDetailPage() {
                     <ArrowRight size={14} />
                   </Link>
                   <a
-                    href={`https://api.whatsapp.com/send?phone=${(hospitalInfo.emergencyHotline || '6285363395383').replace(/[^0-9]/g, '')}&text=Halo%20Naray%20Hospital,%20saya%20ingin%20konsultasi%20jadwal%20dokter.`}
+                    href={`https://api.whatsapp.com/send?phone=${(hospitalInfo.whatsapp || '628117529798').replace(/[^0-9]/g, '')}&text=Halo%20Naray%20Hospital,%20saya%20ingin%20konsultasi%20jadwal%20dokter.`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all text-center"
