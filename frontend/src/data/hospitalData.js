@@ -28,7 +28,7 @@ export const hospitalInfo = {
   totalBeds: "104 Tempat Tidur",
   totalDoctors: "30+ Dokter Spesialis",
   totalPolis: "13 Poliklinik Terpadu",
-  instagram: "https://www.instagram.com/narayhospital",
+  instagram: "https://www.instagram.com/narayhospital/?hl=id",
   youtube: "https://www.youtube.com/@NarayHospital",
   gmapsIframe: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.0645585284587!2d101.39689867423775!3d1.6988783603561073!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31d3a978dfcdb1fb%3A0xeffaf38f1dce7e9c!2sNaray%20Hospital!5e0!3m2!1sen!2sid!4v1749523003379!5m2!1sen!2sid"
 };

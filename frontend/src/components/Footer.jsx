@@ -40,6 +40,37 @@ export function Footer() {
               <MapPin size={16} className="text-teal-400 shrink-0 mt-0.5" />
               <span className="leading-relaxed">{hospitalInfo.address}</span>
             </div>
+
+            {/* Media Sosial Resmi */}
+            <div className="flex items-center gap-2.5 mt-2 pt-3 border-t border-slate-800/80">
+              <span className="text-xs text-slate-400 font-medium">Instagram:</span>
+              <a
+                href="https://www.instagram.com/narayhospital/?hl=id"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500/15 via-pink-500/15 to-amber-500/15 hover:from-purple-500/25 hover:via-pink-500/25 hover:to-amber-500/25 text-pink-300 hover:text-white border border-pink-500/30 text-xs font-bold transition-all shadow-2xs group"
+                title="Ikuti Instagram Resmi Naray Hospital @narayhospital"
+              >
+                <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
+                </div>
+                <span>@narayhospital</span>
+              </a>
+            </div>
           </div>
 
           {/* Kolom 2: Navigasi Cepat */}
@@ -126,7 +157,34 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="hover:text-teal-300 transition-colors"
                 >
-                  WhatsApp: <strong className="text-slate-200">{hospitalInfo.whatsappHotline}</strong>
+                  WhatsApp: <strong className="text-slate-200">{hospitalInfo.whatsappHotline || '+62 811-7529-798'}</strong>
+                </a>
+              </div>
+
+              <div className="flex items-center gap-2.5 text-xs text-slate-400">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-pink-400 shrink-0"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                </svg>
+                <a 
+                  href="https://www.instagram.com/narayhospital/?hl=id" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-pink-300 transition-colors"
+                >
+                  Instagram: <strong className="text-slate-200">@narayhospital</strong>
                 </a>
               </div>
 
@@ -160,6 +218,15 @@ export function Footer() {
             <Link to="/berita-artikel" className="hover:text-slate-300 transition-colors">Artikel</Link>
             <span aria-hidden="true" className="text-slate-700">•</span>
             <Link to="/kontak" className="hover:text-slate-300 transition-colors">Kontak</Link>
+            <span aria-hidden="true" className="text-slate-700">•</span>
+            <a 
+              href="https://www.instagram.com/narayhospital/?hl=id" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-pink-400 hover:text-pink-300 transition-colors inline-flex items-center gap-1 font-semibold"
+            >
+              <span>Instagram</span>
+            </a>
           </div>
         </div>
       </div>
